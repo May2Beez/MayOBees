@@ -1,11 +1,16 @@
 {
-  "package": "${mixinGroup}",
+  "package": "com.github.may2beez.mayobees.mixin",
   "refmap": "mixins.${modid}.refmap.json",
   "minVersion": "0.7",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "fml.MixinFMLHandshakeMessage"
   ],
   "client": [
-	"MixinGuiMainMenu"
+    "client.EntityPlayerSPAccessor",
+    "client.MinecraftAccessor",
+    "client.MixinEntityPlayerSP",
+    "client.MixinPlayerController",
+    "render.MixinModelBiped"
   ]
 }
