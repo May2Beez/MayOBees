@@ -30,10 +30,16 @@ import java.util.stream.Collectors;
 public class ESP implements IModule {
     private final Minecraft mc = Minecraft.getMinecraft();
     private final List<BlockPos> clickedFairySouls = new ArrayList<>();
+    private final List<BlockPos> clickedGifts = new ArrayList<>();
     private final File clickedFairySoulsFile = new File(mc.mcDataDir + "/config/mayobees/clickedFairySouls.json");
     private static ESP instance;
 
     private final String FAIRY_SOUL_TEXTURE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjk2OTIzYWQyNDczMTAwMDdmNmFlNWQzMjZkODQ3YWQ1Mzg2NGNmMTZjMzU2NWExODFkYzhlNmIyMGJlMjM4NyJ9fX0=";
+    private final String[] GIFT_SOUL_TEXTURES = new String[] {
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTBmNTM5ODUxMGIxYTA1YWZjNWIyMDFlYWQ4YmZjNTgzZTU3ZDcyMDJmNTE5M2IwYjc2MWZjYmQwYWUyIn19fQ==",
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWQ5N2Y0ZjQ0ZTc5NmY3OWNhNDMw0TdmYWE3YjRmZTkxYzQ0NWM3NmU1YzI2YTVhZDc5NGY1ZTQ3OTgzNyJ9fX0=",
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjczYTIxMTQxMzZiOGVlNDkyNmNhYTUxNzg1NDE0MD2M2YTJiNzZlNGYxNjY4Y2I4OWQ5OTcxNmM0MjEifX19"
+    };
 
     public static ESP getInstance() {
         if (instance == null) {
@@ -110,9 +116,13 @@ public class ESP implements IModule {
         saveClickedFairySouls();
     }
 
+    public void resetClickedGifts() {
+        clickedGifts.clear();
+    }
+
     @Override
     public boolean isRunning() {
-        return MayOBeesConfig.chestESP || MayOBeesConfig.fairySoulESP;
+        return MayOBeesConfig.chestESP || MayOBeesConfig.fairySoulESP || MayOBeesConfig.giftESP;
     }
 
     @Override
@@ -187,6 +197,44 @@ public class ESP implements IModule {
                 }
             }
         }
+
+        if (MayOBeesConfig.giftESP) {
+            if (MayOBeesConfig.giftESPShowOnlyOnJerryWorkshop && GameStateHandler.getInstance().getLocation() != GameStateHandler.Location.JERRY_WORKSHOP) return;
+            AxisAlignedBB closestBb = null;
+            for (EntityArmorStand entityArmorStand : mc.theWorld.loadedEntityList.stream().filter(entity -> entity instanceof EntityArmorStand).map(entity -> (EntityArmorStand) entity).collect(Collectors.toList())) {
+                ItemStack helmet = entityArmorStand.getEquipmentInSlot(4);
+                if (helmet == null || !helmet.hasTagCompound()) continue;
+                if (helmet.getTagCompound().toString().contains(GIFT_SOUL_TEXTURES[0]) || helmet.getTagCompound().toString().contains(GIFT_SOUL_TEXTURES[1]) || helmet.getTagCompound().toString().contains(GIFT_SOUL_TEXTURES[2])) {
+                    if (clickedGifts.contains(entityArmorStand.getPosition())) continue;
+                    AxisAlignedBB bb = new AxisAlignedBB(entityArmorStand.posX - 0.5, entityArmorStand.posY + entityArmorStand.getEyeHeight() - 0.5, entityArmorStand.posZ - 0.5, entityArmorStand.posX + 0.5, entityArmorStand.posY + entityArmorStand.getEyeHeight() + 0.5, entityArmorStand.posZ + 0.5).expand(0.002, 0.002, 0.002);
+                    if (closestBb == null) {
+                        closestBb = bb;
+                    } else {
+                        if (mc.thePlayer.getDistanceSqToCenter(entityArmorStand.getPosition()) < mc.thePlayer.getDistanceSqToCenter(new BlockPos(closestBb.minX + 0.5, closestBb.minY + 0.5, closestBb.minZ + 0.5))) {
+                            closestBb = bb;
+                        }
+                    }
+                    bb = bb.offset(-mc.getRenderManager().viewerPosX, -mc.getRenderManager().viewerPosY, -mc.getRenderManager().viewerPosZ);
+                    RenderUtils.drawBox(bb, MayOBeesConfig.giftESPColor.toJavaColor());
+                    if (MayOBeesConfig.giftESPTracers) {
+                        RenderUtils.drawTracer(new Vec3(entityArmorStand.posX, entityArmorStand.posY + entityArmorStand.getEyeHeight(), entityArmorStand.posZ), MayOBeesConfig.giftESPColor.toJavaColor());
+                    }
+                }
+            }
+            if (closestBb != null) {
+                RenderUtils.drawBox(closestBb.offset(-mc.getRenderManager().viewerPosX, -mc.getRenderManager().viewerPosY, -mc.getRenderManager().viewerPosZ), MayOBeesConfig.giftESPColor.toJavaColor());
+                double x = closestBb.minX + (closestBb.maxX - closestBb.minX) / 2;
+                double y = closestBb.minY + (closestBb.maxY - closestBb.minY) / 2;
+                double z = closestBb.minZ + (closestBb.maxZ - closestBb.minZ) / 2;
+                if (MayOBeesConfig.giftESPTracers) {
+                    RenderUtils.drawTracer(new Vec3(x, y, z), MayOBeesConfig.giftESPColor.toJavaColor());
+                }
+                if (MayOBeesConfig.giftESPShowDistance) {
+                    double distance = Math.sqrt(mc.thePlayer.getDistanceSqToCenter(new BlockPos(closestBb.minX + 0.5, closestBb.minY + 0.5, closestBb.minZ + 0.5)));
+                    RenderUtils.drawText(String.format("%.2fm", distance), x, y, z, 1);
+                }
+            }
+        }
     }
 
     @SubscribeEvent
@@ -203,6 +251,16 @@ public class ESP implements IModule {
                 if (helmet.getTagCompound().toString().contains(FAIRY_SOUL_TEXTURE)) {
                     clickedFairySouls.add(event.entity.getPosition());
                     saveClickedFairySouls();
+                }
+            }
+        }
+
+        if (MayOBeesConfig.giftESP) {
+            if (event.entity instanceof EntityArmorStand) {
+                ItemStack helmet = ((EntityArmorStand) event.entity).getEquipmentInSlot(4);
+                if (helmet == null || !helmet.hasTagCompound()) return;
+                if (helmet.getTagCompound().toString().contains(GIFT_SOUL_TEXTURES[0]) || helmet.getTagCompound().toString().contains(GIFT_SOUL_TEXTURES[1]) || helmet.getTagCompound().toString().contains(GIFT_SOUL_TEXTURES[2])) {
+                    clickedGifts.add(event.entity.getPosition());
                 }
             }
         }

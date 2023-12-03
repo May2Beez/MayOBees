@@ -258,6 +258,61 @@ public class MayOBeesConfig extends Config {
 
     //</editor-fold>
 
+    //<editor-fold desc="Gift ESP">
+    @Switch(
+            name = "Gift EPS",
+            description = "Highlights gifts",
+            category = "Render",
+            subcategory = "Gift ESP"
+    )
+    public static boolean giftESP = false;
+
+    @Color(
+            name = "Gift ESP Color",
+            description = "The color of the gift ESP",
+            category = "Render",
+            subcategory = "Gift ESP"
+    )
+    public static OneColor giftESPColor = new OneColor(255, 0, 0, 100);
+
+    @Switch(
+            name = "Gift ESP Tracers",
+            description = "Draws lines to gifts",
+            category = "Render",
+            subcategory = "Gift ESP"
+    )
+    public static boolean giftESPTracers = false;
+
+    @Switch(
+            name = "Gift ESP Show Only on Jerry Workshop",
+            description = "Only shows the gift on jerry workshop",
+            category = "Render",
+            subcategory = "Gift ESP"
+    )
+    public static boolean giftESPShowOnlyOnJerryWorkshop = false;
+
+    @Switch(
+            name = "Gift ESP Show Distance",
+            description = "Shows the distance to the closest gift",
+            category = "Render",
+            subcategory = "Gift ESP"
+    )
+    public static boolean giftESPShowDistance = false;
+
+    @Button(
+            name = "Gift ESP Reset",
+            text = "Reset",
+            description = "Resets the gift ESP",
+            category = "Render",
+            subcategory = "Gift ESP",
+            size = 2
+    )
+    public static void giftESPReset() {
+        ESP.getInstance().resetClickedGifts();
+    }
+
+    //</editor-fold>
+
     //</editor-fold>
 
     //<editor-fold desc="DEBUG">
