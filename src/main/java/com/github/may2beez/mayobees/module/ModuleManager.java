@@ -1,6 +1,7 @@
 package com.github.may2beez.mayobees.module;
 
 import com.github.may2beez.mayobees.module.impl.combat.ShortbowAura;
+import com.github.may2beez.mayobees.module.impl.other.GhostBlocks;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
 import lombok.Getter;
 
@@ -23,6 +24,7 @@ public class ModuleManager {
     public List<IModule> fillModules() {
         return Arrays.asList(
                 ShortbowAura.getInstance(),
+                GhostBlocks.getInstance(),
                 ESP.getInstance()
         );
     }

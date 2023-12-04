@@ -39,6 +39,14 @@ public class MayOBeesConfig extends Config {
     )
     public static boolean shortBowAuraAttackMobs = true;
 
+    @Switch(
+            name = "Shortbow Aura Attack Until Dead",
+            description = "Whether or not to attack mobs until they are dead",
+            category = "Combat",
+            subcategory = "Shortbow Aura"
+    )
+    public static boolean shortBowAuraAttackUntilDead = false;
+
     @DualOption(
             name = "Shortbow Aura Rotation Type",
             description = "The type of rotation to use for the shortbow aura",
@@ -322,6 +330,36 @@ public class MayOBeesConfig extends Config {
             category = "Debug"
     )
     public static boolean debugMode = false;
+    //</editor-fold>
+
+    //<editor-fold desc="OTHER">
+    //<editor-fold desc="Ghost Blocks">
+    @Switch(
+            name = "Enable Ghost Blocks",
+            description = "Middle clicks turns blocks into air for a short period of time",
+            category = "Other",
+            subcategory = "Ghost Blocks"
+    )
+    public static boolean enableGhostBlocks = false;
+
+    @Switch(
+            name = "Ghost Blocks only while holding Stonk",
+            description = "Middle clicks turns blocks into air for a short period of time",
+            category = "Other",
+            subcategory = "Ghost Blocks"
+    )
+    public static boolean ghostBlocksOnlyWhileHoldingStonk = false;
+
+    @Slider(
+            name = "Ghost Blocks Duration (ms)",
+            description = "The duration of the ghost blocks",
+            category = "Other",
+            subcategory = "Ghost Blocks",
+            min = 500,
+            max = 5000
+    )
+    public static int ghostBlocksDuration = 1000;
+    //</editor-fold>
     //</editor-fold>
 
     public MayOBeesConfig() {

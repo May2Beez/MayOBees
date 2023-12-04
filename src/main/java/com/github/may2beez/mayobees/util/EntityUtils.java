@@ -9,7 +9,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.scoreboard.Score;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.StringUtils;
 import net.minecraft.util.Vec3;
@@ -24,13 +23,7 @@ public class EntityUtils {
         if (!(entity instanceof EntityOtherPlayerMP)) {
             return false;
         }
-        return playerList.stream().anyMatch(player -> {
-            System.out.println(player.toLowerCase() + " " + entity.getName().toLowerCase());
-            if (player.toLowerCase().contains(entity.getName().toLowerCase())) {
-                return true;
-            }
-            return false;
-        });
+        return playerList.stream().anyMatch(player -> player.toLowerCase().contains(entity.getName().toLowerCase()));
     }
 
     public static boolean isNPC(Entity entity) {
@@ -61,17 +54,9 @@ public class EntityUtils {
         return isOnTeam((EntityPlayer) entity);
     }
 
-    public static boolean canEntityBeSeenExt(Entity entity) {
-        Vec3 vec3 = new Vec3(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
-        Vec3 vec31 = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ);
-        MovingObjectPosition mop = mc.theWorld.rayTraceBlocks(vec31, vec3, false, true, false);
-        return mop == null || mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK;
-    }
-
     public static boolean isEntityInFOV(Entity entity, double fov) {
         Rotation rotation = RotationHandler.getInstance().getRotation(entity);
         Rotation neededRotation = RotationHandler.getInstance().getNeededChange(new Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch), rotation);
-        System.out.println(neededRotation.getYaw() + " currentYaw: " + mc.thePlayer.rotationYaw);
         return Math.abs(neededRotation.getYaw()) <= fov / 2f;
     }
 

@@ -60,14 +60,12 @@ public class ShortbowAura implements IModule {
         return enabled;
     }
 
-    @Override
     public void start() {
         enabled = true;
         nextRotationSpeed = MayOBeesConfig.getRandomizedRotationSpeed();
         LogUtils.info("Shortbow Aura enabled!");
     }
 
-    @Override
     public void stop() {
         enabled = false;
         currentTarget = Optional.empty();
@@ -119,7 +117,6 @@ public class ShortbowAura implements IModule {
         Rotation startRotation;
         if (!MayOBeesConfig.shortBowAuraRotationType && RotationHandler.getInstance().isRotating()) {
             startRotation = new Rotation(RotationHandler.getInstance().getServerSideYaw(), RotationHandler.getInstance().getServerSidePitch());
-
         } else {
             startRotation = new Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
         }
@@ -130,7 +127,7 @@ public class ShortbowAura implements IModule {
                 currentTarget = possibleTargets.stream().min((entity1, entity2) -> {
                     Rotation rot1 = RotationHandler.getInstance().getNeededChange(startRotation, RotationHandler.getInstance().getRotation(entity1));
                     Rotation rot2 = RotationHandler.getInstance().getNeededChange(startRotation, RotationHandler.getInstance().getRotation(entity2));
-                    return Float.compare(rot1.getYaw(), rot2.getYaw());
+                    return Float.compare(Math.abs(rot1.getYaw()), Math.abs(rot2.getYaw()));
                 });
             }
             if (!currentTarget.isPresent()) {
@@ -138,10 +135,14 @@ public class ShortbowAura implements IModule {
             }
         }
 
-        if (currentTarget.get().isDead || currentTarget.get().getDistanceToEntity(mc.thePlayer) > MayOBeesConfig.shortBowAuraRange || currentTarget.get().getHealth() <= 0) {
+        if (currentTarget.get().isDead || currentTarget.get().getDistanceToEntity(mc.thePlayer) > MayOBeesConfig.shortBowAuraRange || currentTarget.get().getHealth() <= 0 || !mc.thePlayer.canEntityBeSeen(currentTarget.get())) {
             currentTarget = Optional.empty();
+            if (RotationHandler.getInstance().isRotating()) {
+                RotationHandler.getInstance().reset();
+            }
             return;
         }
+
         int slot = InventoryUtils.getSlotIdOfItemInHotbar(MayOBeesConfig.shortBowAuraItemName);
 
         if (MayOBeesConfig.shortBowAuraItemName.isEmpty() || slot == -1 || slot != mc.thePlayer.inventory.currentItem) {
@@ -153,12 +154,6 @@ public class ShortbowAura implements IModule {
         }
 
         if (RotationHandler.getInstance().isRotating() && !RotationHandler.getInstance().getConfiguration().goingBackToClientSide()) {
-            if (MayOBeesConfig.shortBowAuraRotationType) {
-                Vec3 lookDirection = mc.thePlayer.getLookVec();
-                if (EntityUtils.isLookingAtEntity(currentTarget.get(), MayOBeesConfig.shortBowAuraRange, lookDirection)) {
-                    shootEntity();
-                }
-            }
             return;
         }
         Rotation neededChange = RotationHandler.getInstance().getNeededChange(startRotation, RotationHandler.getInstance().getRotation(currentTarget.get()));
@@ -177,8 +172,10 @@ public class ShortbowAura implements IModule {
         } else {
             KeyBindUtils.leftClick();
         }
-        currentTarget.ifPresent(entityLivingBase -> hitTargets.add(new Tuple<>(entityLivingBase, System.currentTimeMillis())));
-        currentTarget = Optional.empty();
+        if (!MayOBeesConfig.shortBowAuraAttackUntilDead) {
+            currentTarget.ifPresent(entityLivingBase -> hitTargets.add(new Tuple<>(entityLivingBase, System.currentTimeMillis())));
+            currentTarget = Optional.empty();
+        }
         lastHit = System.currentTimeMillis();
         currentRandomDelay = MayOBeesConfig.getRandomizedCooldown();
         nextRotationSpeed = MayOBeesConfig.getRandomizedRotationSpeed();
@@ -232,6 +229,14 @@ public class ShortbowAura implements IModule {
             bb = bb.offset(-mc.getRenderManager().viewerPosX, -mc.getRenderManager().viewerPosY, -mc.getRenderManager().viewerPosZ);
             RenderUtils.drawBox(bb, possibleTargetColor);
         }
+
+        Vec3 playerPos = mc.thePlayer.getPositionVector();
+        Vec3 playerLeftLooking = AngleUtils.getVectorForRotation(0, mc.thePlayer.rotationYaw - MayOBeesConfig.shortBowAuraFOV / 2f);
+        Vec3 playerRightLooking = AngleUtils.getVectorForRotation(0, mc.thePlayer.rotationYaw + MayOBeesConfig.shortBowAuraFOV / 2f);
+        Vec3 playerLeftLookingEnd = playerPos.addVector(playerLeftLooking.xCoord * MayOBeesConfig.shortBowAuraRange, playerLeftLooking.yCoord * MayOBeesConfig.shortBowAuraRange, playerLeftLooking.zCoord * MayOBeesConfig.shortBowAuraRange);
+        Vec3 playerRightLookingEnd = playerPos.addVector(playerRightLooking.xCoord * MayOBeesConfig.shortBowAuraRange, playerRightLooking.yCoord * MayOBeesConfig.shortBowAuraRange, playerRightLooking.zCoord * MayOBeesConfig.shortBowAuraRange);
+        RenderUtils.drawTracer(new Vec3(0, 0, 0), playerLeftLookingEnd, Color.WHITE);
+        RenderUtils.drawTracer(new Vec3(0, 0, 0), playerRightLookingEnd, Color.WHITE);
     }
 
     @SubscribeEvent
