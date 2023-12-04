@@ -156,6 +156,18 @@ public class InventoryUtils {
         return false;
     }
 
+    public static boolean hasItemInContainer(String item) {
+        for (Slot slot : mc.thePlayer.openContainer.inventorySlots) {
+            if (slot.getHasStack()) {
+                String itemName = StringUtils.stripControlCodes(slot.getStack().getDisplayName());
+                if (itemName.contains(item)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static ArrayList<Slot> getIndexesOfItemsFromInventory(Predicate<Slot> predicate) {
         ArrayList<Slot> indexes = new ArrayList<>();
         for (int i = 0; i < 36; i++) {
