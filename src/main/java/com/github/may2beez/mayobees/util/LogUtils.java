@@ -13,7 +13,7 @@ public class LogUtils {
             System.out.println(prefix + "§3" + message);
             return;
         }
-        mc.thePlayer.addChatMessage(new ChatComponentText(prefix + message));
+        mc.thePlayer.addChatMessage(new ChatComponentText(prefix + "§3" + message));
     }
 
     public static void warn(String message) {
@@ -21,7 +21,7 @@ public class LogUtils {
             System.out.println(prefix + "§c" + message);
             return;
         }
-        mc.thePlayer.addChatMessage(new ChatComponentText(prefix + message));
+        mc.thePlayer.addChatMessage(new ChatComponentText(prefix + "§c" + message));
     }
 
     public static void error(String message) {
@@ -29,7 +29,7 @@ public class LogUtils {
             System.out.println(prefix + "§4" + message);
             return;
         }
-        mc.thePlayer.addChatMessage(new ChatComponentText(prefix + message));
+        mc.thePlayer.addChatMessage(new ChatComponentText(prefix + "§4" + message));
     }
 
     public static void debug(String message) {
@@ -37,6 +37,6 @@ public class LogUtils {
             System.out.println(prefix + "§b" + message);
             return;
         }
-        mc.thePlayer.addChatMessage(new ChatComponentText(prefix + message));
+        mc.thePlayer.addChatMessage(new ChatComponentText(prefix + "§b" + message));
     }
 }
