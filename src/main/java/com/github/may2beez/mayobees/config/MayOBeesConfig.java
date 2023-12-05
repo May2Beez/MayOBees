@@ -200,7 +200,7 @@ public class MayOBeesConfig extends Config {
             category = "Render",
             subcategory = "Chest ESP"
     )
-    public static OneColor chestESPColor = new OneColor(255, 0, 0, 100);
+    public static OneColor chestESPColor = new OneColor(194, 91, 12, 100);
 
     @Switch(
             name = "Chest ESP Tracers",
@@ -226,7 +226,7 @@ public class MayOBeesConfig extends Config {
             category = "Render",
             subcategory = "Fairy Soul ESP"
     )
-    public static OneColor fairySoulESPColor = new OneColor(255, 0, 0, 100);
+    public static OneColor fairySoulESPColor = new OneColor(147, 8, 207, 100);
 
     @Switch(
             name = "Fairy Soul ESP Tracers",
@@ -281,7 +281,7 @@ public class MayOBeesConfig extends Config {
             category = "Render",
             subcategory = "Gift ESP"
     )
-    public static OneColor giftESPColor = new OneColor(255, 0, 0, 100);
+    public static OneColor giftESPColor = new OneColor(230, 230, 230, 100);
 
     @Switch(
             name = "Gift ESP Tracers",

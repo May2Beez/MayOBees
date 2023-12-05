@@ -94,8 +94,8 @@ public class RenderUtils {
         GlStateManager.enableTexture2D();
         GlStateManager.enableDepth();
         GlStateManager.disableBlend();
-        GlStateManager.resetColor();
         GlStateManager.popMatrix();
+        GlStateManager.resetColor();
     }
 
     public static void drawCenterTopText(String text, RenderGameOverlayEvent event, Color color) {
@@ -161,8 +161,8 @@ public class RenderUtils {
 
         GlStateManager.enableDepth();
         GlStateManager.enableBlend();
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.popMatrix();
+        GlStateManager.resetColor();
     }
 
     public static void drawTracer(Vec3 from, Vec3 to, Color color) {
@@ -186,9 +186,8 @@ public class RenderUtils {
         GlStateManager.enableTexture2D();
         GlStateManager.enableDepth();
         GlStateManager.disableBlend();
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        GlStateManager.resetColor();
         GlStateManager.popMatrix();
+        GlStateManager.resetColor();
     }
 
     public static void drawTracer(Vec3 to, Color color) {

@@ -16,7 +16,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.Tuple;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -27,13 +26,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ESP implements IModule {
     private final Minecraft mc = Minecraft.getMinecraft();
-    private final List<Tuple<String, BlockPos>> clickedFairySouls = new ArrayList<>();
+    private final HashMap<String, List<Location>> clickedFairySouls = new HashMap<>();
     private final List<BlockPos> clickedGifts = new ArrayList<>();
     private final File clickedFairySoulsFile = new File(mc.mcDataDir + "/config/mayobees/clickedFairySouls.json");
     private static ESP instance;
@@ -85,10 +85,16 @@ public class ESP implements IModule {
             fileInputStream.read(bytes);
             String json = new String(bytes);
             if (json.isEmpty()) return;
-            Type type = new TypeToken<Tuple<String, BlockPos>[]>() {
+            Type type = new TypeToken<HashMap<String, List<Location>>>() {
             }.getType();
-            Tuple<String, BlockPos>[] locations = MayOBees.GSON.fromJson(json, type);
-            clickedFairySouls.addAll(Arrays.asList(locations));
+            try {
+                HashMap<String, List<Location>> locations = MayOBees.GSON.fromJson(json, type);
+                if (locations == null) return;
+                clickedFairySouls.putAll(locations);
+            } catch (Exception e) {
+                e.printStackTrace();
+                saveClickedFairySouls();
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
@@ -188,8 +194,11 @@ public class ESP implements IModule {
         ItemStack helmet = entityArmorStand.getEquipmentInSlot(4);
         if (helmet == null || !helmet.hasTagCompound()) return closestBb;
         if (!helmet.getTagCompound().toString().contains(FAIRY_SOUL_TEXTURE)) return closestBb;
-        if (clickedFairySouls.stream().anyMatch(cfs -> cfs.getFirst().equals(GameStateHandler.getInstance().getLocation().getName()) && cfs.getSecond().equals(entityArmorStand.getPosition())))
-            return closestBb;
+
+        List<Location> fairySoulsFromThisLocation = clickedFairySouls.get(GameStateHandler.getInstance().getLocation().getName());
+
+        if (fairySoulsFromThisLocation != null && listHasElement(fairySoulsFromThisLocation, Location.of(entityArmorStand.getPosition()))) return closestBb;
+
         AxisAlignedBB bb = new AxisAlignedBB(entityArmorStand.posX - 0.5, entityArmorStand.posY + entityArmorStand.getEyeHeight() - 0.5, entityArmorStand.posZ - 0.5, entityArmorStand.posX + 0.5, entityArmorStand.posY + entityArmorStand.getEyeHeight() + 0.5, entityArmorStand.posZ + 0.5).expand(0.002, 0.002, 0.002);
         if (MayOBeesConfig.fairySoulESPShowOnlyClosest) {
             if (closestBb == null) {
@@ -262,9 +271,14 @@ public class ESP implements IModule {
         ItemStack helmet = ((EntityArmorStand) event.entity).getEquipmentInSlot(4);
         if (helmet == null || !helmet.hasTagCompound()) return;
         if (helmet.getTagCompound().toString().contains(FAIRY_SOUL_TEXTURE)) {
-            if (clickedFairySouls.stream().anyMatch(cfs -> cfs.getFirst().equals(GameStateHandler.getInstance().getLocation().getName()) && cfs.getSecond().equals(event.entity.getPosition())))
+            List<Location> thisLocationFairySouls = clickedFairySouls.get(GameStateHandler.getInstance().getLocation().getName());
+            if (thisLocationFairySouls == null || thisLocationFairySouls.isEmpty()) {
+                clickedFairySouls.put(GameStateHandler.getInstance().getLocation().getName(), new ArrayList<>(Collections.singletonList(Location.of(event.entity.getPosition()))));
+                saveClickedFairySouls();
                 return;
-            clickedFairySouls.add(new Tuple<>(GameStateHandler.getInstance().getLocation().getName(), event.entity.getPosition()));
+            }
+            if (listHasElement(thisLocationFairySouls, Location.of(event.entity.getPosition()))) return;
+            clickedFairySouls.get(GameStateHandler.getInstance().getLocation().getName()).add(Location.of(event.entity.getPosition()));
             saveClickedFairySouls();
         }
     }
@@ -277,6 +291,32 @@ public class ESP implements IModule {
         if (helmet.getTagCompound().toString().contains(GIFT_TEXTURES[0]) || helmet.getTagCompound().toString().contains(GIFT_TEXTURES[1]) || helmet.getTagCompound().toString().contains(GIFT_TEXTURES[2])) {
             if (clickedGifts.contains(event.entity.getPosition())) return;
             clickedGifts.add(event.entity.getPosition());
+        }
+    }
+
+    private boolean listHasElement(List<Location> list, Location location) {
+        for (Location location1 : list) {
+            if (location1.x == location.x && location1.y == location.y && location1.z == location.z) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private static class Location {
+        public final int x;
+        public final int y;
+        public final int z;
+
+        public Location(int x, int y, int z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        public static Location of(BlockPos blockPos) {
+            return new Location(blockPos.getX(), blockPos.getY(), blockPos.getZ());
         }
     }
 }
