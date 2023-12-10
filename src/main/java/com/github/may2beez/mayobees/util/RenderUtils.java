@@ -1,5 +1,6 @@
 package com.github.may2beez.mayobees.util;
 
+import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
@@ -9,6 +10,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.StringUtils;
@@ -19,6 +21,7 @@ import org.lwjgl.opengl.GL11;
 import java.awt.*;
 
 public class RenderUtils {
+    static Minecraft mc = Minecraft.getMinecraft();
 
     public static void drawBlockBox(BlockPos blockPos, Color color) {
         double x = blockPos.getX();
@@ -96,6 +99,12 @@ public class RenderUtils {
         GlStateManager.disableBlend();
         GlStateManager.popMatrix();
         GlStateManager.resetColor();
+    }
+
+    public static void drawHeadBox(Entity entity, Color color) {
+        AxisAlignedBB bb = new AxisAlignedBB(entity.posX - 0.5, entity.posY + entity.getEyeHeight() - 0.5, entity.posZ - 0.5, entity.posX + 0.5, entity.posY + entity.getEyeHeight() + 0.5, entity.posZ + 0.5).expand(0.002, 0.002, 0.002);
+        bb = bb.offset(-mc.getRenderManager().viewerPosX, -mc.getRenderManager().viewerPosY, -mc.getRenderManager().viewerPosZ);
+        RenderUtils.drawBox(bb, color);
     }
 
     public static void drawCenterTopText(String text, RenderGameOverlayEvent event, Color color) {

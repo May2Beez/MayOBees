@@ -6,6 +6,7 @@ import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.event.ClickEvent;
 import com.github.may2beez.mayobees.handler.GameStateHandler;
 import com.github.may2beez.mayobees.module.IModule;
+import com.github.may2beez.mayobees.util.HeadUtils;
 import com.github.may2beez.mayobees.util.RenderUtils;
 import com.google.gson.reflect.TypeToken;
 import net.minecraft.block.Block;
@@ -37,13 +38,6 @@ public class ESP implements IModule {
     private final List<BlockPos> clickedGifts = new ArrayList<>();
     private final File clickedFairySoulsFile = new File(mc.mcDataDir + "/config/mayobees/clickedFairySouls.json");
     private static ESP instance;
-
-    private final String FAIRY_SOUL_TEXTURE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjk2OTIzYWQyNDczMTAwMDdmNmFlNWQzMjZkODQ3YWQ1Mzg2NGNmMTZjMzU2NWExODFkYzhlNmIyMGJlMjM4NyJ9fX0=";
-    private final String[] GIFT_TEXTURES = new String[]{
-            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTBmNTM5ODUxMGIxYTA1YWZjNWIyMDFlYWQ4YmZjNTgzZTU3ZDcyMDJmNTE5M2IwYjc2MWZjYmQwYWUyIn19fQ==",
-            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWQ5N2Y0ZjQ0ZTc5NmY3OWNhNDMw0TdmYWE3YjRmZTkxYzQ0NWM3NmU1YzI2YTVhZDc5NGY1ZTQ3OTgzNyJ9fX0=",
-            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjczYTIxMTQxMzZiOGVlNDkyNmNhYTUxNzg1NDE0MD2M2YTJiNzZlNGYxNjY4Y2I4OWQ5OTcxNmM0MjEifX19"
-    };
 
     public static ESP getInstance() {
         if (instance == null) {
@@ -193,7 +187,7 @@ public class ESP implements IModule {
     private AxisAlignedBB fairySoulEntityCheck(EntityArmorStand entityArmorStand, AxisAlignedBB closestBb) {
         ItemStack helmet = entityArmorStand.getEquipmentInSlot(4);
         if (helmet == null || !helmet.hasTagCompound()) return closestBb;
-        if (!helmet.getTagCompound().toString().contains(FAIRY_SOUL_TEXTURE)) return closestBb;
+        if (!helmet.getTagCompound().toString().contains(HeadUtils.FAIRY_SOUL_TEXTURE)) return closestBb;
 
         List<Location> fairySoulsFromThisLocation = clickedFairySouls.get(GameStateHandler.getInstance().getLocation().getName());
 
@@ -226,11 +220,9 @@ public class ESP implements IModule {
     private void giftEntityCheck(EntityArmorStand entityArmorStand) {
         ItemStack helmet = entityArmorStand.getEquipmentInSlot(4);
         if (helmet == null || !helmet.hasTagCompound()) return;
-        if (helmet.getTagCompound().toString().contains(GIFT_TEXTURES[0]) || helmet.getTagCompound().toString().contains(GIFT_TEXTURES[1]) || helmet.getTagCompound().toString().contains(GIFT_TEXTURES[2])) {
+        if (helmet.getTagCompound().toString().contains(HeadUtils.GIFT_TEXTURES[0]) || helmet.getTagCompound().toString().contains(HeadUtils.GIFT_TEXTURES[1]) || helmet.getTagCompound().toString().contains(HeadUtils.GIFT_TEXTURES[2])) {
             if (clickedGifts.contains(entityArmorStand.getPosition())) return;
-            AxisAlignedBB bb = new AxisAlignedBB(entityArmorStand.posX - 0.5, entityArmorStand.posY + entityArmorStand.getEyeHeight() - 0.5, entityArmorStand.posZ - 0.5, entityArmorStand.posX + 0.5, entityArmorStand.posY + entityArmorStand.getEyeHeight() + 0.5, entityArmorStand.posZ + 0.5).expand(0.002, 0.002, 0.002);
-            bb = bb.offset(-mc.getRenderManager().viewerPosX, -mc.getRenderManager().viewerPosY, -mc.getRenderManager().viewerPosZ);
-            RenderUtils.drawBox(bb, MayOBeesConfig.giftESPColor.toJavaColor());
+            RenderUtils.drawHeadBox(entityArmorStand, MayOBeesConfig.giftESPColor.toJavaColor());
             if (MayOBeesConfig.giftESPTracers) {
                 RenderUtils.drawTracer(new Vec3(entityArmorStand.posX, entityArmorStand.posY + entityArmorStand.getEyeHeight(), entityArmorStand.posZ), MayOBeesConfig.giftESPColor.toJavaColor());
             }
@@ -270,7 +262,7 @@ public class ESP implements IModule {
         if (!(event.entity instanceof EntityArmorStand)) return;
         ItemStack helmet = ((EntityArmorStand) event.entity).getEquipmentInSlot(4);
         if (helmet == null || !helmet.hasTagCompound()) return;
-        if (helmet.getTagCompound().toString().contains(FAIRY_SOUL_TEXTURE)) {
+        if (helmet.getTagCompound().toString().contains(HeadUtils.FAIRY_SOUL_TEXTURE)) {
             List<Location> thisLocationFairySouls = clickedFairySouls.get(GameStateHandler.getInstance().getLocation().getName());
             if (thisLocationFairySouls == null || thisLocationFairySouls.isEmpty()) {
                 clickedFairySouls.put(GameStateHandler.getInstance().getLocation().getName(), new ArrayList<>(Collections.singletonList(Location.of(event.entity.getPosition()))));
@@ -285,13 +277,9 @@ public class ESP implements IModule {
 
     private void giftClick(ClickEvent event) {
         if (!MayOBeesConfig.giftESP) return;
-        if (!(event.entity instanceof EntityArmorStand)) return;
-        ItemStack helmet = ((EntityArmorStand) event.entity).getEquipmentInSlot(4);
-        if (helmet == null || !helmet.hasTagCompound()) return;
-        if (helmet.getTagCompound().toString().contains(GIFT_TEXTURES[0]) || helmet.getTagCompound().toString().contains(GIFT_TEXTURES[1]) || helmet.getTagCompound().toString().contains(GIFT_TEXTURES[2])) {
-            if (clickedGifts.contains(event.entity.getPosition())) return;
-            clickedGifts.add(event.entity.getPosition());
-        }
+        if (!HeadUtils.isGift(event.entity)) return;
+        if (clickedGifts.contains(event.entity.getPosition())) return;
+        clickedGifts.add(event.entity.getPosition());
     }
 
     private boolean listHasElement(List<Location> list, Location location) {

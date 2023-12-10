@@ -8,6 +8,7 @@ import cc.polyfrost.oneconfig.config.data.InfoType;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import com.github.may2beez.mayobees.module.impl.combat.ShortbowAura;
+import com.github.may2beez.mayobees.module.impl.player.GiftAura;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
 import org.lwjgl.input.Keyboard;
 
@@ -213,7 +214,7 @@ public class MayOBeesConfig extends Config {
 
     //<editor-fold desc="Fairy Soul ESP">
     @Switch(
-            name = "Fairy Soul EPS",
+            name = "Fairy Soul ESP",
             description = "Highlights fairy souls",
             category = "Render",
             subcategory = "Fairy Soul ESP"
@@ -268,7 +269,7 @@ public class MayOBeesConfig extends Config {
 
     //<editor-fold desc="Gift ESP">
     @Switch(
-            name = "Gift EPS",
+            name = "Gift ESP",
             description = "Highlights gifts",
             category = "Render",
             subcategory = "Gift ESP"
@@ -333,6 +334,7 @@ public class MayOBeesConfig extends Config {
     //</editor-fold>
 
     //<editor-fold desc="OTHER">
+
     //<editor-fold desc="Ghost Blocks">
     @Switch(
             name = "Enable Ghost Blocks",
@@ -360,6 +362,84 @@ public class MayOBeesConfig extends Config {
     )
     public static int ghostBlocksDuration = 1000;
     //</editor-fold>
+
+    //<editor-fold desc="Gift Aura">
+    @Switch(
+            name = "Gift Aura",
+            description = "Automatically opens gifts",
+            category = "Other",
+            subcategory = "Gift Aura"
+    )
+    public static boolean giftAura = false;
+    @Button(
+            name = "Gift Aura Reset",
+            text = "Reset",
+            description = "Resets the Gift Aura",
+            category = "Other",
+            subcategory = "Gift Aura",
+            size = 2
+    )
+    public static void giftAuraReset() {
+        GiftAura.getInstance().reset();
+    }
+    @DualOption(
+            name = "Gift Aura Rotation Type",
+            description = "The type of rotation to use for the gift aura",
+            category = "Other",
+            subcategory = "Gift Aura",
+            left = "Silent",
+            right = "Client",
+            size = 2
+    )
+    public static boolean giftAuraRotationType = true;
+
+    @Color(
+            name = "Gift Aura ESP Color",
+            description = "The color of the gift aura ESP",
+            category = "Other",
+            subcategory = "Gift Aura"
+    )
+    public static OneColor giftAuraESPColor = new OneColor(240, 93, 94, 100);
+    @Switch(
+            name = "Open default gifts at Jerry's Workshop",
+            description = "Automatically opens gifts hidden throughout Jerry's Workshop",
+            category = "Other",
+            subcategory = "Gift Aura"
+    )
+    public static boolean giftAuraOpenDefaultGiftsAtJerryWorkshop = false;
+    @Switch(
+            name = "Open player gifts",
+            description = "Automatically opens gifts from other players",
+            category = "Other",
+            subcategory = "Gift Aura"
+    )
+    public static boolean giftAuraOpenPlayerGifts = false;
+    @Switch(
+            name = "Open gifts outside of Jerry's Workshop",
+            description = "Automatically opens gifts outside of Jerry's Workshop",
+            category = "Other",
+            subcategory = "Gift Aura"
+    )
+    public static boolean giftAuraOpenGiftsOutsideOfJerryWorkshop = false;
+    @Switch(
+            name = "Don't check for visibility",
+            description = "Don't check if the gift is visible before opening it",
+            category = "Other",
+            subcategory = "Gift Aura"
+    )
+    public static boolean giftAuraDontCheckForVisibility = false;
+    @Slider(
+            name = "Delay (ms)",
+            description = "The delay between opening gifts",
+            category = "Other",
+            subcategory = "Gift Aura",
+            min = 150,
+            max = 2000
+    )
+    public static int giftAuraDelay = 750;
+
+    //</editor-fold>
+
     //</editor-fold>
 
     public MayOBeesConfig() {
