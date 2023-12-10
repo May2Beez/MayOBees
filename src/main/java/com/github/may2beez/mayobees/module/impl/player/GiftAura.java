@@ -14,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -78,7 +79,7 @@ public class GiftAura implements IModule {
                 .filter(entity -> shouldOpenGift(entity) && !openedGifts.contains(entity) && mc.thePlayer.getDistanceToEntity(entity) <= 3.5f)
                 .findFirst()
                 .ifPresent(entity -> {
-                    if (isGiftVisible(entity) || MayOBeesConfig.giftAuraDontCheckForVisibility) {
+                    if (mc.thePlayer.canEntityBeSeen(entity) || MayOBeesConfig.giftAuraDontCheckForVisibility) {
                         RotationHandler.getInstance().easeTo(new RotationConfiguration(
                                 new Target(entity), 400L,
                                 MayOBeesConfig.giftAuraRotationType ? RotationConfiguration.RotationType.CLIENT : RotationConfiguration.RotationType.SERVER,
@@ -89,7 +90,7 @@ public class GiftAura implements IModule {
     }
 
     private void tryToOpenGift(EntityArmorStand entity) {
-        if (isGiftVisible(entity) || MayOBeesConfig.giftAuraDontCheckForVisibility) {
+        if (mc.thePlayer.canEntityBeSeen(entity) || MayOBeesConfig.giftAuraDontCheckForVisibility) {
             mc.playerController.interactWithEntitySendPacket(mc.thePlayer, entity);
             openedGifts.add(entity);
             LogUtils.debug("Gift opened!");
@@ -103,11 +104,6 @@ public class GiftAura implements IModule {
     private boolean shouldOpenGift(EntityArmorStand entity) {
         return (MayOBeesConfig.giftAuraOpenDefaultGiftsAtJerryWorkshop && HeadUtils.isGift(entity))
                 || (MayOBeesConfig.giftAuraOpenPlayerGifts && HeadUtils.isPersonalGift(entity));
-    }
-
-    public boolean isGiftVisible(Entity entity) { // not working
-        MovingObjectPosition mop = mc.theWorld.rayTraceBlocks(mc.thePlayer.getPositionEyes(1), entity.getPositionEyes(1), false, true, false);
-        return mop != null && mop.entityHit == entity;
     }
 
     @SubscribeEvent
