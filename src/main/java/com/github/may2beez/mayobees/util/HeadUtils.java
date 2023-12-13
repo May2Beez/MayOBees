@@ -22,7 +22,7 @@ public class HeadUtils {
 
     public static boolean isGift(EntityArmorStand armorStand) {
         ItemStack helmet = armorStand.getEquipmentInSlot(4);
-        if (helmet == null || helmet.getItem() != Items.skull) return false;
+        if (helmet == null || helmet.getItem() != Items.skull || helmet.getTagCompound() == null) return false;
         return !armorStand.hasCustomName()
                 && Math.abs(armorStand.lastTickPosY - armorStand.posY) < 0.1
                 && (helmet.getTagCompound().toString().contains(HeadUtils.GIFT_TEXTURES[0])

@@ -1,6 +1,7 @@
 package com.github.may2beez.mayobees.mixin.client;
 
 import com.github.may2beez.mayobees.event.MotionUpdateEvent;
+import com.github.may2beez.mayobees.event.ContainerClosedEvent;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -25,5 +26,10 @@ public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
     @Inject(method = "onUpdateWalkingPlayer", at = @At("RETURN"))
     public void onUpdateWalkingPlayerReturn(CallbackInfo ci) {
         MinecraftForge.EVENT_BUS.post(new MotionUpdateEvent.Post(this.rotationYaw, this.rotationPitch));
+    }
+
+    @Inject(method = "closeScreen", at = @At("HEAD"), cancellable = true)
+    public void closeScreen(CallbackInfo ci) {
+        if (MinecraftForge.EVENT_BUS.post(new ContainerClosedEvent(this.openContainer))) ci.cancel();
     }
 }
