@@ -59,8 +59,8 @@ public class RotationHandler {
         startTime = System.currentTimeMillis();
         startRotation.setRotation(configuration.getFrom());
         Rotation neededChange;
+        randomAddition = (Math.random() * 0.3 - 0.15);
         if (configuration.bowRotation()) {
-            randomBowAddition = (Math.random() * 0.3 - 0.15);
             neededChange = getNeededChange(startRotation, getBowRotation(configuration.getTarget().get().getEntity()));
         } else if (configuration.getTarget().isPresent() && configuration.getTarget().get().getTarget().isPresent()) {
             neededChange = getNeededChange(startRotation, configuration.getTarget().get().getTarget().get());
@@ -153,7 +153,7 @@ public class RotationHandler {
         return new Rotation(yawDiff, endRot.getPitch() - startRot.getPitch());
     }
 
-    private double randomBowAddition = (Math.random() * 0.3 - 0.15);
+    private double randomAddition = (Math.random() * 0.3 - 0.15);
 
     public Rotation getBowRotation(Entity entity) {
         System.out.println("Getting bow rotation");
@@ -165,7 +165,7 @@ public class RotationHandler {
         double zMulti = d / 0.8 * zDelta;
         double x = entity.posX + xMulti - mc.thePlayer.posX;
         double z = entity.posZ + zMulti - mc.thePlayer.posZ;
-        double y = mc.thePlayer.posY + mc.thePlayer.getEyeHeight() - (entity.posY + entity.height / 2 + randomBowAddition);
+        double y = mc.thePlayer.posY + mc.thePlayer.getEyeHeight() - (entity.posY + entity.height / 2 + randomAddition);
         double dist = mc.thePlayer.getDistanceToEntity(entity);
         float yaw = (float) Math.toDegrees(Math.atan2(z, x)) - 90f;
         double d2 = Math.sqrt(x * x + z * z);
@@ -182,7 +182,7 @@ public class RotationHandler {
     }
 
     public Rotation getRotation(Entity to) {
-        return getRotation(mc.thePlayer.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks), to.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks).subtract(0, to.height / 2 + randomBowAddition, 0), false);
+        return getRotation(mc.thePlayer.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks), to.getPositionVector().addVector(0, Math.min(to.getEyeHeight() - 0.15, 1.5) + randomAddition, 0), false);
     }
 
     public Rotation getRotation(Vec3 from, Vec3 to) {
