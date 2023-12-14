@@ -30,11 +30,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class ESP implements IModule {
     private final Minecraft mc = Minecraft.getMinecraft();
     private final HashMap<String, List<Location>> clickedFairySouls = new HashMap<>();
+    private final CopyOnWriteArrayList<EntityArmorStand> visibleFairySouls = new CopyOnWriteArrayList<>();
     private final List<BlockPos> clickedGifts = new ArrayList<>();
     private final File clickedFairySoulsFile = new File(mc.mcDataDir + "/config/mayobees/clickedFairySouls.json");
     private static ESP instance;
@@ -122,6 +124,21 @@ public class ESP implements IModule {
         saveClickedFairySouls();
     }
 
+    public void resetClickedFairySoulsOnlyCurrentIsland() {
+        clickedFairySouls.remove(GameStateHandler.getInstance().getLocation().getName());
+        saveClickedFairySouls();
+    }
+
+    public void addAllVisibleFairySoulsToClickedList() {
+        List<Location> thisLocationFairySouls = clickedFairySouls.computeIfAbsent(GameStateHandler.getInstance().getLocation().getName(), k -> new ArrayList<>());
+        for (EntityArmorStand entityArmorStand : visibleFairySouls) {
+            if (listHasElement(thisLocationFairySouls, Location.of(entityArmorStand.getPosition()))) continue;
+            thisLocationFairySouls.add(Location.of(entityArmorStand.getPosition()));
+        }
+        clickedFairySouls.put(GameStateHandler.getInstance().getLocation().getName(), thisLocationFairySouls);
+        saveClickedFairySouls();
+    }
+
     public void resetClickedGifts() {
         clickedGifts.clear();
     }
@@ -152,18 +169,21 @@ public class ESP implements IModule {
 
         AxisAlignedBB closestFairySoulBb = null;
 
+        List<EntityArmorStand> visibleFairySouls = new ArrayList<>();
         for (EntityArmorStand entityArmorStand : mc.theWorld.loadedEntityList.stream().filter(entity -> entity instanceof EntityArmorStand).map(entity -> (EntityArmorStand) entity).collect(Collectors.toList())) {
             ItemStack helmet = entityArmorStand.getEquipmentInSlot(4);
             if (helmet == null || !helmet.hasTagCompound()) continue;
 
             if (MayOBeesConfig.fairySoulESP) {
-                closestFairySoulBb = fairySoulEntityCheck(entityArmorStand, closestFairySoulBb);
+                closestFairySoulBb = fairySoulEntityCheck(entityArmorStand, closestFairySoulBb, visibleFairySouls);
             }
 
             if (MayOBeesConfig.giftESP && (!MayOBeesConfig.giftESPShowOnlyOnJerryWorkshop || GameStateHandler.getInstance().getLocation() == GameStateHandler.Location.JERRY_WORKSHOP)) {
                 giftEntityCheck(entityArmorStand);
             }
         }
+        this.visibleFairySouls.clear();
+        this.visibleFairySouls.addAll(visibleFairySouls);
 
         drawClosest(closestFairySoulBb, MayOBeesConfig.fairySoulESPColor, MayOBeesConfig.fairySoulESPTracers, MayOBeesConfig.fairySoulESPShowDistance);
     }
@@ -184,7 +204,7 @@ public class ESP implements IModule {
         }
     }
 
-    private AxisAlignedBB fairySoulEntityCheck(EntityArmorStand entityArmorStand, AxisAlignedBB closestBb) {
+    private AxisAlignedBB fairySoulEntityCheck(EntityArmorStand entityArmorStand, AxisAlignedBB closestBb, List<EntityArmorStand> visibleFairySouls) {
         ItemStack helmet = entityArmorStand.getEquipmentInSlot(4);
         if (helmet == null || !helmet.hasTagCompound()) return closestBb;
         if (!helmet.getTagCompound().toString().contains(HeadUtils.FAIRY_SOUL_TEXTURE)) return closestBb;
@@ -192,6 +212,8 @@ public class ESP implements IModule {
         List<Location> fairySoulsFromThisLocation = clickedFairySouls.get(GameStateHandler.getInstance().getLocation().getName());
 
         if (fairySoulsFromThisLocation != null && listHasElement(fairySoulsFromThisLocation, Location.of(entityArmorStand.getPosition()))) return closestBb;
+
+        visibleFairySouls.add(entityArmorStand);
 
         AxisAlignedBB bb = new AxisAlignedBB(entityArmorStand.posX - 0.5, entityArmorStand.posY + entityArmorStand.getEyeHeight() - 0.5, entityArmorStand.posZ - 0.5, entityArmorStand.posX + 0.5, entityArmorStand.posY + entityArmorStand.getEyeHeight() + 0.5, entityArmorStand.posZ + 0.5).expand(0.002, 0.002, 0.002);
         if (MayOBeesConfig.fairySoulESPShowOnlyClosest) {

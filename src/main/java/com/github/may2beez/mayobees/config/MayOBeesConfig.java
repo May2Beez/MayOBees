@@ -265,6 +265,30 @@ public class MayOBeesConfig extends Config {
         ESP.getInstance().resetClickedFairySouls();
     }
 
+    @Button(
+            name = "Fairy Souls ESP reset only current island",
+            text = "Reset only current island",
+            description = "Resets the fairy soul ESP only for the current island",
+            category = "Render",
+            subcategory = "Fairy Soul ESP",
+            size = 2
+    )
+    public static void fairySoulESPResetOnlyCurrentIsland() {
+        ESP.getInstance().resetClickedFairySoulsOnlyCurrentIsland();
+    }
+
+    @Button(
+            name = "Fairy Souls ESP Add all visible souls to clicked list",
+            text = "Add all visible souls to clicked list",
+            description = "Adds all visible fairy souls to the clicked list",
+            category = "Render",
+            subcategory = "Fairy Soul ESP",
+            size = 2
+    )
+    public static void fairySoulESPAddAllVisibleSoulsToClickedList() {
+        ESP.getInstance().addAllVisibleFairySoulsToClickedList();
+    }
+
     //</editor-fold>
 
     //<editor-fold desc="Gift ESP">
