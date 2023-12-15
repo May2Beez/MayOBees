@@ -15,9 +15,9 @@ public class MixinMinecraft {
     @Inject(method = "clickMouse", at = @At("HEAD"))
     public void clickMouse(CallbackInfo ci) {
         MovingObjectPosition objectMouseOver = Minecraft.getMinecraft().objectMouseOver;
-        if (objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY) {
+        if (objectMouseOver != null && objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY && objectMouseOver.entityHit != null) {
             MinecraftForge.EVENT_BUS.post(new ClickEvent.Left(objectMouseOver.entityHit));
-        } else if (objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+        } else if (objectMouseOver != null && objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && objectMouseOver.getBlockPos() != null) {
             MinecraftForge.EVENT_BUS.post(new ClickEvent.Left(objectMouseOver.getBlockPos()));
         } else {
             MinecraftForge.EVENT_BUS.post(new ClickEvent.Left());
@@ -27,9 +27,9 @@ public class MixinMinecraft {
     @Inject(method = "rightClickMouse", at = @At("HEAD"))
     public void rightClickMouse(CallbackInfo ci) {
         MovingObjectPosition objectMouseOver = Minecraft.getMinecraft().objectMouseOver;
-        if (objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY) {
+        if (objectMouseOver != null && objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY && objectMouseOver.entityHit != null) {
             MinecraftForge.EVENT_BUS.post(new ClickEvent.Right(objectMouseOver.entityHit));
-        } else if (objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+        } else if (objectMouseOver != null && objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && objectMouseOver.getBlockPos() != null) {
             MinecraftForge.EVENT_BUS.post(new ClickEvent.Right(objectMouseOver.getBlockPos()));
         } else {
             MinecraftForge.EVENT_BUS.post(new ClickEvent.Right());
@@ -39,9 +39,9 @@ public class MixinMinecraft {
     @Inject(method = "middleClickMouse", at = @At("HEAD"))
     public void middleClickMouse(CallbackInfo ci) {
         MovingObjectPosition objectMouseOver = Minecraft.getMinecraft().objectMouseOver;
-        if (objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY) {
+        if (objectMouseOver != null && objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY && objectMouseOver.entityHit != null) {
             MinecraftForge.EVENT_BUS.post(new ClickEvent.Middle(objectMouseOver.entityHit));
-        } else if (objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+        } else if (objectMouseOver != null && objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && objectMouseOver.getBlockPos() != null) {
             MinecraftForge.EVENT_BUS.post(new ClickEvent.Middle(objectMouseOver.getBlockPos()));
         } else {
             MinecraftForge.EVENT_BUS.post(new ClickEvent.Middle());
