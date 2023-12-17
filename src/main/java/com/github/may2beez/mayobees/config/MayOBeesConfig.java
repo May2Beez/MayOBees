@@ -2,12 +2,14 @@ package com.github.may2beez.mayobees.config;
 
 import cc.polyfrost.oneconfig.config.Config;
 import cc.polyfrost.oneconfig.config.annotations.*;
+import cc.polyfrost.oneconfig.config.annotations.Number;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.InfoType;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import com.github.may2beez.mayobees.module.impl.combat.ShortbowAura;
+import com.github.may2beez.mayobees.module.impl.other.Dev;
 import com.github.may2beez.mayobees.module.impl.player.GiftAura;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
 import org.lwjgl.input.Keyboard;
@@ -345,20 +347,100 @@ public class MayOBeesConfig extends Config {
     }
 
     //</editor-fold>
-
     //</editor-fold>
 
-    //<editor-fold desc="DEBUG">
+    //<editor-fold desc="DEV">
     @Switch(
             name = "Debug Mode",
             description = "Enables debug mode",
             category = "Debug"
     )
     public static boolean debugMode = false;
+
+    //<editor-fold desc="Tablist">
+    @DualOption(
+            name = "Save Tablist",
+            description = "Saves the tablist to a file",
+            category = "Debug",
+            subcategory = "Tablist",
+            left = "Print",
+            right = "Save"
+    )
+    public static boolean saveTablistToFile = false;
+    @Switch(
+            name = "Transposed Tablist",
+            description = "Transposes the tablist",
+            category = "Debug",
+            subcategory = "Tablist"
+    )
+    public static boolean transposedTablist = false;
+    @Button(
+            name = "Get Tablist",
+            text = "Get Tablist",
+            description = "Gets the tablist",
+            category = "Debug",
+            subcategory = "Tablist"
+    )
+    public static void getTablist() {
+        Dev.getInstance().getTablist();
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="Inventory">
+    @DualOption(
+            name = "Save Inventory",
+            description = "Saves the inventory to a file",
+            category = "Debug",
+            subcategory = "Inventory",
+            left = "Print",
+            right = "Save"
+    )
+    public static boolean saveInventoryToFile = false;
+    @Button(
+            name = "Get Inventory",
+            text = "Get Inventory",
+            description = "Gets the inventory",
+            category = "Debug",
+            subcategory = "Inventory"
+    )
+    public static void getInventory() {
+        Dev.getInstance().getInventory();
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="Item Lore">
+    @DualOption(
+            name = "Save Item Lore",
+            description = "Saves the item lore of specific slot to a file",
+            category = "Debug",
+            subcategory = "Item Lore",
+            left = "Print",
+            right = "Save"
+    )
+    public static boolean saveItemLoreToFile = false;
+    @Number(
+            name = "Item Lore Slot",
+            description = "The slot to get the item lore from",
+            category = "Debug",
+            subcategory = "Item Lore",
+            min = 0,
+            max = 44
+    )
+    public static int itemLoreSlot = 0;
+    @Button(
+            name = "Get Item Lore",
+            text = "Get Item Lore",
+            description = "Gets the item lore of specific slot",
+            category = "Debug",
+            subcategory = "Item Lore"
+    )
+    public static void getItemLore() {
+        Dev.getInstance().getItemLore(itemLoreSlot);
+    }
+    //</editor-fold>
     //</editor-fold>
 
     //<editor-fold desc="OTHER">
-
     //<editor-fold desc="Ghost Blocks">
     @Switch(
             name = "Enable Ghost Blocks",
@@ -463,7 +545,6 @@ public class MayOBeesConfig extends Config {
     public static int giftAuraDelay = 750;
 
     //</editor-fold>
-
     //</editor-fold>
 
     public MayOBeesConfig() {
