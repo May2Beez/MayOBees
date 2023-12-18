@@ -4,6 +4,7 @@ import com.github.may2beez.mayobees.module.impl.combat.ShortbowAura;
 import com.github.may2beez.mayobees.module.impl.other.GhostBlocks;
 import com.github.may2beez.mayobees.module.impl.player.GiftAura;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
+import com.github.may2beez.mayobees.module.impl.skills.AlchemyHelper;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -27,7 +28,8 @@ public class ModuleManager {
                 ShortbowAura.getInstance(),
                 GhostBlocks.getInstance(),
                 GiftAura.getInstance(),
-                ESP.getInstance()
+                ESP.getInstance(),
+                AlchemyHelper.getInstance()
         );
     }
 }

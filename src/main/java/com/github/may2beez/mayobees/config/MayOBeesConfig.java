@@ -12,6 +12,8 @@ import com.github.may2beez.mayobees.module.impl.combat.ShortbowAura;
 import com.github.may2beez.mayobees.module.impl.other.Dev;
 import com.github.may2beez.mayobees.module.impl.player.GiftAura;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
+import com.github.may2beez.mayobees.module.impl.skills.AlchemyHelper;
+import com.github.may2beez.mayobees.util.LogUtils;
 import org.lwjgl.input.Keyboard;
 
 public class MayOBeesConfig extends Config {
@@ -349,7 +351,7 @@ public class MayOBeesConfig extends Config {
     //</editor-fold>
     //</editor-fold>
 
-    //<editor-fold desc="PLAYER">
+    //<editor-fold desc="Player">
     //<editor-fold desc="Fishing">
     @Switch(
             name = "Fishing",
@@ -372,6 +374,64 @@ public class MayOBeesConfig extends Config {
             subcategory = "Fishing"
     )
     public static boolean antiAfkWhileFishing = false;
+    //</editor-fold>
+    //</editor-fold>
+
+    //<editor-fold desc="SKILLS">
+    //<editor-fold desc="Alchemy Helper">
+    @Switch(
+            name = "Alchemy Helper",
+            description = "Automatically brews potions",
+            category = "Skills",
+            subcategory = "Alchemy Helper",
+            size = 2
+    )
+    public static boolean alchemyHelper = false;
+
+    @Switch(
+            name = "Auto put water bottles",
+            description = "Automatically puts water bottles in the brewing stand",
+            category = "Skills",
+            subcategory = "Alchemy Helper - Options"
+    )
+    public static boolean alchemyHelperAutoPutWaterBottles = false;
+
+    @Switch(
+            name = "Auto put ingredients",
+            description = "Automatically puts ingredients in the brewing stand",
+            category = "Skills",
+            subcategory = "Alchemy Helper - Options"
+    )
+    public static boolean alchemyHelperAutoPutIngredients = false;
+
+    @Dropdown(
+            name = "Max ingredient type",
+            description = "The max ingredient type to use",
+            category = "Skills",
+            subcategory = "Alchemy Helper - Options",
+            options = {"None", "Enchanted Sugar Cane", "Enchanted Blaze Rod"},
+            size = 2
+    )
+    public static int alchemyHelperMaxIngredientType = 0;
+
+    @Switch(
+            name = "Auto pick up finish potions",
+            description = "Automatically picks up finish potions",
+            category = "Skills",
+            subcategory = "Alchemy Helper - Options"
+    )
+    public static boolean alchemyHelperAutoPickUpFinishPotions = false;
+
+    @KeyBind(
+            name = "Auto sell potions to NPC",
+            description = "Automatically sells potions to NPC",
+            category = "Skills",
+            subcategory = "Alchemy Helper - Additions"
+    )
+    public static OneKeyBind alchemyHelperAutoSellPotionsToNPCKeybind = new OneKeyBind(Keyboard.KEY_NONE);
+
+    //</editor-fold>
+    //</editor-fold>
 
     //<editor-fold desc="DEV">
     @Switch(
@@ -577,6 +637,11 @@ public class MayOBeesConfig extends Config {
 
         registerKeyBind(shortBowAuraKeybind, () -> {
             ShortbowAura.getInstance().toggle();
+        });
+
+        registerKeyBind(alchemyHelperAutoSellPotionsToNPCKeybind, () -> {
+            LogUtils.info("[Alchemy Helper] Selling to NPC: " + (!AlchemyHelper.getInstance().isSellingPotions() ? "Enabled" : "Disabled"));
+            AlchemyHelper.getInstance().setSellingPotions(!AlchemyHelper.getInstance().isSellingPotions());
         });
     }
 }

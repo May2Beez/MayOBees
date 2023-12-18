@@ -117,6 +117,25 @@ public class InventoryUtils {
         return null;
     }
 
+    public static Slot getSlotOfItemFromInventoryInOpenContainer(String item, boolean equals) {
+        final ContainerChest chest = (ContainerChest) mc.thePlayer.openContainer;
+        for (Slot slot : mc.thePlayer.openContainer.inventorySlots) {
+            if (slot != null && slot.getHasStack() && slot.slotNumber >= chest.getLowerChestInventory().getSizeInventory()) {
+                String itemName = StringUtils.stripControlCodes(slot.getStack().getDisplayName());
+                if (equals) {
+                    if (itemName.equalsIgnoreCase(item)) {
+                        return slot;
+                    }
+                } else {
+                    if (itemName.contains(item)) {
+                        return slot;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     public static String getInventoryName() {
         try {
             if (mc.currentScreen instanceof GuiChest) {
@@ -275,6 +294,35 @@ public class InventoryUtils {
             }
         }
         return speed;
+    }
+
+    public static Slot getFirstEmptySlotInInventory() {
+        if (mc.thePlayer.openContainer != null) {
+            final ContainerChest chest = (ContainerChest) mc.thePlayer.openContainer;
+            for (Slot slot : mc.thePlayer.openContainer.inventorySlots) {
+                if (slot.slotNumber >= chest.getLowerChestInventory().getSizeInventory()) {
+                    if (!slot.getHasStack()) {
+                        return slot;
+                    }
+                }
+            }
+        } else {
+            for (Slot slot : mc.thePlayer.inventoryContainer.inventorySlots) {
+                if (!slot.getHasStack()) {
+                    return slot;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static boolean closeScreen() {
+        if (mc.thePlayer == null) return false;
+        if (mc.currentScreen != null) {
+            mc.displayGuiScreen(null);
+            return true;
+        }
+        return false;
     }
 
     public static enum ClickType {
