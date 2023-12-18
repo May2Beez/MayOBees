@@ -349,6 +349,30 @@ public class MayOBeesConfig extends Config {
     //</editor-fold>
     //</editor-fold>
 
+    //<editor-fold desc="PLAYER">
+    //<editor-fold desc="Fishing">
+    @Switch(
+            name = "Fishing",
+            description = "Automatically fishes",
+            category = "Player",
+            subcategory = "Fishing"
+    )
+    public static boolean fishing = false;
+    @Switch(
+            name = "Sneak while fishing",
+            description = "Sneaks while fishing",
+            category = "Player",
+            subcategory = "Fishing"
+    )
+    public static boolean sneakWhileFishing = false;
+    @Switch(
+            name = "Anti AFK",
+            description = "Anti AFK",
+            category = "Player",
+            subcategory = "Fishing"
+    )
+    public static boolean antiAfkWhileFishing = false;
+
     //<editor-fold desc="DEV">
     @Switch(
             name = "Debug Mode",

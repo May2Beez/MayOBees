@@ -12,6 +12,7 @@
     "client.MinecraftAccessor",
     "client.MixinEntityPlayerSP",
     "client.MixinMinecraft",
+    "network.MixinNetHandlerPlayClient",
     "render.MixinModelBiped"
   ]
 }
