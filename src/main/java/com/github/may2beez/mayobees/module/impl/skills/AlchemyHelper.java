@@ -104,17 +104,17 @@ public class AlchemyHelper implements IModule {
         Slot potion3 = InventoryUtils.getSlotOfIdInContainer(POTION_SLOT_3);
         Slot time = InventoryUtils.getSlotOfIdInContainer(TIME_SLOT);
 
-        getPotion(potion1, POTION_SLOT_1);
+        getPotion(potion1, POTION_SLOT_1, 0);
 
-        getPotion(potion2, POTION_SLOT_2);
+        getPotion(potion2, POTION_SLOT_2, 0);
 
-        getPotion(potion3, POTION_SLOT_3);
+        getPotion(potion3, POTION_SLOT_3, 500);
 
-        putPotion(potion1, POTION_SLOT_1);
+        putPotion(potion1, POTION_SLOT_1, 0);
 
-        putPotion(potion2, POTION_SLOT_2);
+        putPotion(potion2, POTION_SLOT_2, 0);
 
-        putPotion(potion3, POTION_SLOT_3);
+        putPotion(potion3, POTION_SLOT_3, 500);
 
         if (ingredient != null && ingredient.getHasStack()) {
             String ingredientName = ingredient.getStack().getDisplayName();
@@ -125,14 +125,14 @@ public class AlchemyHelper implements IModule {
                 if (MayOBeesConfig.alchemyHelperAutoPutIngredients) {
                     String potionName = StringUtils.stripControlCodes(currentBrewingStand.getPotionName());
                     if (potionName.equals("Water Bottle")) {
-                        putItem(INGREDIENT_SLOT, "Nether Wart", InventoryUtils.ClickType.RIGHT);
+                        putItem(INGREDIENT_SLOT, "Nether Wart", MayOBeesConfig.getRandomizedDelayBetweenIngredientsGuiActions());
                     } else if (potionName.equals("Awkward Potion")) {
                         switch (MayOBeesConfig.alchemyHelperMaxIngredientType) {
                             case 1: {
-                                putItem(INGREDIENT_SLOT, "Enchanted Sugar Cane", InventoryUtils.ClickType.RIGHT);
+                                putItem(INGREDIENT_SLOT, "Enchanted Sugar Cane", MayOBeesConfig.getRandomizedDelayBetweenIngredientsGuiActions());
                             }
                             case 2: {
-                                putItem(INGREDIENT_SLOT, "Enchanted Blaze Rod", InventoryUtils.ClickType.RIGHT);
+                                putItem(INGREDIENT_SLOT, "Enchanted Blaze Rod", MayOBeesConfig.getRandomizedDelayBetweenIngredientsGuiActions());
                             }
                         }
                     }
@@ -167,12 +167,12 @@ public class AlchemyHelper implements IModule {
         String inventoryName = InventoryUtils.getInventoryName();
         if (inventoryName == null) {
             mc.thePlayer.sendChatMessage("/trades");
-            delay.schedule(500 + (int) (Math.random() * 250));
+            delay.schedule(MayOBeesConfig.getRandomizedDelayBetweenPotionGuiActions());
             return;
         }
         if (!inventoryName.equals("Trades")) {
             mc.thePlayer.closeScreen();
-            delay.schedule(500 + (int) (Math.random() * 250));
+            delay.schedule(MayOBeesConfig.getRandomizedDelayBetweenPotionGuiActions());
             return;
         }
 
@@ -184,52 +184,54 @@ public class AlchemyHelper implements IModule {
             return;
         }
         InventoryUtils.clickContainerSlot(potion.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.PICKUP);
-        delay.schedule(300 + (int) (Math.random() * 150));
+        delay.schedule(MayOBeesConfig.getRandomizedDelayBetweenPotionGuiActions());
     }
 
-    private void putPotion(Slot potion, int potionSlot) {
+    private void putPotion(Slot potion, int potionSlot, long extraDelay) {
         if (potion != null && potion.getHasStack()) {
             String potionName = potion.getStack().getDisplayName();
             currentBrewingStand.setPotionName(potionName);
         } else {
             currentBrewingStand.setPotionName("Not Filled");
             if (MayOBeesConfig.alchemyHelperAutoPutWaterBottles)
-                putItem(potionSlot, "Water Bottle", InventoryUtils.ClickType.LEFT);
+                putItem(potionSlot, "Water Bottle", MayOBeesConfig.getRandomizedDelayBetweenPotionGuiActions() + extraDelay);
         }
     }
 
-    private void getPotion(Slot potion, int potionSlot) {
+    private void getPotion(Slot potion, int potionSlot, long extraDelay) {
         if (!MayOBeesConfig.alchemyHelperAutoPickUpFinishPotions) return;
         if (!delay.passed()) return;
         if (potion == null || !potion.getHasStack()) return;
         String potionName = potion.getStack().getDisplayName();
         if (!potionName.endsWith("V Potion")) return;
         InventoryUtils.clickContainerSlot(potionSlot, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.QUICK_MOVE);
-        delay.schedule(300 + (int) (Math.random() * 150));
+        delay.schedule(MayOBeesConfig.getRandomizedDelayBetweenPotionGuiActions() + extraDelay);
     }
 
-    private void putItem(int slot, String itemName, InventoryUtils.ClickType clickType) {
+    private void putItem(int slot, String itemName, long delayTime) {
         if (!delay.passed()) return;
         Slot itemNameSlot = InventoryUtils.getSlotOfItemFromInventoryInOpenContainer(itemName, true);
         if (itemNameSlot == null) return;
         int stackSize = itemNameSlot.getStack().stackSize;
         LogUtils.debug("Putting " + itemName + " in slot " + slot + " from slot " + itemNameSlot.slotNumber);
-        InventoryUtils.clickContainerSlot(itemNameSlot.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.PICKUP);
-        Multithreading.schedule(() -> {
-            if (currentBrewingStand == null) return;
-            InventoryUtils.clickContainerSlot(slot, clickType, InventoryUtils.ClickMode.PICKUP);
-            if (clickType == InventoryUtils.ClickType.RIGHT && stackSize > 1) {
+        if (stackSize == 1) {
+            InventoryUtils.clickContainerSlot(itemNameSlot.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.QUICK_MOVE);
+        } else {
+            InventoryUtils.clickContainerSlot(itemNameSlot.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.PICKUP);
+            Multithreading.schedule(() -> {
+                if (currentBrewingStand == null) return;
+                InventoryUtils.clickContainerSlot(slot, InventoryUtils.ClickType.RIGHT, InventoryUtils.ClickMode.PICKUP);
                 Slot firstEmptySlot = InventoryUtils.getFirstEmptySlotInInventory();
                 if (firstEmptySlot != null) {
-                    Multithreading.schedule(() -> InventoryUtils.clickContainerSlot(firstEmptySlot.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.PICKUP), 150 + (int) (Math.random() * 100), TimeUnit.MILLISECONDS);
+                    Multithreading.schedule(() -> InventoryUtils.clickContainerSlot(firstEmptySlot.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.PICKUP), delayTime / 2, TimeUnit.MILLISECONDS);
                 } else {
                     LogUtils.error("[Alchemy Helper] Inventory is full!");
                     InventoryUtils.closeScreen();
                 }
-                delay.schedule(300 + (int) (Math.random() * 150));
-            }
-        }, 150 + (int) (Math.random() * 100), TimeUnit.MILLISECONDS);
-        delay.schedule(300 + (int) (Math.random() * 150));
+                delay.schedule(delayTime);
+            }, delayTime / 2, TimeUnit.MILLISECONDS);
+        }
+        delay.schedule(delayTime);
     }
 
     @SubscribeEvent

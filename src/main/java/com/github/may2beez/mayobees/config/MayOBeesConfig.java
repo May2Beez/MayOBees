@@ -422,6 +422,54 @@ public class MayOBeesConfig extends Config {
     )
     public static boolean alchemyHelperAutoPickUpFinishPotions = false;
 
+    @Slider(
+            name = "Delay between potion gui actions (ms)",
+            description = "The delay between gui actions",
+            category = "Skills",
+            subcategory = "Alchemy Helper - Times",
+            min = 0,
+            max = 1000
+    )
+    public static int alchemyHelperDelayBetweenPotionGuiActions = 300;
+
+    @Slider(
+            name = "Delay between gui potion actions randomizer (ms)",
+            description = "The randomizer of the delay between gui actions",
+            category = "Skills",
+            subcategory = "Alchemy Helper - Times",
+            min = 0,
+            max = 1000
+    )
+    public static int alchemyHelperDelayBetweenPotionGuiActionsRandomizer = 100;
+
+    public static long getRandomizedDelayBetweenPotionGuiActions() {
+        return (long) (alchemyHelperDelayBetweenPotionGuiActions + Math.random() * alchemyHelperDelayBetweenPotionGuiActionsRandomizer);
+    }
+
+    @Slider(
+            name = "Delay between ingredients gui actions (ms)",
+            description = "The delay between gui actions",
+            category = "Skills",
+            subcategory = "Alchemy Helper - Times",
+            min = 0,
+            max = 1000
+    )
+    public static int alchemyHelperDelayBetweenIngredientsGuiActions = 300;
+
+    @Slider(
+            name = "Delay between gui ingredients actions randomizer (ms)",
+            description = "The randomizer of the delay between gui actions",
+            category = "Skills",
+            subcategory = "Alchemy Helper - Times",
+            min = 0,
+            max = 1000
+    )
+    public static int alchemyHelperDelayBetweenIngredientsGuiActionsRandomizer = 100;
+
+    public static long getRandomizedDelayBetweenIngredientsGuiActions() {
+        return (long) (alchemyHelperDelayBetweenIngredientsGuiActions + Math.random() * alchemyHelperDelayBetweenIngredientsGuiActionsRandomizer);
+    }
+
     @KeyBind(
             name = "Auto sell potions to NPC",
             description = "Automatically sells potions to NPC",
