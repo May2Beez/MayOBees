@@ -470,6 +470,30 @@ public class MayOBeesConfig extends Config {
         return (long) (alchemyHelperDelayBetweenIngredientsGuiActions + Math.random() * alchemyHelperDelayBetweenIngredientsGuiActionsRandomizer);
     }
 
+    @Slider(
+            name = "Delay between potion sell actions (ms)",
+            description = "The delay between potion sell actions",
+            category = "Skills",
+            subcategory = "Alchemy Helper - Times",
+            min = 0,
+            max = 1000
+    )
+    public static int alchemyHelperDelayBetweenPotionSellActions = 300;
+
+    @Slider(
+            name = "Delay between potion sell actions randomizer (ms)",
+            description = "The randomizer of the delay between potion sell actions",
+            category = "Skills",
+            subcategory = "Alchemy Helper - Times",
+            min = 0,
+            max = 1000
+    )
+    public static int alchemyHelperDelayBetweenPotionSellActionsRandomizer = 100;
+
+    public static long getRandomizedDelayBetweenPotionSellActions() {
+        return (long) (alchemyHelperDelayBetweenPotionSellActions + Math.random() * alchemyHelperDelayBetweenPotionSellActionsRandomizer);
+    }
+
     @KeyBind(
             name = "Auto sell potions to NPC",
             description = "Automatically sells potions to NPC",

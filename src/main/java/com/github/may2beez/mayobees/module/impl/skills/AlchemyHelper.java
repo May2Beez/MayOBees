@@ -167,12 +167,12 @@ public class AlchemyHelper implements IModule {
         String inventoryName = InventoryUtils.getInventoryName();
         if (inventoryName == null) {
             mc.thePlayer.sendChatMessage("/trades");
-            delay.schedule(MayOBeesConfig.getRandomizedDelayBetweenPotionGuiActions());
+            delay.schedule(MayOBeesConfig.getRandomizedDelayBetweenPotionSellActions());
             return;
         }
         if (!inventoryName.equals("Trades")) {
             mc.thePlayer.closeScreen();
-            delay.schedule(MayOBeesConfig.getRandomizedDelayBetweenPotionGuiActions());
+            delay.schedule(MayOBeesConfig.getRandomizedDelayBetweenPotionSellActions());
             return;
         }
 
@@ -184,7 +184,7 @@ public class AlchemyHelper implements IModule {
             return;
         }
         InventoryUtils.clickContainerSlot(potion.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.PICKUP);
-        delay.schedule(MayOBeesConfig.getRandomizedDelayBetweenPotionGuiActions());
+        delay.schedule(MayOBeesConfig.getRandomizedDelayBetweenPotionSellActions());
     }
 
     private void putPotion(Slot potion, int potionSlot, long extraDelay) {
