@@ -48,7 +48,7 @@ public class ModuleManager {
             module.onDisable();
         else
             module.onEnable();
-        LogUtils.info("[" + module + "] " + (module.isRunning() ? "Enabled" : "Disabled"));
+        LogUtils.info("[" + module.getName() + "] " + (module.isRunning() ? "Enabled" : "Disabled"));
     }
 
     public void smartToggle() {

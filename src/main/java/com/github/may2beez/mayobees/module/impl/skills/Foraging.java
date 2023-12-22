@@ -164,6 +164,7 @@ public class Foraging implements IModuleActive {
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
+        if (mc.thePlayer == null || mc.theWorld == null) return;
         if(!isRunning()) {
             macroState = MacroState.LOOK;
             return;
