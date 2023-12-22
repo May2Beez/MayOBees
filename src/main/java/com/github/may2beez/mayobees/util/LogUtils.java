@@ -34,9 +34,9 @@ public class LogUtils {
 
     public static void debug(String message) {
         if (mc.thePlayer == null || !MayOBeesConfig.debugMode) {
-            System.out.println(prefix + "§b" + message);
+            System.out.println(prefix + "§7" + message);
             return;
         }
-        mc.thePlayer.addChatMessage(new ChatComponentText(prefix + "§b" + message));
+        mc.thePlayer.addChatMessage(new ChatComponentText(prefix + "§7" + message));
     }
 }

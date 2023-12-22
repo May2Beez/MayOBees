@@ -353,6 +353,54 @@ public class MayOBeesConfig extends Config {
     //</editor-fold>
 
     //<editor-fold desc="MISC">
+    @Info(
+            text = "Smart Toggle activates the appropriate macro depending on the situation",
+            size = 2,
+            category = "Misc",
+            type = InfoType.WARNING
+    )
+    public boolean infoSmartToggle1 = false;
+
+    @Info(
+            text = "Gift Aura - Be at Jerry Workshop",
+            size = 2,
+            category = "Misc",
+            type = InfoType.INFO
+    )
+    public boolean infoSmartToggle3 = false;
+
+    @Info(
+            text = "Fishing Macro - Hold Rod",
+            size = 2,
+            category = "Misc",
+            type = InfoType.INFO
+    )
+    public boolean infoSmartToggle4 = false;
+
+    @Info(
+            text = "Shortbow Aura - Hold Your Item",
+            size = 2,
+            category = "Misc",
+            type = InfoType.INFO
+    )
+    public boolean infoSmartToggle5 = false;
+
+    @Info(
+            text = "Foraging Macro - Hold Treecapitator or Sappling on private island",
+            size = 2,
+            category = "Misc",
+            type = InfoType.INFO
+    )
+    public boolean infoSmartToggle2 = false;
+
+    @Info(
+            text = "Fill Chests with Sapplings Macro - Hold Abiphone and have Treecap in hotbar",
+            size = 2,
+            category = "Misc",
+            type = InfoType.INFO
+    )
+    public boolean infoSmartToggle6 = false;
+
     @KeyBind(
             name = "SmartToggle keybind",
             category = "Misc"
@@ -501,36 +549,69 @@ public class MayOBeesConfig extends Config {
     //</editor-fold>
     
     //<editor-fold desc="Foraging">
-    @Switch(
-            name = "Foraging",
-            description = "Automatically collects foraging items",
-            category = "Skills",
-            subcategory = "Foraging"
-    )
-    public static boolean foraging = false;
-
     @Switch(name = "Use Fishing Rod", category = "Skills",
             subcategory = "Foraging")
     public static boolean foragingUseRod = false;
 
+    @Dropdown(name = "Fill Chest With Sapling Type", category = "Skills",
+            subcategory = "Foraging", options = {"Spruce","Jungle", "Dark Oak"})
+    public static int fillChestSaplingType = 0;
+
+    @Slider(
+            name = "Foraging Macro Base Rotation Speed",
+            description = "The base rotation speed of the foraging macro",
+            category = "Skills",
+            subcategory = "Foraging - Options",
+            min = 50,
+            max = 800
+    )
+    public static int foragingMacroBaseRotationSpeed = 150;
+
+    @Slider(
+            name = "Foraging Macro Rotation Speed Randomizer",
+            description = "The randomizer of the rotation speed of the foraging macro",
+            category = "Skills",
+            subcategory = "Foraging - Options",
+            min = 0,
+            max = 500
+    )
+    public static int foragingMacroRotationSpeedRandomizer = 50;
+
+    public static long getRandomizedForagingMacroRotationSpeed() {
+        return (long) (foragingMacroBaseRotationSpeed + Math.random() * foragingMacroRotationSpeedRandomizer);
+    }
+
     @Slider(name = "Foraging Macro Delay", category = "Skills",
-            subcategory = "Foraging", max = 500, min = 0.0F, step = 10)
+            subcategory = "Foraging - Options", max = 500, min = 0.0F, step = 10)
     public static int foragingDelay = 50;
 
-    @Slider(name = "Foraging Macro Wait After", category = "Skills",
-            subcategory = "Foraging", max = 1000, min = 0.0F, step = 20)
-    public static int foragingWaitAfter = 500;
+    @Slider(
+            name = "Foraging Macro Extra Break Delay",
+            description = "The extra delay between breaking blocks. Most of the time, it's your ping",
+            category = "Skills",
+            subcategory = "Foraging - Options",
+            min = 0,
+            max = 800
+    )
+    public static int foragingMacroExtraBreakDelay = 100;
 
     @Slider(name = "Stuck timeout",
             category = "Skills",
-            subcategory = "Foraging",
+            subcategory = "Foraging - Options",
             max = 2500, min = 0.0F, step = 100
     )
     public static int stuckTimeout = 1500;
 
-    @Dropdown(name = "Fill Chest With Sapling Type", category = "Skills",
-            subcategory = "Foraging", options = {"Spruce","Jungle", "Dark Oak"})
-    public int fillChestSaplingType = 0;
+    @Slider(
+            name = "Monkey level",
+            description = "The monkey level to calculate delay",
+            category = "Skills",
+            subcategory = "Foraging - Options",
+            min = 0,
+            max = 100
+    )
+    public static int monkeyLevel = 0;
+
     //</editor-fold>
     
     //<editor-fold desc="Fishing">
@@ -676,6 +757,33 @@ public class MayOBeesConfig extends Config {
             max = 5000
     )
     public static int ghostBlocksDuration = 1000;
+
+    @Dropdown(
+            name = "Failsafe sound",
+            description = "The sound to play when the failsafe is triggered",
+            category = "Other",
+            subcategory = "Failsafe",
+            options = {"Exp Orbs", "Anvil"},
+            size = 2
+    )
+    public static int failsafeSoundSelected = 0;
+
+    @Switch(
+            name = "Stop active modules on rotation/teleport packet",
+            description = "Stops all active modules when a rotation packet is received",
+            category = "Other",
+            subcategory = "Failsafe"
+    )
+    public static boolean stopMacrosOnRotationTeleportCheck = false;
+
+    @Switch(
+            name = "Stop active modules on world change",
+            description = "Stops all active modules when a world change is detected",
+            category = "Other",
+            subcategory = "Failsafe"
+    )
+    public static boolean stopMacrosOnWorldChange = false;
+
     //</editor-fold>
 
     //<editor-fold desc="Gift Aura">

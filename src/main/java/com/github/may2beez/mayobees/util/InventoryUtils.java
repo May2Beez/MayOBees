@@ -67,6 +67,18 @@ public class InventoryUtils {
         return null;
     }
 
+    public static Slot getSlotOfItemInContainer(String item, int minimumStackSize) {
+        for (Slot slot : mc.thePlayer.openContainer.inventorySlots) {
+            if (slot.getHasStack()) {
+                String itemName = StringUtils.stripControlCodes(slot.getStack().getDisplayName());
+                if (itemName.contains(item) && slot.getStack().stackSize >= minimumStackSize) {
+                    return slot;
+                }
+            }
+        }
+        return null;
+    }
+
     public static int getSlotIdOfItemInHotbar(String... items) {
         for (int i = 0; i < 9; i++) {
             ItemStack slot = mc.thePlayer.inventory.getStackInSlot(i);
@@ -233,6 +245,13 @@ public class InventoryUtils {
         KeyBinding.onTick(mc.gameSettings.keyBindInventory.getKeyCode());
     }
 
+    public static void moveEveryItemToContainer(String item) {
+        final Slot slot = getSlotOfItemFromInventoryInOpenContainer(item, true);
+        if (slot == null) return;
+        final int slotId = slot.slotNumber;
+        clickContainerSlot(slotId, ClickType.LEFT, ClickMode.QUICK_MOVE);
+    }
+
     public static Slot getSlotOfId(int id) {
         for (Slot slot : mc.thePlayer.inventoryContainer.inventorySlots) {
             if (slot.slotNumber == id) {
@@ -294,6 +313,27 @@ public class InventoryUtils {
             }
         }
         return speed;
+    }
+
+    public static boolean hasFreeSlots() {
+        for (Slot slot : mc.thePlayer.inventoryContainer.inventorySlots) {
+            if (!slot.getHasStack()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasFreeSlotsInContainer() {
+        final ContainerChest chest = (ContainerChest) mc.thePlayer.openContainer;
+        for (Slot slot : mc.thePlayer.openContainer.inventorySlots) {
+            if (slot.slotNumber >= chest.getLowerChestInventory().getSizeInventory()) {
+                if (!slot.getHasStack()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public static Slot getFirstEmptySlotInInventory() {

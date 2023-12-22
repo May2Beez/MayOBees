@@ -7,8 +7,10 @@ import com.github.may2beez.mayobees.module.impl.other.GhostBlocks;
 import com.github.may2beez.mayobees.module.impl.player.GiftAura;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
 import com.github.may2beez.mayobees.module.impl.skills.AlchemyHelper;
+import com.github.may2beez.mayobees.module.impl.skills.FillChestWithSaplingMacro;
 import com.github.may2beez.mayobees.module.impl.skills.Fishing;
 import com.github.may2beez.mayobees.module.impl.skills.Foraging;
+import com.github.may2beez.mayobees.util.InventoryUtils;
 import com.github.may2beez.mayobees.util.LogUtils;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
@@ -39,7 +41,8 @@ public class ModuleManager {
                 ESP.getInstance(),
                 AlchemyHelper.getInstance(),
                 Fishing.getInstance(),
-                Foraging.getInstance()
+                Foraging.getInstance(),
+                FillChestWithSaplingMacro.getInstance()
         );
     }
 
@@ -64,12 +67,13 @@ public class ModuleManager {
         ItemStack heldItem = Minecraft.getMinecraft().thePlayer.getHeldItem();
         if (heldItem != null && heldItem.getItem() == Items.fishing_rod)
             toggle(Fishing.getInstance());
-        if (heldItem != null && heldItem.getDisplayName().contains("Stonk"))
-            toggle(GhostBlocks.getInstance());
-        if (heldItem != null && heldItem.getDisplayName().contains("Shortbow"))
+        if (heldItem != null && heldItem.getDisplayName().contains(MayOBeesConfig.shortBowAuraItemName))
             toggle(ShortbowAura.getInstance());
         if (heldItem != null && heldItem.getDisplayName().contains("Sapling") || heldItem != null && heldItem.getDisplayName().contains("Treecapitator")
                 && GameStateHandler.getInstance().getLocation() == GameStateHandler.Location.PRIVATE_ISLAND)
             toggle(Foraging.getInstance());
+        if (heldItem != null && heldItem.getDisplayName().contains("Abiphone") && InventoryUtils.hasItemInHotbar("Treecapitator") && GameStateHandler.getInstance().getLocation() == GameStateHandler.Location.PRIVATE_ISLAND) {
+            toggle(FillChestWithSaplingMacro.getInstance());
+        }
     }
 }
