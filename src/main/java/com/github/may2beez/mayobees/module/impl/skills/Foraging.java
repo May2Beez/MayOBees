@@ -69,9 +69,9 @@ public class Foraging implements IModuleActive {
         macroState = MacroState.LOOK;
         startedAt = System.currentTimeMillis();
         earnedXp = 0;
-        stuckTimer.reset();
+        stuckTimer.schedule();
         stuck = false;
-        updateXpTimer.reset();
+        updateXpTimer.schedule();
         if (MayOBeesConfig.mouseUngrab)
             UngrabUtils.ungrabMouse();
     }
@@ -131,15 +131,15 @@ public class Foraging implements IModuleActive {
         }
     }
 
-    @SubscribeEvent
-    public void onRenderWorldLast(RenderWorldLastEvent event) {
-        if (!isRunning()) return;
-
-        if (bestDirt != null) {
-            AxisAlignedBB bb = new AxisAlignedBB(bestDirt.xCoord - 0.55, bestDirt.yCoord - 0.55, bestDirt.zCoord - 0.55, bestDirt.xCoord + 0.45, bestDirt.yCoord + 0.45, bestDirt.zCoord + 0.45);
-            RenderUtils.drawBox(bb, Color.green);
-        }
-    }
+//    @SubscribeEvent
+//    public void onRenderWorldLast(RenderWorldLastEvent event) {
+//        if (!isRunning()) return;
+//
+//        if (bestDirt != null) {
+//            AxisAlignedBB bb = new AxisAlignedBB(bestDirt.xCoord - 0.5, bestDirt.yCoord - 0.5, bestDirt.zCoord - 0.5, bestDirt.xCoord + 0.5, bestDirt.yCoord + 0.5, bestDirt.zCoord + 0.5);
+//            RenderUtils.drawBox(bb, Color.green);
+//        }
+//    }
 
     private Vec3 getDirt() {
         Vec3 furthest = null;
@@ -148,7 +148,7 @@ public class Foraging implements IModuleActive {
             if (mc.theWorld.getBlockState(pos).getBlock() == Blocks.dirt || mc.theWorld.getBlockState(pos).getBlock() == Blocks.grass) {
                 Block block = mc.theWorld.getBlockState(new BlockPos(pos.getX(), pos.getY() + 1, pos.getZ())).getBlock();
                 if (!(block instanceof net.minecraft.block.BlockLog) && block != Blocks.sapling) {
-                    Vec3 distance = new Vec3(pos.getX() + 0.5D, (pos.getY() + 1), pos.getZ() + 0.5D);
+                    Vec3 distance = new Vec3(pos.getX() + 0.5D + (Math.random() * 0.4) - 0.2, (pos.getY() + 1), pos.getZ() + 0.5D + (Math.random() * 0.4) - 0.2);
                     if (furthest == null || player.squareDistanceTo(distance) > player.squareDistanceTo(furthest))
                         furthest = distance;
                 }
@@ -165,7 +165,7 @@ public class Foraging implements IModuleActive {
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         if (mc.thePlayer == null || mc.theWorld == null) return;
-        if(!isRunning()) {
+        if (!isRunning()) {
             macroState = MacroState.LOOK;
             return;
         }
@@ -205,7 +205,7 @@ public class Foraging implements IModuleActive {
                 stuck = false;
                 macroState = MacroState.LOOK;
                 KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), false);
-                stuckTimer.reset();
+                stuckTimer.schedule();
             }
             return;
         }
@@ -225,7 +225,7 @@ public class Foraging implements IModuleActive {
                 }
                 mc.thePlayer.inventory.currentItem = saplingSlot;
                 bestDirt = getDirt();
-                if(bestDirt != null) {
+                if (bestDirt != null) {
                     RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(bestDirt), 150 + (new Random().nextInt(50)), RotationConfiguration.RotationType.CLIENT, null));
                     macroState = MacroState.PLACE;
                 } else {
@@ -245,7 +245,7 @@ public class Foraging implements IModuleActive {
                 }
                 mc.thePlayer.inventory.currentItem = boneMeal;
                 macroState = MacroState.PLACE_BONE;
-                waitTimer.reset();
+                waitTimer.schedule();
                 break;
             case PLACE_BONE:
                 if(waitTimer.hasPassed(MayOBeesConfig.foragingDelay)) {
@@ -253,7 +253,7 @@ public class Foraging implements IModuleActive {
                     if (mop != null && mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && mc.theWorld.getBlockState(mop.getBlockPos()).getBlock().equals(Blocks.sapling)) {
                         KeyBinding.onTick(mc.gameSettings.keyBindUseItem.getKeyCode());
                     }
-                    waitTimer.reset();
+                    waitTimer.schedule();
                     if(MayOBeesConfig.foragingUseRod) {
                         macroState = MacroState.FIND_ROD;
                     } else {
@@ -270,20 +270,20 @@ public class Foraging implements IModuleActive {
                         break;
                     }
                     mc.thePlayer.inventory.currentItem = rod;
-                    waitTimer.reset();
+                    waitTimer.schedule();
                     macroState = MacroState.THROW_ROD;
                 }
                 break;
             case THROW_ROD:
                 if(waitTimer.hasPassed(MayOBeesConfig.foragingDelay)) {
                     KeyBinding.onTick(mc.gameSettings.keyBindUseItem.getKeyCode());
-                    waitTimer.reset();
+                    waitTimer.schedule();
                     macroState = MacroState.THROW_BREAK_DELAY;
                 }
                 break;
             case THROW_BREAK_DELAY:
                 if(waitTimer.hasPassed(MayOBeesConfig.foragingDelay)) {
-                    waitTimer.reset();
+                    waitTimer.schedule();
                     macroState = MacroState.BREAK;
                 }
                 break;
@@ -299,7 +299,7 @@ public class Foraging implements IModuleActive {
                 BlockPos logPos = mc.objectMouseOver.getBlockPos();
                 if(logPos != null && !(mc.theWorld.getBlockState(logPos).getBlock() instanceof BlockLog)) {
                     KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), false);
-                    waitAfterFinishTimer.reset();
+                    waitAfterFinishTimer.schedule();
                     macroState = MacroState.SWITCH;
                 }
                 break;
@@ -312,7 +312,7 @@ public class Foraging implements IModuleActive {
 
         if (lastState != macroState) {
             lastState = macroState;
-            stuckTimer.reset();
+            stuckTimer.schedule();
         }
     }
 

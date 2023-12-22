@@ -43,6 +43,13 @@ public class ModuleManager {
         );
     }
 
+    public void disableAll() {
+        modules.forEach(module -> {
+            if (module.isRunning() && module instanceof IModuleActive)
+                ((IModuleActive) module).onDisable();
+        });
+    }
+
     public void toggle(IModuleActive module) {
         if (module.isRunning())
             module.onDisable();

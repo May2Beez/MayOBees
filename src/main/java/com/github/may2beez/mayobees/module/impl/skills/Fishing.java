@@ -81,10 +81,10 @@ public class Fishing implements IModuleActive {
     @Override
     public void onEnable() {
         currentState = AutoFishState.THROWING;
-        throwTimer.reset();
-        inWaterTimer.reset();
+        throwTimer.schedule();
+        inWaterTimer.schedule();
         attackDelay.reset();
-        antiAfkTimer.reset();
+        antiAfkTimer.schedule();
         if (MayOBeesConfig.mouseUngrab)
             UngrabUtils.ungrabMouse();
         oldBobberPosY = 0.0D;
@@ -125,7 +125,7 @@ public class Fishing implements IModuleActive {
         }
 
         if (MayOBeesConfig.antiAfkWhileFishing && antiAfkTimer.hasPassed(3000 + new Random().nextInt(1500))) {
-            antiAfkTimer.reset();
+            antiAfkTimer.schedule();
 
             if (RotationHandler.getInstance().isRotating()) {
                 switch (antiAfkState) {
@@ -156,8 +156,8 @@ public class Fishing implements IModuleActive {
                 if (mc.thePlayer.fishEntity == null && throwTimer.hasPassed(250) && RotationHandler.getInstance().isRotating()) {
                     mc.thePlayer.inventory.currentItem = rodSlot;
                     mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.getHeldItem());
-                    throwTimer.reset();
-                    inWaterTimer.reset();
+                    throwTimer.schedule();
+                    inWaterTimer.schedule();
                     currentState = AutoFishState.IN_WATER;
                     break;
                 }
@@ -187,7 +187,7 @@ public class Fishing implements IModuleActive {
                         break;
                     }
                     if (throwTimer.hasPassed(1000) && mc.thePlayer.fishEntity == null) {
-                        throwTimer.reset();
+                        throwTimer.schedule();
                         currentState = AutoFishState.THROWING;
                     }
                     break;
@@ -200,7 +200,7 @@ public class Fishing implements IModuleActive {
                 mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.getHeldItem());
                 RotationHandler.getInstance().easeTo(
                         new RotationConfiguration(startRotation, 45L, RotationConfiguration.RotationType.CLIENT, null));
-                throwTimer.reset();
+                throwTimer.schedule();
                 currentState = AutoFishState.THROWING;
                 break;
             }
