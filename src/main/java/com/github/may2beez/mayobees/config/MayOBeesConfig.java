@@ -8,6 +8,7 @@ import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.InfoType;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
+import com.github.may2beez.mayobees.module.ModuleManager;
 import com.github.may2beez.mayobees.module.impl.combat.ShortbowAura;
 import com.github.may2beez.mayobees.module.impl.other.Dev;
 import com.github.may2beez.mayobees.module.impl.player.GiftAura;
@@ -351,33 +352,20 @@ public class MayOBeesConfig extends Config {
     //</editor-fold>
     //</editor-fold>
 
-    //<editor-fold desc="Player">
-    //<editor-fold desc="Fishing">
-    @Switch(
-            name = "Fishing",
-            description = "Automatically fishes",
-            category = "Player",
-            subcategory = "Fishing"
+    //<editor-fold desc="MISC">
+    @KeyBind(
+            name = "SmartToggle keybind",
+            category = "Misc"
     )
-    public static boolean fishing = false;
+    public static OneKeyBind smartToggleKeybind = new OneKeyBind(Keyboard.KEY_NONE);
     @Switch(
-            name = "Sneak while fishing",
-            description = "Sneaks while fishing",
-            category = "Player",
-            subcategory = "Fishing"
+            name = "Ungrab Mouse",
+            category = "Misc"
     )
-    public static boolean sneakWhileFishing = false;
-    @Switch(
-            name = "Anti AFK",
-            description = "Anti AFK",
-            category = "Player",
-            subcategory = "Fishing"
-    )
-    public static boolean antiAfkWhileFishing = false;
-    //</editor-fold>
+    public static boolean mouseUngrab = false;
     //</editor-fold>
 
-    //<editor-fold desc="SKILLS">
+    //<editor-fold desc="Skills">
     //<editor-fold desc="Alchemy Helper">
     @Switch(
             name = "Alchemy Helper",
@@ -510,6 +498,63 @@ public class MayOBeesConfig extends Config {
     )
     public static OneKeyBind alchemyHelperAutoSellPotionsToNPCKeybind = new OneKeyBind(Keyboard.KEY_NONE);
 
+    //</editor-fold>
+    
+    //<editor-fold desc="Foraging">
+    @Switch(
+            name = "Foraging",
+            description = "Automatically collects foraging items",
+            category = "Skills",
+            subcategory = "Foraging"
+    )
+    public static boolean foraging = false;
+
+    @Switch(name = "Use Fishing Rod", category = "Skills",
+            subcategory = "Foraging")
+    public static boolean foragingUseRod = false;
+
+    @Slider(name = "Foraging Macro Delay", category = "Skills",
+            subcategory = "Foraging", max = 500, min = 0.0F, step = 10)
+    public static int foragingDelay = 50;
+
+    @Slider(name = "Foraging Macro Wait After", category = "Skills",
+            subcategory = "Foraging", max = 1000, min = 0.0F, step = 20)
+    public static int foragingWaitAfter = 500;
+
+    @Slider(name = "Stuck timeout",
+            category = "Skills",
+            subcategory = "Foraging",
+            max = 2500, min = 0.0F, step = 100
+    )
+    public static int stuckTimeout = 1500;
+
+    @Dropdown(name = "Fill Chest With Sapling Type", category = "Skills",
+            subcategory = "Foraging", options = {"Spruce","Jungle", "Dark Oak"})
+    public int fillChestSaplingType = 0;
+    //</editor-fold>
+    
+    //<editor-fold desc="Fishing">
+    @Switch(
+            name = "Fishing",
+            description = "Automatically fishes",
+            category = "Skills",
+            subcategory = "Fishing"
+    )
+    public static boolean fishing = false;
+    @Switch(
+            name = "Sneak while fishing",
+            description = "Sneaks while fishing",
+            category = "Skills",
+            subcategory = "Fishing"
+    )
+    public static boolean sneakWhileFishing = false;
+    @Switch(
+            name = "Anti AFK",
+            description = "Anti AFK",
+            category = "Skills",
+            subcategory = "Fishing"
+    )
+    public static boolean antiAfkWhileFishing = false;
     //</editor-fold>
     //</editor-fold>
 
@@ -715,8 +760,8 @@ public class MayOBeesConfig extends Config {
         super(new Mod("MayOBees", ModType.HYPIXEL), "/mayobees/config.json");
         initialize();
 
-        registerKeyBind(shortBowAuraKeybind, () -> {
-            ShortbowAura.getInstance().toggle();
+        registerKeyBind(smartToggleKeybind, () -> {
+            ModuleManager.getInstance().smartToggle();
         });
 
         registerKeyBind(alchemyHelperAutoSellPotionsToNPCKeybind, () -> {

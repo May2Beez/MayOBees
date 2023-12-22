@@ -1,14 +1,12 @@
-package com.github.may2beez.mayobees.module.impl.player;
+package com.github.may2beez.mayobees.module.impl.skills;
 
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.event.SpawnParticleEvent;
 import com.github.may2beez.mayobees.handler.RotationHandler;
 import com.github.may2beez.mayobees.module.IModule;
+import com.github.may2beez.mayobees.module.IModuleActive;
 import com.github.may2beez.mayobees.module.impl.combat.MobKiller;
-import com.github.may2beez.mayobees.util.InventoryUtils;
-import com.github.may2beez.mayobees.util.JsonUtils;
-import com.github.may2beez.mayobees.util.KeyBindUtils;
-import com.github.may2beez.mayobees.util.LogUtils;
+import com.github.may2beez.mayobees.util.*;
 import com.github.may2beez.mayobees.util.helper.Clock;
 import com.github.may2beez.mayobees.util.helper.Rotation;
 import com.github.may2beez.mayobees.util.helper.RotationConfiguration;
@@ -28,13 +26,18 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class Fishing implements IModule {
+public class Fishing implements IModuleActive {
     private static Fishing instance;
     public static Fishing getInstance() {
         if (instance == null) {
             instance = new Fishing();
         }
         return instance;
+    }
+
+    @Override
+    public String getName() {
+        return "Fishing";
     }
 
     private final Minecraft mc = Minecraft.getMinecraft();
@@ -75,20 +78,21 @@ public class Fishing implements IModule {
 
     private AutoFishState currentState = AutoFishState.THROWING;
 
-    public void start() {
+    @Override
+    public void onEnable() {
         currentState = AutoFishState.THROWING;
         throwTimer.reset();
         inWaterTimer.reset();
         attackDelay.reset();
         antiAfkTimer.reset();
-//        if (MayOBeesConfig.mouseUngrab)
-//            UngrabUtils.ungrabMouse();
+        if (MayOBeesConfig.mouseUngrab)
+            UngrabUtils.ungrabMouse();
         oldBobberPosY = 0.0D;
         particles.clear();
         rodSlot = InventoryUtils.getSlotIdOfItemInHotbar("Rod");
         if (rodSlot == -1) {
             LogUtils.error("No rod found in hotbar!");
-            stop();
+            onDisable();
             return;
         }
         startRotation = new Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
@@ -97,14 +101,15 @@ public class Fishing implements IModule {
         MobKiller.getInstance().setTarget(fishingMobs.stream().filter(name -> !name.toLowerCase().contains("squid")).toArray(String[]::new));
     }
 
-    public void stop() {
+    @Override
+    public void onDisable() {
         if (MayOBeesConfig.sneakWhileFishing) {
             KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), false);
         }
         KeyBindUtils.stopMovement();
         RotationHandler.getInstance().reset();
         MobKiller.getInstance().stop();
-//        UngrabUtils.regrabMouse();
+        UngrabUtils.regrabMouse();
     }
 
     @SubscribeEvent

@@ -4,6 +4,7 @@ import cc.polyfrost.oneconfig.utils.Multithreading;
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.event.ClickEvent;
 import com.github.may2beez.mayobees.module.IModule;
+import com.github.may2beez.mayobees.module.IModuleActive;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
@@ -14,7 +15,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
-public class GhostBlocks implements IModule {
+public class GhostBlocks implements IModuleActive {
     private final Minecraft mc = Minecraft.getMinecraft();
     private static GhostBlocks instance;
     private final CopyOnWriteArrayList<GhostBlock> clickedBlocks = new CopyOnWriteArrayList<>();
@@ -24,6 +25,11 @@ public class GhostBlocks implements IModule {
             instance = new GhostBlocks();
         }
         return instance;
+    }
+
+    @Override
+    public String getName() {
+        return "Ghost Blocks";
     }
 
     @Override
@@ -55,6 +61,17 @@ public class GhostBlocks implements IModule {
 
     @SubscribeEvent
     public void onWorldChange(WorldEvent.Unload event) {
+        clickedBlocks.clear();
+    }
+
+    @Override
+    public void onEnable() {
+        MayOBeesConfig.enableGhostBlocks = true;
+    }
+
+    @Override
+    public void onDisable() {
+        MayOBeesConfig.enableGhostBlocks = false;
         clickedBlocks.clear();
     }
 

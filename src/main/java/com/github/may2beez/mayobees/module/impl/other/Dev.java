@@ -21,6 +21,12 @@ public class Dev implements IModule {
         }
         return instance;
     }
+
+    @Override
+    public String getName() {
+        return "Dev";
+    }
+
     private final Minecraft mc = Minecraft.getMinecraft();
 
     @Override

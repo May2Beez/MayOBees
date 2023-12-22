@@ -12,9 +12,17 @@ public class MobKiller implements IModule {
         }
         return instance;
     }
+
+    @Override
+    public String getName() {
+        return "Mob Killer";
+    }
+
     private final Minecraft mc = Minecraft.getMinecraft();
+
     @Getter
     public static boolean hasTarget = false;
+
     @Override
     public boolean isRunning() {
         return false;

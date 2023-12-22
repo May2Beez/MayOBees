@@ -38,6 +38,11 @@ public class AlchemyHelper implements IModule {
         return instance;
     }
 
+    @Override
+    public String getName() {
+        return "Alchemy Helper";
+    }
+
     private final Minecraft mc = Minecraft.getMinecraft();
 
     private final int POTION_SLOT_1 = 38;

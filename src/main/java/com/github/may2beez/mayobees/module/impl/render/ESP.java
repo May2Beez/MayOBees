@@ -48,6 +48,11 @@ public class ESP implements IModule {
         return instance;
     }
 
+    @Override
+    public String getName() {
+        return "ESP";
+    }
+
     public ESP() {
         try {
             if (!clickedFairySoulsFile.getParentFile().exists()) {

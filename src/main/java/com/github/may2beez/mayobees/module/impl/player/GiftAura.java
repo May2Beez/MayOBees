@@ -4,6 +4,7 @@ import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.handler.GameStateHandler;
 import com.github.may2beez.mayobees.handler.RotationHandler;
 import com.github.may2beez.mayobees.module.IModule;
+import com.github.may2beez.mayobees.module.IModuleActive;
 import com.github.may2beez.mayobees.util.HeadUtils;
 import com.github.may2beez.mayobees.util.LogUtils;
 import com.github.may2beez.mayobees.util.RenderUtils;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class GiftAura implements IModule {
+public class GiftAura implements IModuleActive {
     private static GiftAura instance;
     public static GiftAura getInstance() {
         if (instance == null) {
@@ -31,6 +32,12 @@ public class GiftAura implements IModule {
         }
         return instance;
     }
+
+    @Override
+    public String getName() {
+        return "Gift Aura";
+    }
+
     private final Minecraft mc = Minecraft.getMinecraft();
     private final List<EntityArmorStand> openedGifts = new ArrayList<>();
     private final Clock delay = new Clock();
@@ -45,6 +52,16 @@ public class GiftAura implements IModule {
             return true;
         return GameStateHandler.getInstance().getLocation() != GameStateHandler.Location.JERRY_WORKSHOP
                 && MayOBeesConfig.giftAuraOpenGiftsOutsideOfJerryWorkshop;
+    }
+
+    @Override
+    public void onEnable() {
+        MayOBeesConfig.giftAura = true;
+    }
+
+    @Override
+    public void onDisable() {
+        MayOBeesConfig.giftAura = false;
     }
 
     public void reset() {
@@ -105,7 +122,8 @@ public class GiftAura implements IModule {
     }
 
     @SubscribeEvent
-    public void onWorldUnload(WorldEvent.Unload event) {
+    public void onWorldChange(WorldEvent.Unload event) {
         openedGifts.clear();
+        onDisable();
     }
 }

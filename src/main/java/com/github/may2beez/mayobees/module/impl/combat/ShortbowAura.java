@@ -3,6 +3,7 @@ package com.github.may2beez.mayobees.module.impl.combat;
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.handler.RotationHandler;
 import com.github.may2beez.mayobees.module.IModule;
+import com.github.may2beez.mayobees.module.IModuleActive;
 import com.github.may2beez.mayobees.util.*;
 import com.github.may2beez.mayobees.util.helper.Rotation;
 import com.github.may2beez.mayobees.util.helper.RotationConfiguration;
@@ -33,7 +34,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class ShortbowAura implements IModule {
+public class ShortbowAura implements IModuleActive {
     private final Minecraft mc = Minecraft.getMinecraft();
     private static ShortbowAura instance;
 
@@ -44,8 +45,10 @@ public class ShortbowAura implements IModule {
         return instance;
     }
 
-    @Getter
-    private final String name = "Shortbow Aura";
+    @Override
+    public String getName() {
+        return "Shortbow Aura";
+    }
 
     @Getter
     private boolean enabled = false;
@@ -60,13 +63,15 @@ public class ShortbowAura implements IModule {
         return enabled;
     }
 
-    public void start() {
+    @Override
+    public void onEnable() {
         enabled = true;
         nextRotationSpeed = MayOBeesConfig.getRandomizedRotationSpeed();
         LogUtils.info("Shortbow Aura enabled!");
     }
 
-    public void stop() {
+    @Override
+    public void onDisable() {
         enabled = false;
         currentTarget = Optional.empty();
         hitTargets.clear();
@@ -78,14 +83,6 @@ public class ShortbowAura implements IModule {
         else
             RotationHandler.getInstance().reset();
         LogUtils.info("Shortbow Aura disabled!");
-    }
-
-    public void toggle() {
-        if (enabled) {
-            stop();
-        } else {
-            start();
-        }
     }
 
     private long lastHit = 0;
@@ -243,6 +240,7 @@ public class ShortbowAura implements IModule {
     public void onWorldChange(WorldEvent.Unload event) {
         currentTarget = Optional.empty();
         possibleTargets.clear();
-        if (enabled) stop();
+        if (enabled)
+            onDisable();
     }
 }
