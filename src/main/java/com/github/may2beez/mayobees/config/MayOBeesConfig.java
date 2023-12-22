@@ -422,6 +422,14 @@ public class MayOBeesConfig extends Config {
     )
     public static boolean alchemyHelperAutoPickUpFinishPotions = false;
 
+    @Switch(
+            name = "Auto close GUI after picking up potions",
+            description = "Automatically closes the GUI after picking up potions",
+            category = "Skills",
+            subcategory = "Alchemy Helper - Options"
+    )
+    public static boolean alchemyHelperAutoCloseGUIAfterPickingUpPotions = false;
+
     @Slider(
             name = "Delay between potion gui actions (ms)",
             description = "The delay between gui actions",

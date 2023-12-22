@@ -16,6 +16,7 @@ import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Slot;
+import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StringUtils;
@@ -78,7 +79,7 @@ public class AlchemyHelper implements IModule {
         if (event.block.equals(Blocks.brewing_stand)) {
             lastClickedBrewingStand = event.blockPos;
             Optional<BrewingStand> brewingStand = brewingStands.stream().filter(bs -> bs.getPos().equals(event.blockPos)).findFirst();
-            delay.schedule(500 + (int) (Math.random() * 250));
+            delay.schedule(300 + (int) (Math.random() * 250));
             if (!brewingStand.isPresent()) {
                 BrewingStand bs = new BrewingStand(event.blockPos);
                 brewingStands.add(bs);
@@ -206,6 +207,13 @@ public class AlchemyHelper implements IModule {
         if (!potionName.endsWith("V Potion")) return;
         InventoryUtils.clickContainerSlot(potionSlot, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.QUICK_MOVE);
         delay.schedule(MayOBeesConfig.getRandomizedDelayBetweenPotionGuiActions() + extraDelay);
+        if (potionSlot == POTION_SLOT_3) {
+            if (MayOBeesConfig.alchemyHelperAutoCloseGUIAfterPickingUpPotions) {
+                Multithreading.schedule(() -> {
+                    if (mc.currentScreen != null) InventoryUtils.closeScreen();
+                }, MayOBeesConfig.getRandomizedDelayBetweenPotionGuiActions() + extraDelay, TimeUnit.MILLISECONDS);
+            }
+        }
     }
 
     private void putItem(int slot, String itemName, long delayTime) {
