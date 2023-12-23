@@ -23,6 +23,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -324,12 +325,12 @@ public class Foraging implements IModuleActive {
                     List<Block> sapplings = dirtBlocks.stream().map(pos -> mc.theWorld.getBlockState(new BlockPos(pos.xCoord, pos.yCoord + 0.1, pos.zCoord)).getBlock()).filter(block -> block.equals(Blocks.sapling)).collect(java.util.stream.Collectors.toList());
                     if (Math.abs(mc.thePlayer.motionX) < 0.05 || Math.abs(mc.thePlayer.motionZ) < 0.05) {
                         if (sapplings.size() == 2) {
-                            Block skull = BlockUtils.getRelativeBlock(0, 1, 0);
-                            Block leftSkull = BlockUtils.getRelativeBlock(-1, 1, 0);
-                            Block rightSkull = BlockUtils.getRelativeBlock(1, 1, 0);
-                            if (skull.equals(Blocks.skull) && leftSkull.equals(Blocks.skull)) {
+                            Block[] skull = Arrays.asList(BlockUtils.getRelativeBlock(0, 1, 0), BlockUtils.getRelativeBlock(0, 0, 0)).toArray(new Block[0]);
+                            Block[] leftSkull = Arrays.asList(BlockUtils.getRelativeBlock(-1, 1, 0), BlockUtils.getRelativeBlock(-1, 0, 0)).toArray(new Block[0]);
+                            Block[] rightSkull = Arrays.asList(BlockUtils.getRelativeBlock(1, 1, 0), BlockUtils.getRelativeBlock(1, 0, 0)).toArray(new Block[0]);
+                            if (Arrays.asList(skull).contains(Blocks.skull) && Arrays.asList(leftSkull).contains(Blocks.skull)) {
                                 KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindLeft, true);
-                            } else if (skull.equals(Blocks.skull) && rightSkull.equals(Blocks.skull)) {
+                            } else if (Arrays.asList(skull).contains(Blocks.skull) && Arrays.asList(rightSkull).contains(Blocks.skull)) {
                                 KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindRight, true);
                             } else {
                                 KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindRight, true);
