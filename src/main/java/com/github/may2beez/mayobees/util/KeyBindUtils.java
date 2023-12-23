@@ -111,17 +111,27 @@ public class KeyBindUtils {
     }
 
     public static void stopMovement(boolean ignoreAttack) {
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindForward.getKeyCode(), false);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindBack.getKeyCode(), false);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindRight.getKeyCode(), false);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindLeft.getKeyCode(), false);
+        if (mc.gameSettings.keyBindForward.isKeyDown())
+            KeyBinding.setKeyBindState(mc.gameSettings.keyBindForward.getKeyCode(), false);
+        if (mc.gameSettings.keyBindBack.isKeyDown())
+            KeyBinding.setKeyBindState(mc.gameSettings.keyBindBack.getKeyCode(), false);
+        if (mc.gameSettings.keyBindRight.isKeyDown())
+            KeyBinding.setKeyBindState(mc.gameSettings.keyBindRight.getKeyCode(), false);
+        if (mc.gameSettings.keyBindLeft.isKeyDown())
+            KeyBinding.setKeyBindState(mc.gameSettings.keyBindLeft.getKeyCode(), false);
         if (!ignoreAttack) {
-            KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), false);
+            if (mc.gameSettings.keyBindAttack.isKeyDown())
+                KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), false);
         }
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), false);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindJump.getKeyCode(), false);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindSprint.getKeyCode(), false);
+        if (mc.gameSettings.keyBindUseItem.isKeyDown())
+            KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
+        if (mc.gameSettings.keyBindSneak.isKeyDown())
+            KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), false);
+        if (mc.gameSettings.keyBindJump.isKeyDown())
+            KeyBinding.setKeyBindState(mc.gameSettings.keyBindJump.getKeyCode(), false);
+        System.out.println(mc.gameSettings.keyBindSprint.isKeyDown());
+        if (mc.gameSettings.keyBindSprint.isKeyDown())
+            KeyBinding.setKeyBindState(mc.gameSettings.keyBindSprint.getKeyCode(), false);
     }
 
     public static void holdThese(KeyBinding... keyBinding) {

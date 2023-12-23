@@ -568,6 +568,16 @@ public class MayOBeesConfig extends Config {
     )
     public static boolean foragingMode = false;
 
+    @DualOption(
+            name = "Dirt Detection Mode",
+            description = "The mode of dirt detection. Blocks Scanner won't make the proper Vec3's for now. Doesn't really matter in skull mode",
+            category = "Skills",
+            subcategory = "Foraging",
+            left = "Relative Blocks",
+            right = "Blocks Scanner"
+    )
+    public static boolean dirtDetectionMode = false;
+
     @Slider(
             name = "Foraging Macro Base Rotation Speed",
             description = "The base rotation speed of the foraging macro",

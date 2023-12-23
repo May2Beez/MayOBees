@@ -183,9 +183,12 @@ public class Foraging implements IModuleActive {
     }
 
     private List<Vec3> getDirts() {
+        if (!MayOBeesConfig.dirtDetectionMode) {
+            return getRelativeDirts();
+        }
         List<Vec3> dirtBlocks = new ArrayList<>();
-        for (int x = 1; x <= 4; x++) {
-            for (int z = 1; z <= 4; z++) {
+        for (int x = -3; x <= 3; x++) {
+            for (int z = 1; z <= 2; z++) {
                 BlockPos blockPos = BlockUtils.getRelativeBlockPos(x, 0, z, AngleUtils.getClosest());
                 Block block = mc.theWorld.getBlockState(blockPos).getBlock();
                 if (block.equals(Blocks.dirt) || block.equals(Blocks.grass)) {
@@ -280,8 +283,6 @@ public class Foraging implements IModuleActive {
             unstuck();
             return;
         }
-
-        System.out.println(macroState);
 
         switch (macroState) {
             case LOOK:
@@ -406,7 +407,6 @@ public class Foraging implements IModuleActive {
                 break;
             case SWITCH:
                 if (waitAfterFinishTimer.hasPassed(150) && mc.gameSettings.keyBindAttack.isKeyDown()) {
-                    System.out.println("Switching");
                     KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindAttack, false);
                     if (MayOBeesConfig.foragingMode) {
                         macroState = MacroState.LOOK;
