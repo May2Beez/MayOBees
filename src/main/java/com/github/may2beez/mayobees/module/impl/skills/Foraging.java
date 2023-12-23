@@ -184,6 +184,27 @@ public class Foraging implements IModuleActive {
 
     private List<Vec3> getDirts() {
         List<Vec3> dirtBlocks = new ArrayList<>();
+        for (int x = 1; x <= 4; x++) {
+            for (int z = 1; z <= 4; z++) {
+                BlockPos blockPos = BlockUtils.getRelativeBlockPos(x, 0, z, AngleUtils.getClosest());
+                Block block = mc.theWorld.getBlockState(blockPos).getBlock();
+                if (block.equals(Blocks.dirt) || block.equals(Blocks.grass)) {
+                    dirtBlocks.add(new Vec3(blockPos.getX() + 0.5D, blockPos.getY() + 1, blockPos.getZ() + 0.5D));
+                }
+            }
+        }
+        if (dirtBlocks.isEmpty()) {
+            LogUtils.error("No dirt blocks found!");
+            onDisable();
+            return dirtBlocks;
+        } else if (dirtBlocks.size() > 4) {
+            return getRelativeDirts();
+        }
+        return dirtBlocks;
+    }
+
+    private List<Vec3> getRelativeDirts() {
+        List<Vec3> dirtBlocks = new ArrayList<>();
         boolean leftSide = !BlockUtils.getRelativeBlock(-1, 0, 1).equals(Blocks.dirt);
         BlockPos frontLeftDirt;
         BlockPos frontRightDirt;
