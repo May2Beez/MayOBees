@@ -221,6 +221,11 @@ public class RotationHandler {
         return new Rotation(yaw, pitch);
     }
 
+    public boolean shouldRotate(Rotation to) {
+        Rotation neededChange = getNeededChange(to);
+        return Math.abs(neededChange.getYaw()) > 0.1 || Math.abs(neededChange.getPitch()) > 0.1;
+    }
+
     public void reset() {
         LogUtils.debug("[Rotation] Resetting");
         rotating = false;

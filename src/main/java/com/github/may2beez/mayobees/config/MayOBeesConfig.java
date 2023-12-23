@@ -557,6 +557,17 @@ public class MayOBeesConfig extends Config {
             subcategory = "Foraging", options = {"Spruce","Jungle", "Dark Oak"})
     public static int fillChestSaplingType = 0;
 
+    @DualOption(
+            name = "Foraging Mode",
+            description = "The mode of foraging",
+            category = "Skills",
+            subcategory = "Foraging",
+            left = "Camera rotations",
+            right = "Skulls and moving",
+            size = 2
+    )
+    public static boolean foragingMode = false;
+
     @Slider(
             name = "Foraging Macro Base Rotation Speed",
             description = "The base rotation speed of the foraging macro",

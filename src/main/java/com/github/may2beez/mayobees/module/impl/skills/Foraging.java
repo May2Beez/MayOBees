@@ -4,6 +4,7 @@ import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.handler.RotationHandler;
 import com.github.may2beez.mayobees.module.IModuleActive;
 import com.github.may2beez.mayobees.util.*;
+import com.github.may2beez.mayobees.util.helper.Rotation;
 import com.github.may2beez.mayobees.util.helper.RotationConfiguration;
 import com.github.may2beez.mayobees.util.helper.Target;
 import com.github.may2beez.mayobees.util.helper.Timer;
@@ -45,7 +46,15 @@ public class Foraging implements IModuleActive {
     public static Minecraft mc = Minecraft.getMinecraft();
 
     private enum MacroState {
-        LOOK, PLACE, PLACE_BONE, BREAK, FIND_ROD, FIND_BONE, THROW_ROD, THROW_BREAK_DELAY, SWITCH
+        LOOK,
+        PLACE,
+        FIND_BONE,
+        PLACE_BONE,
+        FIND_ROD,
+        THROW_ROD,
+        THROW_BREAK_DELAY,
+        BREAK,
+        SWITCH
     }
 
     private MacroState macroState = MacroState.LOOK;
@@ -83,8 +92,7 @@ public class Foraging implements IModuleActive {
 
     @Override
     public void onDisable() {
-        KeyBindUtils.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindAttack, false);
-        KeyBindUtils.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindUseItem, false);
+        KeyBindUtils.stopMovement();
         enabled = false;
         UngrabUtils.regrabMouse();
     }
@@ -197,13 +205,14 @@ public class Foraging implements IModuleActive {
         dirtBlocks.add(new Vec3(frontRightDirt.getX() + 0.25, frontRightDirt.getY() + 1, frontRightDirt.getZ() + 0.75));
         dirtBlocks.add(new Vec3(backLeftDirt.getX() + 0.75, backLeftDirt.getY() + 1, backLeftDirt.getZ() + 0.25));
         dirtBlocks.add(new Vec3(backRightDirt.getX() + 0.25, backRightDirt.getY() + 1, backRightDirt.getZ() + 0.25));
-        
+
         return dirtBlocks;
     }
 
     private void unstuck() {
         LogUtils.warn("[Foraging] I'm stuck! Unstuck process activated");
         stuck = true;
+        KeyBindUtils.stopMovement();
     }
 
     @SubscribeEvent
@@ -215,14 +224,175 @@ public class Foraging implements IModuleActive {
         }
 
         if (RotationHandler.getInstance().isRotating()) return;
+        if (!waitTimer.hasPassed(MayOBeesConfig.foragingDelay)) return;
 
+        if (isStuck()) return;
+
+        if (stuckTimer.hasPassed(MayOBeesConfig.stuckTimeout)) {
+            unstuck();
+            return;
+        }
+
+        System.out.println(macroState);
+
+        switch (macroState) {
+            case LOOK:
+                int saplingSlot = InventoryUtils.getSlotIdOfItemInHotbar("Sapling");
+                if (saplingSlot == -1) {
+                    LogUtils.error("No saplings found in hotbar!");
+                    onDisable();
+                    return;
+                }
+                mc.thePlayer.inventory.currentItem = saplingSlot;
+                if (MayOBeesConfig.foragingMode) {
+                    Rotation rotation = new Rotation(AngleUtils.getClosest(), 18.5f);
+                    if (RotationHandler.getInstance().shouldRotate(rotation)) {
+                        RotationHandler.getInstance().easeTo(new RotationConfiguration(rotation, (long) (MayOBeesConfig.getRandomizedForagingMacroRotationSpeed() * 1.5f), RotationConfiguration.RotationType.CLIENT, null));
+                    } else {
+                        macroState = MacroState.PLACE;
+                    }
+                    break;
+                } else {
+                    for (Vec3 pos : dirtBlocks) {
+                        Block block = mc.theWorld.getBlockState(new BlockPos(pos.xCoord, pos.yCoord + 0.1, pos.zCoord)).getBlock();
+                        if (block instanceof BlockLog) {
+                            unstuck();
+                            return;
+                        }
+                    }
+                    currentTarget = getBestDirt();
+                    if (currentTarget != null) {
+                        RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(currentTarget), (long) (MayOBeesConfig.getRandomizedForagingMacroRotationSpeed() * 1.5f), RotationConfiguration.RotationType.CLIENT, null));
+                        macroState = MacroState.PLACE;
+                    } else {
+                        macroState = MacroState.FIND_BONE;
+                    }
+                }
+                return;
+            case PLACE:
+                if (MayOBeesConfig.foragingMode) {
+                    KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, true);
+                    List<Block> sapplings = dirtBlocks.stream().map(pos -> mc.theWorld.getBlockState(new BlockPos(pos.xCoord, pos.yCoord + 0.1, pos.zCoord)).getBlock()).filter(block -> block.equals(Blocks.sapling)).collect(java.util.stream.Collectors.toList());
+                    System.out.println(Math.abs(mc.thePlayer.motionX));
+                    System.out.println(Math.abs(mc.thePlayer.motionZ));
+                    System.out.println(sapplings.size());
+                    if (Math.abs(mc.thePlayer.motionX) < 0.05 || Math.abs(mc.thePlayer.motionZ) < 0.05) {
+                        if (sapplings.size() == 2) {
+                            Block skull = BlockUtils.getRelativeBlock(0, 1, 0);
+                            Block leftSkull = BlockUtils.getRelativeBlock(-1, 1, 0);
+                            Block rightSkull = BlockUtils.getRelativeBlock(1, 1, 0);
+                            if (skull.equals(Blocks.skull) && leftSkull.equals(Blocks.skull)) {
+                                KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindLeft, true);
+                            } else if (skull.equals(Blocks.skull) && rightSkull.equals(Blocks.skull)) {
+                                KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindRight, true);
+                            } else {
+                                KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindRight, true);
+                            }
+                        }
+                        if (sapplings.size() == 4) {
+                            KeyBindUtils.stopMovement();
+                            macroState = MacroState.FIND_BONE;
+//                            if (skullState == SkullState.LEFT) {
+//                                skullState = SkullState.RIGHT;
+//                            } else {
+//                                skullState = SkullState.LEFT;
+//                            }
+                        }
+                        waitTimer.schedule();
+                    }
+                    break;
+                } else {
+                    KeyBindUtils.rightClick();
+                    macroState = MacroState.LOOK;
+                }
+                return;
+            case FIND_BONE:
+                int boneMeal = InventoryUtils.getSlotIdOfItemInHotbar("Bone Meal");
+                if (boneMeal == -1) {
+                    LogUtils.error("No Bone Meal found in hotbar!");
+                    onDisable();
+                    return;
+                }
+                mc.thePlayer.inventory.currentItem = boneMeal;
+                macroState = MacroState.PLACE_BONE;
+                waitTimer.schedule();
+                break;
+            case PLACE_BONE:
+                MovingObjectPosition mop = mc.objectMouseOver;
+                if (mop != null && mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && mc.theWorld.getBlockState(mop.getBlockPos()).getBlock().equals(Blocks.sapling)) {
+                    KeyBindUtils.rightClick();
+                }
+                waitTimer.schedule();
+                if (MayOBeesConfig.foragingUseRod) {
+                    macroState = MacroState.FIND_ROD;
+                } else {
+                    macroState = MacroState.BREAK;
+                }
+                break;
+            case FIND_ROD:
+                int rod = InventoryUtils.getSlotIdOfItemInHotbar("Rod");
+                if (rod == -1) {
+                    LogUtils.error("No Fishing Rod found in hotbar!");
+                    onDisable();
+                    break;
+                }
+                mc.thePlayer.inventory.currentItem = rod;
+                waitTimer.schedule();
+                macroState = MacroState.THROW_ROD;
+                break;
+            case THROW_ROD:
+                KeyBindUtils.rightClick();
+                waitTimer.schedule();
+                macroState = MacroState.THROW_BREAK_DELAY;
+                break;
+            case THROW_BREAK_DELAY:
+                waitTimer.schedule();
+                macroState = MacroState.BREAK;
+                break;
+            case BREAK:
+                int treecapitator = InventoryUtils.getSlotIdOfItemInHotbar("Treecapitator");
+                if (treecapitator == -1) {
+                    LogUtils.error("No Treecapitator found in hotbar!");
+                    onDisable();
+                    break;
+                }
+                mc.thePlayer.inventory.currentItem = treecapitator;
+                if (lastBreakTime != 0 && System.currentTimeMillis() - lastBreakTime < (2000 - (MayOBeesConfig.monkeyLevel / 100f * 2000 * 0.5)))
+                    return;
+                KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindAttack, true);
+                waitAfterFinishTimer.schedule();
+                macroState = MacroState.SWITCH;
+                lastBreakTime = System.currentTimeMillis() + MayOBeesConfig.foragingMacroExtraBreakDelay;
+                break;
+            case SWITCH:
+                if (waitAfterFinishTimer.hasPassed(150) && mc.gameSettings.keyBindAttack.isKeyDown()) {
+                    System.out.println("Switching");
+                    KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindAttack, false);
+                    if (MayOBeesConfig.foragingMode) {
+                        macroState = MacroState.LOOK;
+                        waitTimer.schedule();
+                    }
+                }
+                if (waitAfterFinishTimer.hasPassed(350)) {
+                    macroState = MacroState.LOOK;
+                }
+                break;
+        }
+
+        if (lastState != macroState) {
+            lastState = macroState;
+            stuckTimer.schedule();
+        }
+    }
+
+    private boolean isStuck() {
         if (stuck) {
             Vec3 closest = null;
             Vec3 player = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.eyeHeight, mc.thePlayer.posZ);
             for (Vec3 dirt : dirtBlocks) {
                 Block block = mc.theWorld.getBlockState(new BlockPos(dirt.xCoord, dirt.yCoord + 0.1, dirt.zCoord)).getBlock();
                 BlockPos blockPos = new BlockPos(dirt.xCoord, dirt.yCoord + 0.1, dirt.zCoord);
-                if ((block instanceof net.minecraft.block.BlockLog) || block == Blocks.sapling) {
+                if ((block instanceof BlockLog) || block == Blocks.sapling) {
                     Vec3 distance = new Vec3(blockPos.getX() + 0.5D + getBetween(-0.1f, 0.1f), (blockPos.getY() + 0.8 + getBetween(-0.1f, 0.1f)), blockPos.getZ() + 0.5D + getBetween(-0.1f, 0.1f));
                     if (closest == null || player.squareDistanceTo(distance) <= player.squareDistanceTo(closest))
                         closest = distance;
@@ -232,7 +402,7 @@ public class Foraging implements IModuleActive {
             if (treecapitator == -1) {
                 LogUtils.error("No Treecapitator found in hotbar!");
                 onDisable();
-                return;
+                return true;
             }
 
             mc.thePlayer.inventory.currentItem = treecapitator;
@@ -250,126 +420,9 @@ public class Foraging implements IModuleActive {
                 KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindAttack, false);
                 stuckTimer.schedule();
             }
-            return;
+            return true;
         }
-
-        if (stuckTimer.hasPassed(MayOBeesConfig.stuckTimeout)) {
-            unstuck();
-            return;
-        }
-
-        System.out.println(System.currentTimeMillis() - lastBreakTime);
-        System.out.println((2000 - (MayOBeesConfig.monkeyLevel / 100f * 2000 * 0.5)));
-        System.out.println("State: " + macroState);
-
-        switch (macroState) {
-            case LOOK:
-                int saplingSlot = InventoryUtils.getSlotIdOfItemInHotbar("Sapling");
-                if (saplingSlot == -1) {
-                    LogUtils.error("No saplings found in hotbar!");
-                    onDisable();
-                    return;
-                }
-                for (Vec3 pos : dirtBlocks) {
-                    Block block = mc.theWorld.getBlockState(new BlockPos(pos.xCoord, pos.yCoord + 0.1, pos.zCoord)).getBlock();
-                    if (block instanceof BlockLog) {
-                        unstuck();
-                        return;
-                    }
-                }
-                mc.thePlayer.inventory.currentItem = saplingSlot;
-                currentTarget = getBestDirt();
-                if (currentTarget != null) {
-                    RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(currentTarget), (long) (MayOBeesConfig.getRandomizedForagingMacroRotationSpeed() * 1.5f), RotationConfiguration.RotationType.CLIENT, null));
-                    macroState = MacroState.PLACE;
-                } else {
-                    macroState = MacroState.FIND_BONE;
-                }
-                return;
-            case PLACE:
-                KeyBindUtils.rightClick();
-                macroState = MacroState.LOOK;
-                return;
-            case FIND_BONE:
-                int boneMeal = InventoryUtils.getSlotIdOfItemInHotbar("Bone Meal");
-                if (boneMeal == -1) {
-                    LogUtils.error("No Bone Meal found in hotbar!");
-                    onDisable();
-                    return;
-                }
-                mc.thePlayer.inventory.currentItem = boneMeal;
-                macroState = MacroState.PLACE_BONE;
-                waitTimer.schedule();
-                break;
-            case PLACE_BONE:
-                if (waitTimer.hasPassed(MayOBeesConfig.foragingDelay)) {
-                    MovingObjectPosition mop = mc.objectMouseOver;
-                    if (mop != null && mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && mc.theWorld.getBlockState(mop.getBlockPos()).getBlock().equals(Blocks.sapling)) {
-                        KeyBindUtils.rightClick();
-                    }
-                    waitTimer.schedule();
-                    if (MayOBeesConfig.foragingUseRod) {
-                        macroState = MacroState.FIND_ROD;
-                    } else {
-                        macroState = MacroState.BREAK;
-                    }
-                }
-                break;
-            case FIND_ROD:
-                if (waitTimer.hasPassed(MayOBeesConfig.foragingDelay)) {
-                    int rod = InventoryUtils.getSlotIdOfItemInHotbar("Rod");
-                    if (rod == -1) {
-                        LogUtils.error("No Fishing Rod found in hotbar!");
-                        onDisable();
-                        break;
-                    }
-                    mc.thePlayer.inventory.currentItem = rod;
-                    waitTimer.schedule();
-                    macroState = MacroState.THROW_ROD;
-                }
-                break;
-            case THROW_ROD:
-                if (waitTimer.hasPassed(MayOBeesConfig.foragingDelay)) {
-                    KeyBindUtils.rightClick();
-                    waitTimer.schedule();
-                    macroState = MacroState.THROW_BREAK_DELAY;
-                }
-                break;
-            case THROW_BREAK_DELAY:
-                if (waitTimer.hasPassed(MayOBeesConfig.foragingDelay)) {
-                    waitTimer.schedule();
-                    macroState = MacroState.BREAK;
-                }
-                break;
-            case BREAK:
-                int treecapitator = InventoryUtils.getSlotIdOfItemInHotbar("Treecapitator");
-                if (treecapitator == -1) {
-                    LogUtils.error("No Treecapitator found in hotbar!");
-                    onDisable();
-                    break;
-                }
-                mc.thePlayer.inventory.currentItem = treecapitator;
-                if (lastBreakTime != 0 && System.currentTimeMillis() - lastBreakTime < (2000 - (MayOBeesConfig.monkeyLevel / 100f * 2000 * 0.5))) return;
-                KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindAttack, true);
-                waitAfterFinishTimer.schedule();
-                macroState = MacroState.SWITCH;
-                lastBreakTime = System.currentTimeMillis() + MayOBeesConfig.foragingMacroExtraBreakDelay;
-                break;
-            case SWITCH:
-                if (waitAfterFinishTimer.hasPassed(150) && mc.gameSettings.keyBindAttack.isKeyDown()) {
-                    System.out.println("Switching");
-                    KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindAttack, false);
-                }
-                if (waitAfterFinishTimer.hasPassed(350)) {
-                    macroState = MacroState.LOOK;
-                }
-                break;
-        }
-
-        if (lastState != macroState) {
-            lastState = macroState;
-            stuckTimer.schedule();
-        }
+        return false;
     }
 
     @SubscribeEvent
