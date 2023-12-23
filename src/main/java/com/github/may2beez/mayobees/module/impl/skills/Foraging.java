@@ -201,10 +201,37 @@ public class Foraging implements IModuleActive {
             backRightDirt = BlockUtils.getRelativeBlockPos(0, 0, 1, AngleUtils.getClosest());
         }
 
-        dirtBlocks.add(new Vec3(frontLeftDirt.getX() + 0.75, frontLeftDirt.getY() + 1, frontLeftDirt.getZ() + 0.75));
-        dirtBlocks.add(new Vec3(frontRightDirt.getX() + 0.25, frontRightDirt.getY() + 1, frontRightDirt.getZ() + 0.75));
-        dirtBlocks.add(new Vec3(backLeftDirt.getX() + 0.75, backLeftDirt.getY() + 1, backLeftDirt.getZ() + 0.25));
-        dirtBlocks.add(new Vec3(backRightDirt.getX() + 0.25, backRightDirt.getY() + 1, backRightDirt.getZ() + 0.25));
+        EnumFacing facing = mc.thePlayer.getHorizontalFacing();
+        switch (facing) {
+            case NORTH:
+                dirtBlocks.add(new Vec3(frontLeftDirt.getX() + 0.75, frontLeftDirt.getY() + 1, frontLeftDirt.getZ() + 0.75));
+                dirtBlocks.add(new Vec3(frontRightDirt.getX() + 0.25, frontRightDirt.getY() + 1, frontRightDirt.getZ() + 0.75));
+                dirtBlocks.add(new Vec3(backLeftDirt.getX() + 0.75, backLeftDirt.getY() + 1, backLeftDirt.getZ() + 0.25));
+                dirtBlocks.add(new Vec3(backRightDirt.getX() + 0.25, backRightDirt.getY() + 1, backRightDirt.getZ() + 0.25));
+                break;
+            case SOUTH:
+                dirtBlocks.add(new Vec3(frontLeftDirt.getX() + 0.25, frontLeftDirt.getY() + 1, frontLeftDirt.getZ() + 0.25));
+                dirtBlocks.add(new Vec3(frontRightDirt.getX() + 0.75, frontRightDirt.getY() + 1, frontRightDirt.getZ() + 0.25));
+                dirtBlocks.add(new Vec3(backLeftDirt.getX() + 0.25, backLeftDirt.getY() + 1, backLeftDirt.getZ() + 0.75));
+                dirtBlocks.add(new Vec3(backRightDirt.getX() + 0.75, backRightDirt.getY() + 1, backRightDirt.getZ() + 0.75));
+                break;
+            case WEST:
+                dirtBlocks.add(new Vec3(frontLeftDirt.getX() + 0.75, frontLeftDirt.getY() + 1, frontLeftDirt.getZ() + 0.25));
+                dirtBlocks.add(new Vec3(frontRightDirt.getX() + 0.75, frontRightDirt.getY() + 1, frontRightDirt.getZ() + 0.75));
+                dirtBlocks.add(new Vec3(backLeftDirt.getX() + 0.25, backLeftDirt.getY() + 1, backLeftDirt.getZ() + 0.25));
+                dirtBlocks.add(new Vec3(backRightDirt.getX() + 0.25, backRightDirt.getY() + 1, backRightDirt.getZ() + 0.75));
+                break;
+            case EAST:
+                dirtBlocks.add(new Vec3(frontLeftDirt.getX() + 0.25, frontLeftDirt.getY() + 1, frontLeftDirt.getZ() + 0.75));
+                dirtBlocks.add(new Vec3(frontRightDirt.getX() + 0.25, frontRightDirt.getY() + 1, frontRightDirt.getZ() + 0.25));
+                dirtBlocks.add(new Vec3(backLeftDirt.getX() + 0.75, backLeftDirt.getY() + 1, backLeftDirt.getZ() + 0.75));
+                dirtBlocks.add(new Vec3(backRightDirt.getX() + 0.75, backRightDirt.getY() + 1, backRightDirt.getZ() + 0.25));
+                break;
+            default:
+                LogUtils.error("Invalid facing: " + facing);
+                onDisable();
+                break;
+        }
 
         return dirtBlocks;
     }
