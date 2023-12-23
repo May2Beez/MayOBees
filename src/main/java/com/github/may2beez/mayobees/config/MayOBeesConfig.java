@@ -35,7 +35,7 @@ public class MayOBeesConfig extends Config {
             subcategory = "Shortbow Aura",
             size = 2
     )
-    public static String shortBowAuraItemName = "";
+    public static String shortBowAuraItemName = "Shortbow";
 
     @Switch(
             name = "Shortbow Aura Attack Animals",

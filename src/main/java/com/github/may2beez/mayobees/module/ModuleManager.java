@@ -67,7 +67,7 @@ public class ModuleManager {
         ItemStack heldItem = Minecraft.getMinecraft().thePlayer.getHeldItem();
         if (heldItem != null && heldItem.getItem() == Items.fishing_rod)
             toggle(Fishing.getInstance());
-        if (heldItem != null && heldItem.getDisplayName().contains(MayOBeesConfig.shortBowAuraItemName))
+        if (heldItem != null && !MayOBeesConfig.shortBowAuraItemName.isEmpty() && heldItem.getDisplayName().contains(MayOBeesConfig.shortBowAuraItemName))
             toggle(ShortbowAura.getInstance());
         if (heldItem != null && heldItem.getDisplayName().contains("Sapling") || heldItem != null && heldItem.getDisplayName().contains("Treecapitator")
                 && GameStateHandler.getInstance().getLocation() == GameStateHandler.Location.PRIVATE_ISLAND)
