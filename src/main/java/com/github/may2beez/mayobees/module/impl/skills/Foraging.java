@@ -300,9 +300,6 @@ public class Foraging implements IModuleActive {
                 if (MayOBeesConfig.foragingMode) {
                     KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, true);
                     List<Block> sapplings = dirtBlocks.stream().map(pos -> mc.theWorld.getBlockState(new BlockPos(pos.xCoord, pos.yCoord + 0.1, pos.zCoord)).getBlock()).filter(block -> block.equals(Blocks.sapling)).collect(java.util.stream.Collectors.toList());
-                    System.out.println(Math.abs(mc.thePlayer.motionX));
-                    System.out.println(Math.abs(mc.thePlayer.motionZ));
-                    System.out.println(sapplings.size());
                     if (Math.abs(mc.thePlayer.motionX) < 0.05 || Math.abs(mc.thePlayer.motionZ) < 0.05) {
                         if (sapplings.size() == 2) {
                             Block skull = BlockUtils.getRelativeBlock(0, 1, 0);
@@ -319,11 +316,6 @@ public class Foraging implements IModuleActive {
                         if (sapplings.size() == 4) {
                             KeyBindUtils.stopMovement();
                             macroState = MacroState.FIND_BONE;
-//                            if (skullState == SkullState.LEFT) {
-//                                skullState = SkullState.RIGHT;
-//                            } else {
-//                                skullState = SkullState.LEFT;
-//                            }
                         }
                         waitTimer.schedule();
                     }
