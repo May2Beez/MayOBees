@@ -9,7 +9,6 @@ import cc.polyfrost.oneconfig.config.data.InfoType;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import com.github.may2beez.mayobees.module.ModuleManager;
-import com.github.may2beez.mayobees.module.impl.combat.ShortbowAura;
 import com.github.may2beez.mayobees.module.impl.other.Dev;
 import com.github.may2beez.mayobees.module.impl.player.GiftAura;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
@@ -20,13 +19,6 @@ import org.lwjgl.input.Keyboard;
 public class MayOBeesConfig extends Config {
 
     //<editor-fold desc="COMBAT">
-    @KeyBind(
-            name = "Shortbow Aura",
-            description = "Automatically shoots arrows at nearby enemies",
-            category = "Combat",
-            subcategory = "Shortbow Aura"
-    )
-    public static OneKeyBind shortBowAuraKeybind = new OneKeyBind(Keyboard.KEY_O);
 
     @Text(
             name = "Shortbow Aura Item's Name",
@@ -795,7 +787,7 @@ public class MayOBeesConfig extends Config {
             category = "Other",
             subcategory = "Failsafe"
     )
-    public static boolean stopMacrosOnRotationTeleportCheck = false;
+    public static boolean stopMacrosOnRotationTeleportCheck = true;
 
     @Switch(
             name = "Stop active modules on world change",
@@ -803,7 +795,7 @@ public class MayOBeesConfig extends Config {
             category = "Other",
             subcategory = "Failsafe"
     )
-    public static boolean stopMacrosOnWorldChange = false;
+    public static boolean stopMacrosOnWorldChange = true;
 
     //</editor-fold>
 

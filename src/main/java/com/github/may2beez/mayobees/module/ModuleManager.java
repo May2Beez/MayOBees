@@ -19,6 +19,7 @@ import net.minecraft.item.ItemStack;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 public class ModuleManager {
@@ -62,6 +63,13 @@ public class ModuleManager {
     }
 
     public void smartToggle() {
+        Optional<IModuleActive> activeModule = modules.stream().filter(module -> module instanceof IModuleActive && module.isRunning()).map(module -> (IModuleActive) module).findFirst();
+        if (activeModule.isPresent()) {
+            activeModule.get().onDisable();
+            LogUtils.info("[" + activeModule.get().getName() + "] Disabled");
+            return;
+        }
+
         if (GameStateHandler.getInstance().getLocation() == GameStateHandler.Location.JERRY_WORKSHOP)
             toggle(GiftAura.getInstance());
         ItemStack heldItem = Minecraft.getMinecraft().thePlayer.getHeldItem();

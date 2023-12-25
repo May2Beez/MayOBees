@@ -255,6 +255,8 @@ public class RotationHandler {
         return 1 + c3 * (float) Math.pow(x - 1, 3) + c1 * (float) Math.pow(x - 1, 2);
     }
 
+    private final Clock delayBetweenTargetFollow = new Clock();
+
     @SubscribeEvent
     public void onRender(RenderWorldLastEvent event) {
         if (!rotating || configuration == null || configuration.getRotationType() != RotationConfiguration.RotationType.CLIENT)
@@ -283,25 +285,8 @@ public class RotationHandler {
             return;
         }
 
-        if (configuration.followTarget() && configuration.getTarget().isPresent()) {
-            Target target = configuration.getTarget().get();
-            Rotation rot;
-            if (target.getEntity() != null) {
-                if (configuration.bowRotation()) {
-                    rot = getBowRotation(target.getEntity());
-                } else {
-                    rot = getRotation(target.getEntity());
-                }
-            } else if (target.getBlockPos() != null) {
-                rot = getRotation(target.getBlockPos());
-            } else if (target.getTarget().isPresent()) {
-                rot = getRotation(target.getTarget().get());
-            } else {
-                throw new IllegalArgumentException("No target specified!");
-            }
-            Rotation neededChange = getNeededChange(startRotation, rot);
-            targetRotation.setYaw(startRotation.getYaw() + neededChange.getYaw());
-            targetRotation.setPitch(startRotation.getPitch() + neededChange.getPitch());
+        if (configuration.followTarget() && configuration.getTarget().isPresent() && delayBetweenTargetFollow.passed()) {
+            adjustTargetRotation();
         }
         mc.thePlayer.rotationYaw = interpolate(startRotation.getYaw(), targetRotation.getYaw(), configuration.easeOutBack() ? this::easeOutBack : this::easeOutExpo);
         mc.thePlayer.rotationPitch = interpolate(startRotation.getPitch(), targetRotation.getPitch(), configuration.easeOutBack() ? this::easeOutBack : this::easeOutQuart);
@@ -327,32 +312,8 @@ public class RotationHandler {
         clientSidePitch = mc.thePlayer.rotationPitch;
         clientSideYaw = mc.thePlayer.rotationYaw;
         // rotating
-        if (configuration.followTarget() && configuration.getTarget().isPresent() && !configuration.goingBackToClientSide()) {
-            Target target = configuration.getTarget().get();
-            Rotation rot;
-            if (target.getEntity() != null) {
-                if (configuration.bowRotation()) {
-                    rot = getBowRotation(target.getEntity());
-                } else {
-                    rot = getRotation(target.getEntity());
-                }
-            } else if (target.getBlockPos() != null) {
-                rot = getRotation(target.getBlockPos());
-            } else if (target.getTarget().isPresent()) {
-                rot = getRotation(target.getTarget().get());
-            } else {
-                throw new IllegalArgumentException("No target specified!");
-            }
-//            if (distanceTraveled > 180) {
-//                distanceTraveled = 0;
-//                startRotation.setRotation(new Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch));
-//            }
-            Rotation neededChange = getNeededChange(startRotation, rot);
-            targetRotation.setYaw(startRotation.getYaw() + neededChange.getYaw());
-            targetRotation.setPitch(startRotation.getPitch() + neededChange.getPitch());
-//            distanceTraveled += Math.abs(neededChange.getYaw());
-//            long time = (long) getTime(pythagoras(Math.abs(neededChange.getYaw()), Math.abs(neededChange.getPitch())), configuration.getTime());
-//            endTime = System.currentTimeMillis() + Math.max(time, (long) (50 + Math.random() * 100));
+        if (configuration.followTarget() && configuration.getTarget().isPresent() && !configuration.goingBackToClientSide() && delayBetweenTargetFollow.passed()) {
+            adjustTargetRotation();
         }
         if (configuration.goingBackToClientSide()) {
             LogUtils.debug("Going back to client side");
@@ -375,6 +336,28 @@ public class RotationHandler {
         serverSideYaw = event.yaw;
         mc.thePlayer.rotationYaw = serverSideYaw;
         mc.thePlayer.rotationPitch = serverSidePitch;
+    }
+
+    private void adjustTargetRotation() {
+        Target target = configuration.getTarget().get();
+        Rotation rot;
+        if (target.getEntity() != null) {
+            if (configuration.bowRotation()) {
+                rot = getBowRotation(target.getEntity());
+            } else {
+                rot = getRotation(target.getEntity());
+            }
+        } else if (target.getBlockPos() != null) {
+            rot = getRotation(target.getBlockPos());
+        } else if (target.getTarget().isPresent()) {
+            rot = getRotation(target.getTarget().get());
+        } else {
+            throw new IllegalArgumentException("No target specified!");
+        }
+        Rotation neededChange = getNeededChange(startRotation, rot);
+        targetRotation.setYaw(startRotation.getYaw() + neededChange.getYaw());
+        targetRotation.setPitch(startRotation.getPitch() + neededChange.getPitch());
+        delayBetweenTargetFollow.schedule(80 + Math.random() * 40);
     }
 
     @SubscribeEvent(receiveCanceled = true)
