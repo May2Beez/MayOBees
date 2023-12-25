@@ -9,9 +9,13 @@ import com.github.may2beez.mayobees.util.helper.Clock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+
+import java.util.List;
 
 public class FillChestWithSaplingMacro implements IModuleActive {
 
@@ -40,8 +44,10 @@ public class FillChestWithSaplingMacro implements IModuleActive {
 
     public enum States {
         IDLE,
+        SACK,
         ABIPHONE,
         BUILDER,
+        GET_FREE_HAND,
         OPEN_CHEST,
         FILL_CHEST
     }
@@ -70,8 +76,8 @@ public class FillChestWithSaplingMacro implements IModuleActive {
 
         switch (state) {
             case IDLE:
-                if (InventoryUtils.hasItemInInventory(getSaplingName())) {
-                    state = States.OPEN_CHEST;
+                if (InventoryUtils.hasItemInInventory(MayOBeesConfig.getSaplingName())) {
+                    state = States.GET_FREE_HAND;
                     waitTimer.schedule(300);
                     return;
                 }
@@ -80,19 +86,50 @@ public class FillChestWithSaplingMacro implements IModuleActive {
                     return;
                 }
 
-                if (InventoryUtils.getSlotIdOfItemInHotbar("Abiphone") == -1) {
-                    LogUtils.error("[" + getName() + "] You need an Abiphone to use this macro!");
-                    onDisable();
-                    return;
+                if (InventoryUtils.getSlotIdOfItemInHotbar("Abiphone") != -1) {
+                    if (mc.thePlayer.inventory.getCurrentItem() == null || !mc.thePlayer.inventory.getCurrentItem().getDisplayName().contains("Abiphone")) {
+                        mc.thePlayer.inventory.currentItem = InventoryUtils.getSlotIdOfItemInHotbar("Abiphone");
+                    } else {
+                        mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getCurrentItem());
+                        state = States.ABIPHONE;
+                    }
+                    waitTimer.schedule(300);
+                    break;
                 }
 
-                if (mc.thePlayer.inventory.getCurrentItem() == null || !mc.thePlayer.inventory.getCurrentItem().getDisplayName().contains("Abiphone")) {
-                    mc.thePlayer.inventory.currentItem = InventoryUtils.getSlotIdOfItemInHotbar("Abiphone");
-                } else {
-                    mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.inventory.getCurrentItem());
-                    state = States.ABIPHONE;
+                if (InventoryUtils.getSlotIdOfItemInHotbar("Foraging Sack") != -1) {
+                    if (mc.thePlayer.inventory.getCurrentItem() == null || !mc.thePlayer.inventory.getCurrentItem().getDisplayName().contains("Foraging Sack")) {
+                        mc.thePlayer.inventory.currentItem = InventoryUtils.getSlotIdOfItemInHotbar("Foraging Sack");
+                    } else {
+                        KeyBindUtils.rightClick();
+                        state = States.SACK;
+                    }
+                    waitTimer.schedule(800);
+                    break;
                 }
-                waitTimer.schedule(300);
+
+                LogUtils.error("[" + getName() + "] You need an Abiphone or a Foraging Sack in your hotbar to use this macro!");
+                onDisable();
+                break;
+            case SACK:
+                String invName = InventoryUtils.getInventoryName();
+                if (invName == null) return;
+                if (invName.contains("Foraging Sack")) {
+                    Slot takeOut = InventoryUtils.getSlotOfItemInContainer(MayOBeesConfig.getSaplingName());
+                    if (takeOut != null) {
+                        List<String> lore = InventoryUtils.getItemLore(takeOut.getStack());
+                        if (lore.stream().anyMatch(l -> l.contains("Empty sack!"))) {
+                            LogUtils.error("[" + getName() + "] You need to have a full Foraging Sack to use this macro!");
+                            onDisable();
+                            return;
+                        }
+                        InventoryUtils.clickContainerSlot(takeOut.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.PICKUP);
+                        state = States.GET_FREE_HAND;
+                        waitTimer.schedule(800);
+                        InventoryUtils.closeScreen();
+                        return;
+                    }
+                }
                 break;
             case ABIPHONE:
                 if (mc.currentScreen == null) return;
@@ -128,9 +165,9 @@ public class FillChestWithSaplingMacro implements IModuleActive {
                 }
 
                 if (InventoryUtils.getInventoryName() != null && InventoryUtils.getInventoryName().contains("Green Thumb")) {
-                    Slot sapling = InventoryUtils.getSlotOfItemInContainer(getSaplingName());
+                    Slot sapling = InventoryUtils.getSlotOfItemInContainer(MayOBeesConfig.getSaplingName());
                     if (sapling != null) {
-                        InventoryUtils.clickContainerSlot(sapling.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.PICKUP);
+                        InventoryUtils.clickContainerSlot(sapling.slotNumber, InventoryUtils.ClickType.RIGHT, InventoryUtils.ClickMode.PICKUP);
                         waitTimer.schedule(80);
                         return;
                     }
@@ -139,7 +176,7 @@ public class FillChestWithSaplingMacro implements IModuleActive {
 
                 if (InventoryUtils.getInventoryName() != null && InventoryUtils.getInventoryName().contains("Shop Trading Options")) {
                     if (InventoryUtils.hasFreeSlots()) {
-                        Slot sapling = InventoryUtils.getSlotOfItemInContainer(getSaplingName(), 64);
+                        Slot sapling = InventoryUtils.getSlotOfItemInContainer(MayOBeesConfig.getSaplingName(), 64);
                         if (sapling != null) {
                             InventoryUtils.clickContainerSlot(sapling.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.PICKUP);
                             waitTimer.schedule(300);
@@ -148,17 +185,21 @@ public class FillChestWithSaplingMacro implements IModuleActive {
                     } else {
                         InventoryUtils.closeScreen();
                         waitTimer.schedule(300);
-                        state = States.OPEN_CHEST;
+                        state = States.GET_FREE_HAND;
                         return;
                     }
                 }
                 break;
-            case OPEN_CHEST:
+            case GET_FREE_HAND:
                 if (InventoryUtils.closeScreen()) {
                     waitTimer.schedule(300);
                     return;
                 }
-
+                getFreeHand();
+                state = States.OPEN_CHEST;
+                waitTimer.schedule(300);
+                break;
+            case OPEN_CHEST:
                 MovingObjectPosition objectMouseOver = mc.objectMouseOver;
 
                 if (objectMouseOver == null || objectMouseOver.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK || !mc.theWorld.getBlockState(objectMouseOver.getBlockPos()).getBlock().equals(Blocks.chest)) {
@@ -169,21 +210,23 @@ public class FillChestWithSaplingMacro implements IModuleActive {
 
                 KeyBindUtils.rightClick();
                 state = States.FILL_CHEST;
-                waitTimer.reset();
+                waitTimer.schedule(500);
                 break;
             case FILL_CHEST:
-                if (mc.currentScreen == null) return;
+                invName = InventoryUtils.getInventoryName();
+                if (invName == null) return;
+                if (!invName.contains("Chest")) return;
 
-                if (InventoryUtils.hasItemInInventory(getSaplingName()) && InventoryUtils.hasFreeSlotsInContainer()) {
-                    InventoryUtils.moveEveryItemToContainer(getSaplingName());
-                    waitTimer.reset();
-                } else if (InventoryUtils.hasItemInInventory(getSaplingName()) && !InventoryUtils.hasFreeSlotsInContainer()) {
+                if (InventoryUtils.hasItemInInventory(MayOBeesConfig.getSaplingName()) && InventoryUtils.hasFreeSlotsInContainer()) {
+                    InventoryUtils.moveEveryItemToContainer(MayOBeesConfig.getSaplingName());
+                    waitTimer.schedule(500);
+                } else if (InventoryUtils.hasItemInInventory(MayOBeesConfig.getSaplingName()) && !InventoryUtils.hasFreeSlotsInContainer()) {
                     mc.thePlayer.closeScreen();
                     onDisable();
                     LogUtils.warn("[" + getName() + "] The chest is full!");
                 } else {
                     mc.thePlayer.closeScreen();
-                    waitTimer.reset();
+                    waitTimer.schedule(500);
                     LogUtils.info("[" + getName() + "] Every sapling has been put into the chest");
                     state = States.IDLE;
                 }
@@ -191,16 +234,22 @@ public class FillChestWithSaplingMacro implements IModuleActive {
         }
     }
 
-    private static String getSaplingName() {
-        switch (MayOBeesConfig.fillChestSaplingType) {
-            case 0:
-                return "Spruce Sapling";
-            case 1:
-                return "Jungle Sapling";
-            case 2:
-                return "Dark Oak Sapling";
-            default:
-                throw new IllegalStateException("Unexpected value: " + MayOBeesConfig.fillChestSaplingType);
+    private void getFreeHand() {
+        if (mc.thePlayer.inventory.getCurrentItem() == null) return;
+        int freeSlot = -1;
+        for (int i = 0; i < 9; i++) {
+            ItemStack itemStack = mc.thePlayer.inventory.mainInventory[i];
+            Item sapling = Item.getItemFromBlock(Blocks.sapling);
+            if (itemStack == null || itemStack.getItem().equals(sapling)) {
+                freeSlot = i;
+                break;
+            }
         }
+        if (freeSlot == -1) {
+            LogUtils.error("[" + getName() + "] You don't have any free slots in your hotbar!");
+            onDisable();
+            return;
+        }
+        mc.thePlayer.inventory.currentItem = freeSlot;
     }
 }

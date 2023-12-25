@@ -6,10 +6,7 @@ import com.github.may2beez.mayobees.module.impl.combat.ShortbowAura;
 import com.github.may2beez.mayobees.module.impl.other.GhostBlocks;
 import com.github.may2beez.mayobees.module.impl.player.GiftAura;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
-import com.github.may2beez.mayobees.module.impl.skills.AlchemyHelper;
-import com.github.may2beez.mayobees.module.impl.skills.FillChestWithSaplingMacro;
-import com.github.may2beez.mayobees.module.impl.skills.Fishing;
-import com.github.may2beez.mayobees.module.impl.skills.Foraging;
+import com.github.may2beez.mayobees.module.impl.skills.*;
 import com.github.may2beez.mayobees.util.InventoryUtils;
 import com.github.may2beez.mayobees.util.LogUtils;
 import lombok.Getter;
@@ -43,7 +40,8 @@ public class ModuleManager {
                 AlchemyHelper.getInstance(),
                 Fishing.getInstance(),
                 Foraging.getInstance(),
-                FillChestWithSaplingMacro.getInstance()
+                FillChestWithSaplingMacro.getInstance(),
+                FillForagingSackMacro.getInstance()
         );
     }
 
@@ -73,15 +71,27 @@ public class ModuleManager {
         if (GameStateHandler.getInstance().getLocation() == GameStateHandler.Location.JERRY_WORKSHOP)
             toggle(GiftAura.getInstance());
         ItemStack heldItem = Minecraft.getMinecraft().thePlayer.getHeldItem();
-        if (heldItem != null && heldItem.getItem() == Items.fishing_rod)
+        if (heldItem == null) return;
+
+        if (heldItem.getItem() == Items.fishing_rod)
             toggle(Fishing.getInstance());
-        if (heldItem != null && !MayOBeesConfig.shortBowAuraItemName.isEmpty() && heldItem.getDisplayName().contains(MayOBeesConfig.shortBowAuraItemName))
+
+        if (!MayOBeesConfig.shortBowAuraItemName.isEmpty() && heldItem.getDisplayName().contains(MayOBeesConfig.shortBowAuraItemName))
             toggle(ShortbowAura.getInstance());
-        if (heldItem != null && heldItem.getDisplayName().contains("Sapling") || heldItem != null && heldItem.getDisplayName().contains("Treecapitator")
-                && GameStateHandler.getInstance().getLocation() == GameStateHandler.Location.PRIVATE_ISLAND)
-            toggle(Foraging.getInstance());
-        if (heldItem != null && heldItem.getDisplayName().contains("Abiphone") && InventoryUtils.hasItemInHotbar("Treecapitator") && GameStateHandler.getInstance().getLocation() == GameStateHandler.Location.PRIVATE_ISLAND) {
-            toggle(FillChestWithSaplingMacro.getInstance());
+
+        if (GameStateHandler.getInstance().getLocation() == GameStateHandler.Location.PRIVATE_ISLAND) {
+            if (heldItem.getDisplayName().contains("Treecapitator"))
+                toggle(Foraging.getInstance());
+
+            if ((heldItem.getDisplayName().contains("Abiphone") || heldItem.getDisplayName().contains("Foraging Sack") || heldItem.getDisplayName().contains("Sapling")) && InventoryUtils.hasItemInHotbar("Treecapitator")) {
+                toggle(FillChestWithSaplingMacro.getInstance());
+            }
+        }
+
+        if (GameStateHandler.getInstance().getLocation() == GameStateHandler.Location.HUB) {
+            if (heldItem.getDisplayName().contains("Foraging Sack")) {
+                toggle(FillForagingSackMacro.getInstance());
+            }
         }
     }
 }

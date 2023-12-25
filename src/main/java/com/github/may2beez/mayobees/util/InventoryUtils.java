@@ -246,10 +246,16 @@ public class InventoryUtils {
     }
 
     public static void moveEveryItemToContainer(String item) {
-        final Slot slot = getSlotOfItemFromInventoryInOpenContainer(item, true);
-        if (slot == null) return;
-        final int slotId = slot.slotNumber;
-        clickContainerSlot(slotId, ClickType.LEFT, ClickMode.QUICK_MOVE);
+        if (mc.currentScreen instanceof GuiChest) {
+            final ContainerChest chest = (ContainerChest) mc.thePlayer.openContainer;
+            for (Slot slot : chest.inventorySlots) {
+                if (slot != null && slot.getHasStack() && slot.slotNumber >= chest.getLowerChestInventory().getSizeInventory()) {
+                    if (StringUtils.stripControlCodes(slot.getStack().getDisplayName()).equalsIgnoreCase(item)) {
+                        clickContainerSlot(slot.slotNumber, ClickType.LEFT, ClickMode.QUICK_MOVE);
+                    }
+                }
+            }
+        }
     }
 
     public static Slot getSlotOfId(int id) {
@@ -327,7 +333,7 @@ public class InventoryUtils {
     public static boolean hasFreeSlotsInContainer() {
         final ContainerChest chest = (ContainerChest) mc.thePlayer.openContainer;
         for (Slot slot : mc.thePlayer.openContainer.inventorySlots) {
-            if (slot.slotNumber >= chest.getLowerChestInventory().getSizeInventory()) {
+            if (slot.slotNumber < chest.getLowerChestInventory().getSizeInventory()) {
                 if (!slot.getHasStack()) {
                     return true;
                 }

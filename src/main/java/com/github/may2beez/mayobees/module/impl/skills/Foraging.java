@@ -77,6 +77,8 @@ public class Foraging implements IModuleActive {
     @Override
     public void onEnable() {
         enabled = true;
+        if (MayOBeesConfig.mouseUngrab)
+            UngrabUtils.ungrabMouse();
         dirtBlocks.clear();
         dirtBlocks.addAll(getDirts());
         currentTarget = null;
@@ -87,8 +89,6 @@ public class Foraging implements IModuleActive {
         stuckTimer.schedule();
         stuck = false;
         updateXpTimer.schedule();
-        if (MayOBeesConfig.mouseUngrab)
-            UngrabUtils.ungrabMouse();
     }
 
     @Override

@@ -1,8 +1,8 @@
 package com.github.may2beez.mayobees.config;
 
 import cc.polyfrost.oneconfig.config.Config;
-import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.annotations.Number;
+import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.InfoType;
@@ -345,6 +345,18 @@ public class MayOBeesConfig extends Config {
     //</editor-fold>
 
     //<editor-fold desc="MISC">
+    @KeyBind(
+            name = "SmartToggle keybind",
+            category = "Misc"
+    )
+    public static OneKeyBind smartToggleKeybind = new OneKeyBind(Keyboard.KEY_NONE);
+
+    @Switch(
+            name = "Ungrab Mouse",
+            category = "Misc"
+    )
+    public static boolean mouseUngrab = false;
+
     @Info(
             text = "Smart Toggle activates the appropriate macro depending on the situation",
             size = 2,
@@ -378,7 +390,7 @@ public class MayOBeesConfig extends Config {
     public boolean infoSmartToggle5 = false;
 
     @Info(
-            text = "Foraging Macro - Hold Treecapitator or Sappling on private island",
+            text = "Foraging Macro - Hold Treecapitator on private island",
             size = 2,
             category = "Misc",
             type = InfoType.INFO
@@ -386,23 +398,21 @@ public class MayOBeesConfig extends Config {
     public boolean infoSmartToggle2 = false;
 
     @Info(
-            text = "Fill Chests with Sapplings Macro - Hold Abiphone and have Treecap in hotbar",
+            text = "Fill Chests with Sapplings Macro - Hold Abiphone, Foraging Sack or Sappling and have Treecap in hotbar",
             size = 2,
             category = "Misc",
             type = InfoType.INFO
     )
     public boolean infoSmartToggle6 = false;
 
-    @KeyBind(
-            name = "SmartToggle keybind",
-            category = "Misc"
+    @Info(
+            text = "Fill Foraging Sacks Macro - Stay in the Hub while looking at the building and holding any Foraging Sack",
+            size = 2,
+            category = "Misc",
+            type = InfoType.INFO
     )
-    public static OneKeyBind smartToggleKeybind = new OneKeyBind(Keyboard.KEY_NONE);
-    @Switch(
-            name = "Ungrab Mouse",
-            category = "Misc"
-    )
-    public static boolean mouseUngrab = false;
+    public boolean infoSmartToggle7 = false;
+
     //</editor-fold>
 
     //<editor-fold desc="Skills">
@@ -539,15 +549,28 @@ public class MayOBeesConfig extends Config {
     public static OneKeyBind alchemyHelperAutoSellPotionsToNPCKeybind = new OneKeyBind(Keyboard.KEY_NONE);
 
     //</editor-fold>
-    
+
     //<editor-fold desc="Foraging">
     @Switch(name = "Use Fishing Rod", category = "Skills",
             subcategory = "Foraging")
     public static boolean foragingUseRod = false;
 
     @Dropdown(name = "Fill Chest With Sapling Type", category = "Skills",
-            subcategory = "Foraging", options = {"Spruce","Jungle", "Dark Oak"})
+            subcategory = "Foraging", options = {"Spruce", "Jungle", "Dark Oak"})
     public static int fillChestSaplingType = 0;
+
+    public static String getSaplingName() {
+        switch (MayOBeesConfig.fillChestSaplingType) {
+            case 0:
+                return "Spruce Sapling";
+            case 1:
+                return "Jungle Sapling";
+            case 2:
+                return "Dark Oak Sapling";
+            default:
+                throw new IllegalStateException("Unexpected value: " + MayOBeesConfig.fillChestSaplingType);
+        }
+    }
 
     @DualOption(
             name = "Foraging Mode",
@@ -626,7 +649,7 @@ public class MayOBeesConfig extends Config {
     public static int monkeyLevel = 0;
 
     //</editor-fold>
-    
+
     //<editor-fold desc="Fishing">
     @Switch(
             name = "Fishing",
@@ -677,6 +700,7 @@ public class MayOBeesConfig extends Config {
             subcategory = "Tablist"
     )
     public static boolean transposedTablist = false;
+
     @Button(
             name = "Get Tablist",
             text = "Get Tablist",
@@ -699,6 +723,7 @@ public class MayOBeesConfig extends Config {
             right = "Save"
     )
     public static boolean saveInventoryToFile = false;
+
     @Button(
             name = "Get Inventory",
             text = "Get Inventory",
@@ -730,6 +755,7 @@ public class MayOBeesConfig extends Config {
             max = 44
     )
     public static int itemLoreSlot = 0;
+
     @Button(
             name = "Get Item Lore",
             text = "Get Item Lore",
@@ -807,6 +833,7 @@ public class MayOBeesConfig extends Config {
             subcategory = "Gift Aura"
     )
     public static boolean giftAura = false;
+
     @Button(
             name = "Gift Aura Reset",
             text = "Reset",
@@ -818,6 +845,7 @@ public class MayOBeesConfig extends Config {
     public static void giftAuraReset() {
         GiftAura.getInstance().reset();
     }
+
     @DualOption(
             name = "Gift Aura Rotation Type",
             description = "The type of rotation to use for the gift aura",
