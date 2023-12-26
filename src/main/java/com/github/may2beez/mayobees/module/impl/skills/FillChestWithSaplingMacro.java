@@ -5,6 +5,7 @@ import com.github.may2beez.mayobees.module.IModuleActive;
 import com.github.may2beez.mayobees.util.InventoryUtils;
 import com.github.may2beez.mayobees.util.KeyBindUtils;
 import com.github.may2beez.mayobees.util.LogUtils;
+import com.github.may2beez.mayobees.util.UngrabUtils;
 import com.github.may2beez.mayobees.util.helper.Clock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
@@ -60,11 +61,14 @@ public class FillChestWithSaplingMacro implements IModuleActive {
         state = States.IDLE;
         waitTimer.reset();
         enabled = true;
+        if (MayOBeesConfig.mouseUngrab)
+            UngrabUtils.ungrabMouse();
     }
 
     @Override
     public void onDisable() {
         enabled = false;
+        UngrabUtils.regrabMouse();
     }
 
     @SubscribeEvent
@@ -175,19 +179,15 @@ public class FillChestWithSaplingMacro implements IModuleActive {
                 }
 
                 if (InventoryUtils.getInventoryName() != null && InventoryUtils.getInventoryName().contains("Shop Trading Options")) {
-                    if (InventoryUtils.hasFreeSlots()) {
-                        Slot sapling = InventoryUtils.getSlotOfItemInContainer(MayOBeesConfig.getSaplingName(), 64);
-                        if (sapling != null) {
-                            InventoryUtils.clickContainerSlot(sapling.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.PICKUP);
-                            waitTimer.schedule(300);
-                            return;
-                        }
-                    } else {
-                        InventoryUtils.closeScreen();
-                        waitTimer.schedule(300);
+                    if (InventoryUtils.getFirstEmptySlotInInventory() == null) {
                         state = States.GET_FREE_HAND;
-                        return;
+                        waitTimer.schedule(500);
+                        break;
                     }
+                    Slot saplingStack = InventoryUtils.getSlotOfItemInContainer(MayOBeesConfig.getSaplingName(), 64);
+                    if (saplingStack == null) break;
+                    InventoryUtils.clickContainerSlot(saplingStack.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.PICKUP);
+                    waitTimer.schedule(150 + Math.random() * 75);
                 }
                 break;
             case GET_FREE_HAND:
