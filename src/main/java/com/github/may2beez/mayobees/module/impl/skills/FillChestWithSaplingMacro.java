@@ -126,7 +126,6 @@ public class FillChestWithSaplingMacro implements IModuleActive {
                         InventoryUtils.clickContainerSlot(takeOut.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.PICKUP);
                         state = States.GET_FREE_HAND;
                         waitTimer.schedule(800);
-                        InventoryUtils.closeScreen();
                         return;
                     }
                 }
