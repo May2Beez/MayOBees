@@ -3,6 +3,7 @@ package com.github.may2beez.mayobees.module.impl.other;
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.module.IModule;
 import com.github.may2beez.mayobees.util.LogUtils;
+import com.github.may2beez.mayobees.util.ScoreboardUtils;
 import com.github.may2beez.mayobees.util.TablistUtils;
 import net.minecraft.client.Minecraft;
 
@@ -55,7 +56,7 @@ public class Dev implements IModule {
         if (mc.thePlayer == null || mc.theWorld == null)
             return;
         if (TablistUtils.getTabListPlayersUnprocessed().isEmpty()) {
-            LogUtils.debug("Tablist is empty!");
+            LogUtils.info("Tablist is empty!");
             return;
         }
         List<String> tabList;
@@ -74,16 +75,16 @@ public class Dev implements IModule {
                     file.write(name.replace("§", "&") + "\n");
                 }
                 file.close();
-                LogUtils.debug("Saved tablist to file!");
+                LogUtils.info("Saved tablist to file!");
             } catch (IOException e) {
-                LogUtils.debug("Failed to save tablist to file!");
+                LogUtils.error("Failed to save tablist to file!");
                 e.printStackTrace();
             }
         } else {
             for (String name : tabList) {
                 System.out.println(name);
             }
-            LogUtils.debug("Printed tablist to console!");
+            LogUtils.info("Printed tablist to console!");
         }
     }
     //</editor-fold>
@@ -93,7 +94,7 @@ public class Dev implements IModule {
         if (mc.thePlayer == null || mc.theWorld == null)
             return;
         if (mc.thePlayer.inventoryContainer == null) {
-            LogUtils.debug("Inventory is empty!");
+            LogUtils.info("Inventory is empty!");
             return;
         }
         List<String> inventory = new ArrayList<>();
@@ -110,28 +111,30 @@ public class Dev implements IModule {
                     file.write(name.replace("§", "&") + "\n");
                 }
                 file.close();
-                LogUtils.debug("Saved inventory to file!");
+                LogUtils.info("Saved inventory to file!");
             } catch (IOException e) {
-                LogUtils.debug("Failed to save inventory to file!");
+                LogUtils.error("Failed to save inventory to file!");
                 e.printStackTrace();
             }
         } else {
             for (String name : inventory) {
                 System.out.println(name);
             }
-            LogUtils.debug("Printed inventory to console!");
+            LogUtils.info("Printed inventory to console!");
         }
     }
+    //</editor-fold>
 
+    //<editor-fold desc="Item Lore">
     public void getItemLore(int slot) {
         if (mc.thePlayer == null || mc.theWorld == null)
             return;
         if (mc.thePlayer.inventoryContainer == null) {
-            LogUtils.debug("Inventory is empty!");
+            LogUtils.info("Inventory is empty!");
             return;
         }
         if (mc.thePlayer.inventoryContainer.inventorySlots.get(slot).getStack() == null) {
-            LogUtils.debug("Slot is empty!");
+            LogUtils.info("Slot is empty!");
             return;
         }
         List<String> lore = mc.thePlayer.inventoryContainer.inventorySlots.get(slot).getStack().getTooltip(mc.thePlayer, false);
@@ -142,20 +145,46 @@ public class Dev implements IModule {
                     file.write(name.replace("§", "&") + "\n");
                 }
                 file.close();
-                LogUtils.debug("Saved item lore to file!");
+                LogUtils.info("Saved item lore to file!");
             } catch (IOException e) {
-                LogUtils.debug("Failed to save item lore to file!");
+                LogUtils.error("Failed to save item lore to file!");
                 e.printStackTrace();
             }
         } else {
             for (String name : lore) {
                 System.out.println(name);
             }
-            LogUtils.debug("Printed item lore to console!");
+            LogUtils.info("Printed item lore to console!");
+        }
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="Scoreboard">
+    public void getScoreboard() {
+        if (mc.thePlayer == null || mc.theWorld == null)
+            return;
+        if (MayOBeesConfig.saveInventoryToFile) {
+            try {
+                FileWriter file = new FileWriter("inventory_" + getCurrentTime() + ".txt");
+                for (String line : ScoreboardUtils.getScoreboardLines()) {
+                    file.write(line.replace("§", "&") + "\n");
+                }
+                file.close();
+                LogUtils.info("Saved inventory to file!");
+            } catch (IOException e) {
+                LogUtils.error("Failed to save inventory to file!");
+                e.printStackTrace();
+            }
+        } else {
+            for (String line : ScoreboardUtils.getScoreboardLines()) {
+                System.out.println(line);
+            }
+            LogUtils.info("Printed inventory to console!");
         }
     }
 
     public String getCurrentTime() {
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
     }
+    //</editor-fold>
 }

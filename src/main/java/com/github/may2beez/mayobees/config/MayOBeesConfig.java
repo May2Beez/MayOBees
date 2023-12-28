@@ -767,6 +767,29 @@ public class MayOBeesConfig extends Config {
         Dev.getInstance().getItemLore(itemLoreSlot);
     }
     //</editor-fold>
+
+    //<editor-fold desc="Scoreboard">
+    @DualOption(
+            name = "Save Scoreboard",
+            description = "Saves the scoreboard to a file",
+            category = "Debug",
+            subcategory = "Scoreboard",
+            left = "Print",
+            right = "Save"
+    )
+    public static boolean saveScoreboardToFile = false;
+
+    @Button(
+            name = "Get Scoreboard",
+            text = "Get Scoreboard",
+            description = "Gets the scoreboard",
+            category = "Debug",
+            subcategory = "Scoreboard"
+    )
+    public static void getScoreboard() {
+        Dev.getInstance().getScoreboard();
+    }
+    //</editor-fold>
     //</editor-fold>
 
     //<editor-fold desc="OTHER">
