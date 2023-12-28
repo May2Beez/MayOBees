@@ -163,7 +163,7 @@ public class Dev implements IModule {
     public void getScoreboard() {
         if (mc.thePlayer == null || mc.theWorld == null)
             return;
-        if (MayOBeesConfig.saveInventoryToFile) {
+        if (MayOBeesConfig.saveScoreboardToFile) {
             try {
                 FileWriter file = new FileWriter("scoreboard_" + getCurrentTime() + ".txt");
                 if (MayOBeesConfig.includeScoreboardTitle)
