@@ -40,6 +40,8 @@ public class FillForagingSackMacro implements IModuleActive {
     @Override
     public void onEnable() {
         enabled = true;
+        state = States.IDLE;
+        waitTimer.reset();
     }
 
     @Override
