@@ -165,19 +165,25 @@ public class Dev implements IModule {
             return;
         if (MayOBeesConfig.saveInventoryToFile) {
             try {
-                FileWriter file = new FileWriter("inventory_" + getCurrentTime() + ".txt");
+                FileWriter file = new FileWriter("scoreboard_" + getCurrentTime() + ".txt");
+                if (MayOBeesConfig.includeScoreboardTitle)
+                    System.out.println(ScoreboardUtils.getScoreboardTitle());
                 for (String line : ScoreboardUtils.getScoreboardLines()) {
-                    file.write(line.replace("§", "&") + "\n");
+                    String cleanedLine = ScoreboardUtils.cleanSB(line);
+                    file.write((MayOBeesConfig.cleanScoreboardLines ? cleanedLine : line).replace("§", "&") + "\n");
                 }
                 file.close();
-                LogUtils.info("Saved inventory to file!");
+                LogUtils.info("Saved scoreboard to file!");
             } catch (IOException e) {
-                LogUtils.error("Failed to save inventory to file!");
+                LogUtils.error("Failed to save scoreboard to file!");
                 e.printStackTrace();
             }
         } else {
+            if (MayOBeesConfig.includeScoreboardTitle)
+                System.out.println(ScoreboardUtils.getScoreboardTitle());
             for (String line : ScoreboardUtils.getScoreboardLines()) {
-                System.out.println(line);
+                String cleanedLine = ScoreboardUtils.cleanSB(line);
+                System.out.println(MayOBeesConfig.cleanScoreboardLines ? cleanedLine : line);
             }
             LogUtils.info("Printed inventory to console!");
         }

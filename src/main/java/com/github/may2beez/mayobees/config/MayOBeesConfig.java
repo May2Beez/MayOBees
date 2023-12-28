@@ -779,6 +779,14 @@ public class MayOBeesConfig extends Config {
     )
     public static boolean saveScoreboardToFile = false;
 
+    @Switch(
+            name = "Clean scoreboard lines",
+            description = "Gets the cleaned scoreboard lines",
+            category = "Debug",
+            subcategory = "Scoreboard"
+    )
+    public static boolean cleanScoreboardLines = true;
+
     @Button(
             name = "Get Scoreboard",
             text = "Get Scoreboard",
@@ -789,6 +797,14 @@ public class MayOBeesConfig extends Config {
     public static void getScoreboard() {
         Dev.getInstance().getScoreboard();
     }
+
+    @Switch(
+            name = "Include scoreboard title",
+            description = "Includes the scoreboard title",
+            category = "Debug",
+            subcategory = "Scoreboard"
+    )
+    public static boolean includeScoreboardTitle = false;
     //</editor-fold>
     //</editor-fold>
 
