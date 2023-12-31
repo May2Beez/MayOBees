@@ -8,16 +8,13 @@ import com.github.may2beez.mayobees.util.helper.Rotation;
 import com.github.may2beez.mayobees.util.helper.RotationConfiguration;
 import com.github.may2beez.mayobees.util.helper.Target;
 import com.github.may2beez.mayobees.util.helper.Timer;
-import com.google.common.base.Splitter;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLog;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.*;
-import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -26,8 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Foraging implements IModuleActive {
     private static Foraging instance;
@@ -83,12 +78,9 @@ public class Foraging implements IModuleActive {
         dirtBlocks.addAll(getDirts());
         currentTarget = null;
         macroState = MacroState.LOOK;
-        startedAt = System.currentTimeMillis();
-        earnedXp = 0;
         lastBreakTime = 0;
         stuckTimer.schedule();
         stuck = false;
-        updateXpTimer.schedule();
     }
 
     @Override
@@ -98,49 +90,9 @@ public class Foraging implements IModuleActive {
         UngrabUtils.regrabMouse();
     }
 
-    private static final Timer updateXpTimer = new Timer();
     private static final Timer waitTimer = new Timer();
     private static final Timer waitAfterFinishTimer = new Timer();
-    private static double xpPerHour = 0;
-
-    public String[] drawFunction() {
-        String[] textToDraw = new String[4];
-        if (updateXpTimer.hasPassed(100)) {
-            xpPerHour = earnedXp / ((System.currentTimeMillis() - startedAt) / 3600000.0);
-            updateXpTimer.reset();
-        }
-        textToDraw[0] = "§r§lForaging Macro";
-        textToDraw[1] = "§r§lState: §f" + macroState;
-        textToDraw[2] = "§r§lXP/H: §f" + String.format("%.2f", xpPerHour);
-        textToDraw[3] = "§r§lXP Since start: §f" + String.format("%.2f", earnedXp);
-        return textToDraw;
-    }
-
-    private long startedAt = 0;
-    private double earnedXp = 0;
-    private final Splitter SPACE_SPLITTER = Splitter.on("  ").omitEmptyStrings().trimResults();
-    private final Pattern SKILL_PATTERN = Pattern.compile("\\+([\\d.]+)\\s+([A-Za-z]+)\\s+\\((\\d+(\\.\\d+)?)%\\)");
-
-    @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
-    public void onChatReceive(ClientChatReceivedEvent event) {
-        if (!isRunning()) return;
-        if (event.type != 2) return;
-
-        String actionBar = StringUtils.stripControlCodes(event.message.getUnformattedText());
-
-        List<String> components = SPACE_SPLITTER.splitToList(actionBar);
-
-        for (String component : components) {
-            Matcher matcher = SKILL_PATTERN.matcher(component);
-            if (matcher.matches()) {
-                String addedXp = matcher.group(1);
-                String skillName = matcher.group(2);
-                if (skillName.equalsIgnoreCase("foraging")) {
-                    earnedXp += Double.parseDouble(addedXp) * 6.5;
-                }
-            }
-        }
-    }
+    private int randomTime = (int) (150 + Math.random() * 100);
 
     private final Color color = new Color(0, 200, 0, 80);
     private final Color targetColor = new Color(200, 0, 0, 80);
@@ -412,10 +364,12 @@ public class Foraging implements IModuleActive {
                     if (MayOBeesConfig.foragingMode) {
                         macroState = MacroState.LOOK;
                         waitTimer.schedule();
+                        break;
                     }
                 }
-                if (waitAfterFinishTimer.hasPassed(350)) {
+                if (waitAfterFinishTimer.hasPassed(randomTime)) {
                     macroState = MacroState.LOOK;
+                    randomTime = (int) (150 + Math.random() * 100);
                 }
                 break;
         }
@@ -434,7 +388,7 @@ public class Foraging implements IModuleActive {
                 Block block = mc.theWorld.getBlockState(new BlockPos(dirt.xCoord, dirt.yCoord + 0.1, dirt.zCoord)).getBlock();
                 BlockPos blockPos = new BlockPos(dirt.xCoord, dirt.yCoord + 0.1, dirt.zCoord);
                 if ((block instanceof BlockLog) || block == Blocks.sapling) {
-                    Vec3 distance = new Vec3(blockPos.getX() + 0.5D + getBetween(-0.1f, 0.1f), (blockPos.getY() + 0.8 + getBetween(-0.1f, 0.1f)), blockPos.getZ() + 0.5D + getBetween(-0.1f, 0.1f));
+                    Vec3 distance = new Vec3(blockPos.getX() + 0.5D + getBetween(-0.1f, 0.1f), (blockPos.getY() + (block.getBlockBoundsMaxY() * 0.75) + getBetween(-0.1f, 0.1f)), blockPos.getZ() + 0.5D + getBetween(-0.1f, 0.1f));
                     if (closest == null || player.squareDistanceTo(distance) <= player.squareDistanceTo(closest))
                         closest = distance;
                 }
