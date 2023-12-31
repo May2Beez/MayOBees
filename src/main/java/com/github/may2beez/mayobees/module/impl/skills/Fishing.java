@@ -5,7 +5,7 @@ import com.github.may2beez.mayobees.event.SpawnParticleEvent;
 import com.github.may2beez.mayobees.handler.RotationHandler;
 import com.github.may2beez.mayobees.module.IModule;
 import com.github.may2beez.mayobees.module.IModuleActive;
-import com.github.may2beez.mayobees.module.impl.combat.MobKiller;
+import com.github.may2beez.mayobees.module.impl.combat.MobAura;
 import com.github.may2beez.mayobees.util.*;
 import com.github.may2beez.mayobees.util.helper.Clock;
 import com.github.may2beez.mayobees.util.helper.Rotation;
@@ -97,8 +97,8 @@ public class Fishing implements IModuleActive {
         }
         startRotation = new Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
         KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), MayOBeesConfig.sneakWhileFishing);
-        MobKiller.getInstance().start();
-        MobKiller.getInstance().setTarget(fishingMobs.stream().filter(name -> !name.toLowerCase().contains("squid")).toArray(String[]::new));
+        MobAura.getInstance().onEnable();
+//        MobAura.getInstance().setTarget(fishingMobs.stream().filter(name -> !name.toLowerCase().contains("squid")).toArray(String[]::new));
     }
 
     @Override
@@ -108,7 +108,7 @@ public class Fishing implements IModuleActive {
         }
         KeyBindUtils.stopMovement();
         RotationHandler.getInstance().reset();
-        MobKiller.getInstance().stop();
+        MobAura.getInstance().onDisable();
         UngrabUtils.regrabMouse();
     }
 
@@ -120,7 +120,7 @@ public class Fishing implements IModuleActive {
 
         particles.removeIf(p -> (System.currentTimeMillis() - p.timeAdded) > 1000);
 
-        if (MobKiller.hasTarget) {
+        if (MobAura.getInstance().isRunning()) {
             return;
         }
 

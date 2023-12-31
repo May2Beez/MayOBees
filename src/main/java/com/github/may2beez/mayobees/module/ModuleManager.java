@@ -2,7 +2,7 @@ package com.github.may2beez.mayobees.module;
 
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.handler.GameStateHandler;
-import com.github.may2beez.mayobees.module.impl.combat.ShortbowAura;
+import com.github.may2beez.mayobees.module.impl.combat.MobAura;
 import com.github.may2beez.mayobees.module.impl.other.GhostBlocks;
 import com.github.may2beez.mayobees.module.impl.player.GiftAura;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
@@ -33,7 +33,7 @@ public class ModuleManager {
 
     public List<IModule> fillModules() {
         return Arrays.asList(
-                ShortbowAura.getInstance(),
+                MobAura.getInstance(),
                 GhostBlocks.getInstance(),
                 GiftAura.getInstance(),
                 ESP.getInstance(),
@@ -76,8 +76,8 @@ public class ModuleManager {
         if (heldItem.getItem() == Items.fishing_rod)
             toggle(Fishing.getInstance());
 
-        if (!MayOBeesConfig.shortBowAuraItemName.isEmpty() && heldItem.getDisplayName().contains(MayOBeesConfig.shortBowAuraItemName))
-            toggle(ShortbowAura.getInstance());
+        if (!MayOBeesConfig.mobAuraItemName.isEmpty() && heldItem.getDisplayName().contains(MayOBeesConfig.mobAuraItemName))
+            toggle(MobAura.getInstance());
 
         if (GameStateHandler.getInstance().getLocation() == GameStateHandler.Location.PRIVATE_ISLAND) {
             if (heldItem.getDisplayName().contains("Treecapitator"))

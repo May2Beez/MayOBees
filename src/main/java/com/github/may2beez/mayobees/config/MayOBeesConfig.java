@@ -20,165 +20,206 @@ public class MayOBeesConfig extends Config {
 
     //<editor-fold desc="COMBAT">
 
-    @Text(
-            name = "Shortbow Aura Item's Name",
-            description = "The name of the item to use for the shortbow aura",
+    @Dropdown(
+            name = "Preset",
+            description = "The preset to use",
             category = "Combat",
-            subcategory = "Shortbow Aura",
+            subcategory = "Mob Aura - Presets",
+            options = {"Melee", "Reach Melee", "Shortbow", "Terminator"}
+    )
+    public static int mobAuraPreset = 0;
+
+    @Button(
+            name = "",
+            text = "Apply Preset",
+            description = "Applies the preset",
+            category = "Combat",
+            subcategory = "Mob Aura - Presets"
+    )
+    public static void applyPreset() {
+        switch (mobAuraPreset) {
+            case 0:
+                mobAuraRange = 3f;
+                mobAuraFOV = 90;
+                mobAuraRotationSpeed = 300;
+                mobAuraRotationSpeedRandomizer = 100;
+                mobAuraCooldown = 300;
+                mobAuraCooldownRandomizer = 100;
+                mobAuraMouseButton = false;
+                mobAuraRotationMode = true;
+                mobAuraAttackMobs = true;
+                mobAuraAttackUntilDead = true;
+                mobAuraItemName = "Sword";
+                break;
+            case 1:
+                mobAuraRange = 4.5f;
+                mobAuraFOV = 120;
+                mobAuraRotationSpeed = 300;
+                mobAuraRotationSpeedRandomizer = 100;
+                mobAuraCooldown = 500;
+                mobAuraCooldownRandomizer = 100;
+                mobAuraMouseButton = false;
+                mobAuraRotationMode = true;
+                mobAuraAttackMobs = true;
+                mobAuraAttackUntilDead = true;
+                mobAuraItemName = "Sword";
+                break;
+            case 2:
+                mobAuraRange = 3f;
+                mobAuraFOV = 120;
+                mobAuraRotationSpeed = 300;
+                mobAuraRotationSpeedRandomizer = 100;
+                mobAuraCooldown = 500;
+                mobAuraCooldownRandomizer = 100;
+                mobAuraMouseButton = false;
+                mobAuraRotationMode = false;
+                mobAuraAttackMobs = true;
+                mobAuraAttackUntilDead = false;
+                mobAuraItemName = "bow";
+                break;
+        }
+    }
+
+    @Text(
+            name = "Mob Aura Item's Name",
+            description = "The name of the item to use for the mob aura",
+            category = "Combat",
+            subcategory = "Mob Aura",
             size = 2
     )
-    public static String shortBowAuraItemName = "Shortbow";
+    public static String mobAuraItemName = "Sword";
 
     @Switch(
-            name = "Shortbow Aura Attack Animals",
+            name = "Mob Aura Attack Animals",
             description = "Whether or not to attack mobs",
             category = "Combat",
-            subcategory = "Shortbow Aura"
+            subcategory = "Mob Aura"
     )
-    public static boolean shortBowAuraAttackMobs = true;
+    public static boolean mobAuraAttackMobs = true;
 
     @Switch(
-            name = "Shortbow Aura Attack Until Dead",
+            name = "Mob Aura Attack Until Dead",
             description = "Whether or not to attack mobs until they are dead",
             category = "Combat",
-            subcategory = "Shortbow Aura"
+            subcategory = "Mob Aura"
     )
-    public static boolean shortBowAuraAttackUntilDead = false;
+    public static boolean mobAuraAttackUntilDead = false;
 
     @DualOption(
-            name = "Shortbow Aura Rotation Type",
-            description = "The type of rotation to use for the shortbow aura",
+            name = "Mob Aura Rotation Type",
+            description = "The type of rotation to use for the mob aura",
             category = "Combat",
-            subcategory = "Shortbow Aura",
+            subcategory = "Mob Aura",
             left = "Silent",
             right = "Client",
             size = 2
     )
-    public static boolean shortBowAuraRotationType = false;
+    public static boolean mobAuraRotationType = false;
 
     @DualOption(
-            name = "Shortbow Aura Mouse Button",
-            description = "The mouse button to use for the shortbow aura",
+            name = "Mob Aura Mouse Button",
+            description = "The mouse button to use for the mob aura",
             category = "Combat",
-            subcategory = "Shortbow Aura",
+            subcategory = "Mob Aura",
             left = "Left",
             right = "Right",
             size = 2
     )
-    public static boolean shortBowAuraMouseButton = false;
+    public static boolean mobAuraMouseButton = false;
 
     @DualOption(
-            name = "Shortbow Aura Rotation Mode",
-            description = "The mode of rotation to use for the shortbow aura",
+            name = "Mob Aura Rotation Mode",
+            description = "The mode of rotation to use for the mob aura",
             category = "Combat",
-            subcategory = "Shortbow Aura",
+            subcategory = "Mob Aura",
             left = "Bow Rotation",
             right = "Straight Rotation"
     )
-    public static boolean shortBowAuraRotationMode = false;
-
-    @Info(
-            text = "The range of the shortbow aura",
-            category = "Combat",
-            subcategory = "Shortbow Aura",
-            size = 2,
-            type = InfoType.INFO
-    )
-    public static String shortBowAuraRangeInfo = "The range of the shortbow aura";
+    public static boolean mobAuraRotationMode = false;
 
     @Slider(
-            name = "Shortbow Aura Range",
-            description = "The range of the shortbow aura",
+            name = "Mob Aura Range",
+            description = "The range of the mob aura",
             category = "Combat",
-            subcategory = "Shortbow Aura",
-            min = 4,
-            max = 30
+            subcategory = "Mob Aura - Range",
+            min = 1f,
+            max = 30f
     )
-    public static int shortBowAuraRange = 15;
+    public static float mobAuraRange = 3f;
 
     @Slider(
-            name = "Shortbow Aura FOV",
-            description = "The FOV of the shortbow aura",
+            name = "Mob Aura FOV",
+            description = "The FOV of the mob aura",
             category = "Combat",
-            subcategory = "Shortbow Aura",
+            subcategory = "Mob Aura - Range",
             min = 0,
             max = 360
     )
-    public static int shortBowAuraFOV = 120;
-
-    @Info(
-            text = "The speed of the shortbow aura's rotation",
-            category = "Combat",
-            subcategory = "Shortbow Aura",
-            size = 2,
-            type = InfoType.INFO
-    )
-    public static String shortBowAuraRotationSpeedInfo = "The speed of the shortbow aura's rotation";
+    public static int mobAuraFOV = 120;
 
     @Slider(
-            name = "Shortbow Aura Rotation Speed",
-            description = "The speed of the shortbow aura's rotation",
+            name = "Mob Aura Rotation Speed",
+            description = "The speed of the mob aura's rotation",
             category = "Combat",
-            subcategory = "Shortbow Aura",
+            subcategory = "Mob Aura - Rotation Speed",
             min = 50,
             max = 800
     )
-    public static int shortBowAuraRotationSpeed = 300;
+    public static int mobAuraRotationSpeed = 300;
 
     @Slider(
-            name = "Shortbow Aura Rotation Speed Randomizer",
-            description = "The speed of the shortbow aura's rotation",
+            name = "Mob Aura Rotation Speed Randomizer",
+            description = "The speed of the mob aura's rotation",
             category = "Combat",
-            subcategory = "Shortbow Aura",
+            subcategory = "Mob Aura - Rotation Speed",
             min = 0,
             max = 500
     )
-    public static int shortBowAuraRotationSpeedRandomizer = 100;
+    public static int mobAuraRotationSpeedRandomizer = 100;
 
-    public static long getRandomizedRotationSpeed() {
-        return (long) (shortBowAuraRotationSpeed + Math.random() * shortBowAuraRotationSpeedRandomizer);
+    public static long getRandomizedMobAuraRotationSpeed() {
+        return (long) (mobAuraRotationSpeed + Math.random() * mobAuraRotationSpeedRandomizer);
     }
 
-    @Info(
-            text = "The speed of the shortbow aura's attack",
-            category = "Combat",
-            subcategory = "Shortbow Aura",
-            size = 2,
-            type = InfoType.INFO
-    )
-    public static String shortBowAuraAttackSpeedInfo = "The speed of the shortbow aura's attack";
-
     @Slider(
-            name = "Shortbow Aura Cooldown (ms)",
-            description = "The cooldown of the shortbow aura",
+            name = "Mob Aura Cooldown (ms)",
+            description = "The cooldown of the mob aura",
             category = "Combat",
-            subcategory = "Shortbow Aura",
+            subcategory = "Mob Aura - Attack Speed",
             min = 0,
             max = 1000
     )
-    public static int shortBowAuraCooldown = 500;
+    public static int mobAuraCooldown = 500;
 
     @Slider(
-            name = "Shortbow Aura Cooldown Randomizer (ms)",
-            description = "The randomizer of the shortbow aura cooldown",
+            name = "Mob Aura Cooldown Randomizer (ms)",
+            description = "The randomizer of the mob aura cooldown",
             category = "Combat",
-            subcategory = "Shortbow Aura",
+            subcategory = "Mob Aura - Attack Speed",
             min = 0,
             max = 1000
     )
-    public static int shortBowAuraCooldownRandomizer = 100;
+    public static int mobAuraCooldownRandomizer = 100;
 
-    public static long getRandomizedCooldown() {
-        return (long) (shortBowAuraCooldown + Math.random() * shortBowAuraCooldownRandomizer);
+    public static long getRandomizedMobAuraCooldown() {
+        return (long) (mobAuraCooldown + Math.random() * mobAuraCooldownRandomizer);
     }
 
     @Color(
-            name = "Shortbow Aura Target Color",
-            description = "The color of the shortbow aura",
+            name = "Mob Aura Possible Target Color",
+            description = "The color of the possible targets of the mob aura",
             category = "Combat",
-            subcategory = "Shortbow Aura"
+            subcategory = "Mob Aura - ESP"
     )
-    public static OneColor shortBowAuraTargetColor = new OneColor(255, 0, 0, 100);
+    public static OneColor mobAuraPossibleTargetColor = new OneColor(255, 255, 0, 100);
+
+    @Color(
+            name = "Mob Aura Target Color",
+            description = "The color of the target of the mob aura",
+            category = "Combat",
+            subcategory = "Mob Aura - ESP"
+    )
+    public static OneColor mobAuraCurrentTargetColor = new OneColor(255, 0, 0, 100);
 
     //</editor-fold>
 
