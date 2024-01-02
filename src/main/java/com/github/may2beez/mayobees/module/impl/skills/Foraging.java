@@ -340,10 +340,6 @@ public class Foraging implements IModuleActive {
                 macroState = MacroState.THROW_BREAK_DELAY;
                 break;
             case THROW_BREAK_DELAY:
-                waitTimer.schedule();
-                macroState = MacroState.BREAK;
-                break;
-            case BREAK:
                 int treecapitator = InventoryUtils.getSlotIdOfItemInHotbar("Treecapitator");
                 if (treecapitator == -1) {
                     LogUtils.error("No Treecapitator found in hotbar!");
@@ -351,25 +347,34 @@ public class Foraging implements IModuleActive {
                     break;
                 }
                 mc.thePlayer.inventory.currentItem = treecapitator;
+                macroState = MacroState.BREAK;
+                break;
+            case BREAK:
                 if (lastBreakTime != 0 && System.currentTimeMillis() - lastBreakTime < (2000 - (MayOBeesConfig.monkeyLevel / 100f * 2000 * 0.5)))
                     return;
+                MovingObjectPosition objectMouseOver = mc.objectMouseOver;
+                if (objectMouseOver == null || objectMouseOver.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) return;
+                BlockPos blockPos = objectMouseOver.getBlockPos();
+                Block block = mc.theWorld.getBlockState(blockPos).getBlock();
+                if (!(block instanceof BlockLog)) return;
                 KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindAttack, true);
                 waitAfterFinishTimer.schedule();
                 macroState = MacroState.SWITCH;
                 lastBreakTime = System.currentTimeMillis() + MayOBeesConfig.foragingMacroExtraBreakDelay;
                 break;
             case SWITCH:
-                if (waitAfterFinishTimer.hasPassed(150) && mc.gameSettings.keyBindAttack.isKeyDown()) {
+                if (waitAfterFinishTimer.hasPassed(randomTime) && mc.gameSettings.keyBindAttack.isKeyDown()) {
                     KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindAttack, false);
                     if (MayOBeesConfig.foragingMode) {
                         macroState = MacroState.LOOK;
                         waitTimer.schedule();
+                        randomTime = (int) (100 + Math.random() * 100);
                         break;
                     }
                 }
-                if (waitAfterFinishTimer.hasPassed(randomTime)) {
+                if (waitAfterFinishTimer.hasPassed(randomTime + 150)) {
                     macroState = MacroState.LOOK;
-                    randomTime = (int) (150 + Math.random() * 100);
+                    randomTime = (int) (100 + Math.random() * 100);
                 }
                 break;
         }
