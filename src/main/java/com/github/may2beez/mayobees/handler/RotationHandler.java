@@ -156,7 +156,6 @@ public class RotationHandler {
     private double randomAddition = (Math.random() * 0.3 - 0.15);
 
     public Rotation getBowRotation(Entity entity) {
-        System.out.println("Getting bow rotation");
         double xDelta = (entity.posX - entity.lastTickPosX) * 0.4d;
         double zDelta = (entity.posZ - entity.lastTickPosZ) * 0.4d;
         double d = mc.thePlayer.getDistanceToEntity(entity);
@@ -165,7 +164,7 @@ public class RotationHandler {
         double zMulti = d / 0.8 * zDelta;
         double x = entity.posX + xMulti - mc.thePlayer.posX;
         double z = entity.posZ + zMulti - mc.thePlayer.posZ;
-        double y = mc.thePlayer.posY + mc.thePlayer.getEyeHeight() - (entity.posY + entity.height / 2 + randomAddition);
+        double y = mc.thePlayer.posY + mc.thePlayer.getEyeHeight() - Math.min((entity.posY + (entity.height * 0.8) + randomAddition), (entity.posY + entity.height));
         double dist = mc.thePlayer.getDistanceToEntity(entity);
         float yaw = (float) Math.toDegrees(Math.atan2(z, x)) - 90f;
         double d2 = Math.sqrt(x * x + z * z);

@@ -204,6 +204,9 @@ public class MobAura implements IModuleActive {
             return !EntityUtils.isTeam(entity);
         }
 
+        if (entity.isDead) {
+            return false;
+        }
 
         return !(entity instanceof EntityVillager);
     }
