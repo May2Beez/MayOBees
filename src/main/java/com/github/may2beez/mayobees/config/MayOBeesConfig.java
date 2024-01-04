@@ -45,7 +45,7 @@ public class MayOBeesConfig extends Config {
                 mobAuraRotationSpeedRandomizer = 100;
                 mobAuraCooldown = 300;
                 mobAuraCooldownRandomizer = 100;
-                mobAuraMouseButton = false;
+                mobAuraMouseButton = 0;
                 mobAuraRotationMode = true;
                 mobAuraAttackMobs = true;
                 mobAuraAttackUntilDead = true;
@@ -58,7 +58,7 @@ public class MayOBeesConfig extends Config {
                 mobAuraRotationSpeedRandomizer = 100;
                 mobAuraCooldown = 500;
                 mobAuraCooldownRandomizer = 100;
-                mobAuraMouseButton = false;
+                mobAuraMouseButton = 0;
                 mobAuraRotationMode = true;
                 mobAuraAttackMobs = true;
                 mobAuraAttackUntilDead = true;
@@ -71,7 +71,7 @@ public class MayOBeesConfig extends Config {
                 mobAuraRotationSpeedRandomizer = 100;
                 mobAuraCooldown = 500;
                 mobAuraCooldownRandomizer = 100;
-                mobAuraMouseButton = false;
+                mobAuraMouseButton = 1;
                 mobAuraRotationMode = false;
                 mobAuraAttackMobs = true;
                 mobAuraAttackUntilDead = false;
@@ -116,16 +116,15 @@ public class MayOBeesConfig extends Config {
     )
     public static boolean mobAuraRotationType = false;
 
-    @DualOption(
+    @Dropdown(
             name = "Mob Aura Mouse Button",
             description = "The mouse button to use for the mob aura",
             category = "Combat",
             subcategory = "Mob Aura",
-            left = "Left",
-            right = "Right",
+            options = {"Left", "Right", "Hold Right"},
             size = 2
     )
-    public static boolean mobAuraMouseButton = false;
+    public static int mobAuraMouseButton = 1;
 
     @DualOption(
             name = "Mob Aura Rotation Mode",

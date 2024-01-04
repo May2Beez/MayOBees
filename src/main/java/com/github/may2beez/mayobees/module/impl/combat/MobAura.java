@@ -9,6 +9,7 @@ import com.github.may2beez.mayobees.util.helper.RotationConfiguration;
 import com.github.may2beez.mayobees.util.helper.Target;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
@@ -66,7 +67,6 @@ public class MobAura implements IModuleActive {
     public void onEnable() {
         enabled = true;
         nextRotationSpeed = MayOBeesConfig.getRandomizedMobAuraRotationSpeed();
-        LogUtils.info("Mob Aura enabled!");
     }
 
     @Override
@@ -81,7 +81,9 @@ public class MobAura implements IModuleActive {
             RotationHandler.getInstance().easeBackFromServerRotation();
         else
             RotationHandler.getInstance().reset();
-        LogUtils.info("Mob Aura disabled!");
+        if (mc.gameSettings.keyBindUseItem.isKeyDown()) {
+            KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, false);
+        }
     }
 
     private long lastHit = 0;
@@ -96,6 +98,7 @@ public class MobAura implements IModuleActive {
         hitTargets.removeIf(tuple -> System.currentTimeMillis() - tuple.getSecond() > 1000);
         if (currentTarget.isPresent() && currentTarget.get().isDead) {
             currentTarget = Optional.empty();
+            resetAttack();
             return;
         }
         List<String> playerOnTab = TablistUtils.getTabListPlayersSkyblock();
@@ -128,21 +131,24 @@ public class MobAura implements IModuleActive {
                 });
             }
             if (!currentTarget.isPresent()) {
+                if (mc.gameSettings.keyBindUseItem.isKeyDown()) {
+                    KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, false);
+                }
                 return;
             }
         }
 
         if (currentTarget.get().isDead || currentTarget.get().getDistanceToEntity(mc.thePlayer) > MayOBeesConfig.mobAuraRange || currentTarget.get().getHealth() <= 0 || !mc.thePlayer.canEntityBeSeen(currentTarget.get())) {
             currentTarget = Optional.empty();
-            if (RotationHandler.getInstance().isRotating()) {
-                RotationHandler.getInstance().reset();
-            }
+            resetAttack();
             return;
         }
 
         int slot = InventoryUtils.getSlotIdOfItemInHotbar(MayOBeesConfig.mobAuraItemName);
 
         if (MayOBeesConfig.mobAuraItemName.isEmpty() || slot == -1 || slot != mc.thePlayer.inventory.currentItem) {
+            currentTarget = Optional.empty();
+            resetAttack();
             return;
         }
 
@@ -163,11 +169,28 @@ public class MobAura implements IModuleActive {
         );
     }
 
+    private void resetAttack() {
+        if (RotationHandler.getInstance().isRotating()) {
+            RotationHandler.getInstance().reset();
+        }
+        if (mc.gameSettings.keyBindUseItem.isKeyDown()) {
+            KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, false);
+        }
+    }
+
     private void hitEntity() {
-        if (MayOBeesConfig.mobAuraMouseButton) {
+        int slot = InventoryUtils.getSlotIdOfItemInHotbar(MayOBeesConfig.mobAuraItemName);
+        if (slot == -1) {
+            return;
+        }
+        if (MayOBeesConfig.mobAuraMouseButton == 1) {
             KeyBindUtils.rightClick();
-        } else {
+        } else if (MayOBeesConfig.mobAuraMouseButton == 2) {
             KeyBindUtils.leftClick();
+        } else {
+            if (!mc.gameSettings.keyBindUseItem.isKeyDown()) {
+                KeyBindUtils.holdThese(mc.gameSettings.keyBindUseItem);
+            }
         }
         if (!MayOBeesConfig.mobAuraAttackUntilDead) {
             currentTarget.ifPresent(entityLivingBase -> hitTargets.add(new Tuple<>(entityLivingBase, System.currentTimeMillis())));

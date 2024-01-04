@@ -64,7 +64,7 @@ public class AutoBoomTNT implements IModule {
         MovingObjectPosition objectMouseOver = mc.objectMouseOver;
 
         if (currentStack != null && currentStack.getItem().equals(Item.getItemFromBlock(Blocks.tnt))) return;
-        if (objectMouseOver.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) return;
+        if (objectMouseOver == null || objectMouseOver.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) return;
 
         Block block = mc.theWorld.getBlockState(objectMouseOver.getBlockPos()).getBlock();
         if (!block.equals(Blocks.stonebrick)) return;
@@ -111,8 +111,8 @@ public class AutoBoomTNT implements IModule {
                             previousSlot = -1;
                             delay.schedule(2_000);
                         }
-                    }, (long) (100 + Math.random() * 100), TimeUnit.MILLISECONDS);
-                }, (long) (100 + Math.random() * 100), TimeUnit.MILLISECONDS);
+                    }, (long) (150 + Math.random() * 150), TimeUnit.MILLISECONDS);
+                }, (long) (150 + Math.random() * 150), TimeUnit.MILLISECONDS);
             }
         }
     }
@@ -132,7 +132,7 @@ public class AutoBoomTNT implements IModule {
                     previousSlot = -1;
                     delay.schedule(2_000);
                 }
-            }, (long) (100 + Math.random() * 100), TimeUnit.MILLISECONDS);
+            }, (long) (150 + Math.random() * 150), TimeUnit.MILLISECONDS);
         }
     }
 }

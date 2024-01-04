@@ -164,7 +164,7 @@ public class RotationHandler {
         double zMulti = d / 0.8 * zDelta;
         double x = entity.posX + xMulti - mc.thePlayer.posX;
         double z = entity.posZ + zMulti - mc.thePlayer.posZ;
-        double y = mc.thePlayer.posY + mc.thePlayer.getEyeHeight() - Math.min((entity.posY + (entity.height * 0.8) + randomAddition), (entity.posY + entity.height - 0.1));
+        double y = mc.thePlayer.posY + mc.thePlayer.getEyeHeight() - Math.min((entity.posY + (entity.height * 0.85) + randomAddition), (entity.posY + entity.height - 0.05));
         double dist = mc.thePlayer.getDistanceToEntity(entity);
         float yaw = (float) Math.toDegrees(Math.atan2(z, x)) - 90f;
         double d2 = Math.sqrt(x * x + z * z);
@@ -181,7 +181,7 @@ public class RotationHandler {
     }
 
     public Rotation getRotation(Entity to) {
-        return getRotation(mc.thePlayer.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks), to.getPositionVector().addVector(0, Math.min((to.posY + (to.height * 0.8) + randomAddition), (to.posY + to.height - 0.1)), 0), false);
+        return getRotation(mc.thePlayer.getPositionEyes(((MinecraftAccessor) mc).getTimer().renderPartialTicks), to.getPositionVector().addVector(0, Math.min((to.posY + (to.height * 0.85) + randomAddition), (to.posY + to.height - 0.05)), 0), false);
     }
 
     public Rotation getRotation(Vec3 from, Vec3 to) {

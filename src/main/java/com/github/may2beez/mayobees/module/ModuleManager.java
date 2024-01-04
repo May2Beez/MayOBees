@@ -14,6 +14,7 @@ import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumChatFormatting;
 
 import java.util.Arrays;
 import java.util.List;
@@ -59,14 +60,14 @@ public class ModuleManager {
             module.onDisable();
         else
             module.onEnable();
-        LogUtils.info("[" + module.getName() + "] " + (module.isRunning() ? "Enabled" : "Disabled"));
+        LogUtils.info("[" + module.getName() + "] " + (module.isRunning() ? (EnumChatFormatting.GREEN + "Enabled") : (EnumChatFormatting.RED + "Disabled")));
     }
+
 
     public void smartToggle() {
         Optional<IModuleActive> activeModule = modules.stream().filter(module -> module instanceof IModuleActive && module.isRunning()).map(module -> (IModuleActive) module).findFirst();
         if (activeModule.isPresent()) {
-            activeModule.get().onDisable();
-            LogUtils.info("[" + activeModule.get().getName() + "] Disabled");
+            toggle(activeModule.get());
             return;
         }
 
