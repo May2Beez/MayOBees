@@ -223,6 +223,29 @@ public class MayOBeesConfig extends Config {
 
     //</editor-fold>
 
+
+    //<editor-fold desc="DUNGEON">
+    //<editor-fold desc="Auto Boom TNT">
+    @Switch(
+            name = "Auto Superboom TNT",
+            description = "Automatically chooses Superboom TNT when looking at a breakable wall",
+            category = "Dungeon",
+            subcategory = "Auto Superboom TNT"
+    )
+    public static boolean autoBoomTNT = false;
+
+    @Switch(
+            name = "Auto placement",
+            description = "Automatically places the TNT",
+            category = "Dungeon",
+            subcategory = "Auto Superboom TNT"
+    )
+    public static boolean autoBoomTNTAutoPlacement = false;
+
+    //</editor-fold>
+    //</editor-fold>
+
+
     //<editor-fold desc="RENDER">
     //<editor-fold desc="Chest ESP">
     @Switch(
@@ -456,7 +479,7 @@ public class MayOBeesConfig extends Config {
 
     //</editor-fold>
 
-    //<editor-fold desc="Skills">
+    //<editor-fold desc="SKILLS">
     //<editor-fold desc="Alchemy Helper">
     @Switch(
             name = "Alchemy Helper",

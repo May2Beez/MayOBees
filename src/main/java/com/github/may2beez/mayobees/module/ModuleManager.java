@@ -3,6 +3,7 @@ package com.github.may2beez.mayobees.module;
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.handler.GameStateHandler;
 import com.github.may2beez.mayobees.module.impl.combat.MobAura;
+import com.github.may2beez.mayobees.module.impl.dungeon.AutoBoomTNT;
 import com.github.may2beez.mayobees.module.impl.other.GhostBlocks;
 import com.github.may2beez.mayobees.module.impl.player.GiftAura;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
@@ -41,7 +42,8 @@ public class ModuleManager {
                 Fishing.getInstance(),
                 Foraging.getInstance(),
                 FillChestWithSaplingMacro.getInstance(),
-                FillForagingSackMacro.getInstance()
+                FillForagingSackMacro.getInstance(),
+                AutoBoomTNT.getInstance()
         );
     }
 
