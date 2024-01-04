@@ -158,6 +158,16 @@ public class MayOBeesConfig extends Config {
     public static int mobAuraFOV = 120;
 
     @Slider(
+            name = "Mov Aura Y difference",
+            description = "The Y difference of the mob aura",
+            category = "Combat",
+            subcategory = "Mob Aura - Range",
+            min = 0,
+            max = 30
+    )
+    public static int mobAuraYDifference = 8;
+
+    @Slider(
             name = "Mob Aura Rotation Speed",
             description = "The speed of the mob aura's rotation",
             category = "Combat",

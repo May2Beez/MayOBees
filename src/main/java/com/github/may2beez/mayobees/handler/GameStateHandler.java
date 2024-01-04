@@ -5,6 +5,7 @@ import com.github.may2beez.mayobees.util.ScoreboardUtils;
 import com.github.may2beez.mayobees.util.TablistUtils;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.StringUtils;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -51,6 +52,11 @@ public class GameStateHandler {
         }
 
         for (String line : TablistUtils.getTabList()) {
+            if (StringUtils.stripControlCodes(line).startsWith("Dungeon:")) {
+                lastLocation = location;
+                location = Location.DUNGEON;
+                return;
+            }
             Matcher matcher = areaPattern.matcher(line);
             if (matcher.find()) {
                 String area = matcher.group(1);

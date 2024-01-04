@@ -102,6 +102,7 @@ public class MobAura implements IModuleActive {
         List<EntityLivingBase> tempPossibleTarget = mc.theWorld.getEntities(EntityLivingBase.class, entity ->
                 entity != mc.thePlayer &&
                         mc.thePlayer.getDistanceToEntity(entity) < MayOBeesConfig.mobAuraRange &&
+                        Math.abs(mc.thePlayer.getPositionVector().yCoord - entity.getPositionVector().yCoord) <= MayOBeesConfig.mobAuraYDifference &&
                         EntityUtils.isEntityInFOV(entity, MayOBeesConfig.mobAuraFOV) &&
                         this.isValidTarget(entity) &&
                         !EntityUtils.isNPC(entity) &&
@@ -123,7 +124,7 @@ public class MobAura implements IModuleActive {
                 currentTarget = possibleTargets.stream().min((entity1, entity2) -> {
                     Rotation rot1 = RotationHandler.getInstance().getNeededChange(startRotation, RotationHandler.getInstance().getRotation(entity1));
                     Rotation rot2 = RotationHandler.getInstance().getNeededChange(startRotation, RotationHandler.getInstance().getRotation(entity2));
-                    return Float.compare(Math.abs(rot1.getYaw()), Math.abs(rot2.getYaw()));
+                    return Float.compare(Math.abs(rot1.getYaw()) + Math.abs(rot1.getPitch()), Math.abs(rot2.getYaw()) + Math.abs(rot2.getPitch()));
                 });
             }
             if (!currentTarget.isPresent()) {
