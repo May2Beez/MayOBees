@@ -103,8 +103,8 @@ public class MobAura implements IModuleActive {
         List<String> playerOnTab = TablistUtils.getTabListPlayersSkyblock();
         List<EntityLivingBase> tempPossibleTarget = mc.theWorld.getEntities(EntityLivingBase.class, entity ->
                 entity != mc.thePlayer &&
-                        mc.thePlayer.getDistanceToEntity(entity) < MayOBeesConfig.mobAuraRange &&
-                        Math.abs(mc.thePlayer.getPositionVector().yCoord - entity.getPositionVector().yCoord) <= MayOBeesConfig.mobAuraYDifference &&
+                        (MayOBeesConfig.mobAuraUnlimitedRange || mc.thePlayer.getDistanceToEntity(entity) < MayOBeesConfig.mobAuraRange) &&
+                        (MayOBeesConfig.mobAuraUnlimitedRange || Math.abs(mc.thePlayer.getPositionVector().yCoord - entity.getPositionVector().yCoord) <= MayOBeesConfig.mobAuraYDifference) &&
                         EntityUtils.isEntityInFOV(entity, MayOBeesConfig.mobAuraFOV) &&
                         this.isValidTarget(entity) &&
                         !EntityUtils.isNPC(entity) &&
@@ -137,7 +137,7 @@ public class MobAura implements IModuleActive {
             }
         }
 
-        if (currentTarget.get().isDead || currentTarget.get().getDistanceToEntity(mc.thePlayer) > MayOBeesConfig.mobAuraRange || currentTarget.get().getHealth() <= 0 || !mc.thePlayer.canEntityBeSeen(currentTarget.get())) {
+        if (currentTarget.get().isDead || (!MayOBeesConfig.mobAuraUnlimitedRange && currentTarget.get().getDistanceToEntity(mc.thePlayer) > MayOBeesConfig.mobAuraRange) || currentTarget.get().getHealth() <= 0 || !mc.thePlayer.canEntityBeSeen(currentTarget.get())) {
             currentTarget = Optional.empty();
             resetAttack();
             return;

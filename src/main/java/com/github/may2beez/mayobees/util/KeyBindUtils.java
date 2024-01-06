@@ -32,6 +32,8 @@ public class KeyBindUtils {
             mc.gameSettings.keyBindJump,
     };
 
+    public static final ArrayList<KeyBinding> holdingKeybinds = new ArrayList<>();
+
     public static void rightClick() {
         if (!ReflectionUtils.invoke(mc, "func_147121_ag")) {
             ReflectionUtils.invoke(mc, "rightClickMouse");
@@ -71,10 +73,13 @@ public class KeyBindUtils {
             if (!key.isKeyDown()) {
                 KeyBinding.onTick(key.getKeyCode());
                 KeyBinding.setKeyBindState(key.getKeyCode(), true);
+                if (!holdingKeybinds.contains(key))
+                    holdingKeybinds.add(key);
             }
         } else {
             if (key.isKeyDown()) {
                 KeyBinding.setKeyBindState(key.getKeyCode(), false);
+                holdingKeybinds.remove(key);
             }
         }
     }
@@ -107,7 +112,7 @@ public class KeyBindUtils {
 
     public static void releaseAllExcept(KeyBinding... keyBinding) {
         for (KeyBinding key : allKeys) {
-            if (key != null && !contains(keyBinding, key) && key.isKeyDown()) {
+            if (key != null && !contains(keyBinding, key) && key.isKeyDown() && holdingKeybinds.contains(key)) {
                 realSetKeyBindState(key, false);
             }
         }

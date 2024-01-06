@@ -204,15 +204,13 @@ public class MayOBeesConfig extends Config {
     )
     public static float mobAuraRange = 3f;
 
-    @Slider(
-            name = "Mob Aura FOV",
-            description = "The FOV of the mob aura",
+    @Switch(
+            name = "Mob Aura Unlimited Range",
+            description = "Whether or not to have unlimited range for the mob aura",
             category = "Combat",
-            subcategory = "Mob Aura - Range",
-            min = 0,
-            max = 360
+            subcategory = "Mob Aura - Range"
     )
-    public static int mobAuraFOV = 120;
+    public static boolean mobAuraUnlimitedRange = false;
 
     @Slider(
             name = "Mob Aura Y difference",
@@ -223,6 +221,16 @@ public class MayOBeesConfig extends Config {
             max = 30
     )
     public static int mobAuraYDifference = 8;
+
+    @Slider(
+            name = "Mob Aura FOV",
+            description = "The FOV of the mob aura",
+            category = "Combat",
+            subcategory = "Mob Aura - Range",
+            min = 0,
+            max = 360
+    )
+    public static int mobAuraFOV = 120;
 
     @Slider(
             name = "Mob Aura Rotation Speed",
@@ -1097,13 +1105,16 @@ public class MayOBeesConfig extends Config {
         super(new Mod("MayOBees", ModType.HYPIXEL), "/mayobees/config.json");
         initialize();
 
+        this.addDependency("mobAuraRange", "mobAuraUnlimitedRange", () -> !mobAuraUnlimitedRange);
+        this.addDependency("mobAuraYDifference", "mobAuraUnlimitedRange", () -> !mobAuraUnlimitedRange);
+
         registerKeyBind(smartToggleKeybind, () -> {
             ModuleManager.getInstance().smartToggle();
         });
 
         registerKeyBind(autoClickerKeybind, () -> {
-            if (autoClickerMode != 1)
-                ModuleManager.getInstance().toggle(AutoClicker.getInstance());
+            if (autoClickerMode == 1) return;
+            ModuleManager.getInstance().toggle(AutoClicker.getInstance());
         });
 
         registerKeyBind(alchemyHelperAutoSellPotionsToNPCKeybind, () -> {

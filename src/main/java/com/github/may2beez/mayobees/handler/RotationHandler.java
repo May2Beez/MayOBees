@@ -353,10 +353,13 @@ public class RotationHandler {
         } else {
             throw new IllegalArgumentException("No target specified!");
         }
+        startRotation.setPitch(mc.thePlayer.rotationPitch);
+        startRotation.setYaw(mc.thePlayer.rotationYaw);
+        startTime = System.currentTimeMillis();
         Rotation neededChange = getNeededChange(startRotation, rot);
         targetRotation.setYaw(startRotation.getYaw() + neededChange.getYaw());
         targetRotation.setPitch(startRotation.getPitch() + neededChange.getPitch());
-        delayBetweenTargetFollow.schedule(80 + Math.random() * 40);
+        delayBetweenTargetFollow.schedule(100 + Math.random() * 50);
     }
 
     @SubscribeEvent(receiveCanceled = true)
