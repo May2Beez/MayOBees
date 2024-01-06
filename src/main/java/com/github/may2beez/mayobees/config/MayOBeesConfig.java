@@ -166,7 +166,7 @@ public class MayOBeesConfig extends Config {
     public static int mobAuraFOV = 120;
 
     @Slider(
-            name = "Mov Aura Y difference",
+            name = "Mob Aura Y difference",
             description = "The Y difference of the mob aura",
             category = "Combat",
             subcategory = "Mob Aura - Range",
@@ -259,6 +259,24 @@ public class MayOBeesConfig extends Config {
             subcategory = "Auto Superboom TNT"
     )
     public static boolean autoBoomTNTAutoPlacement = false;
+
+    //</editor-fold>
+    //<editor-fold desc="Auto Trap Defuser">
+    @Switch(
+            name = "Auto Trap Defuser",
+            description = "Automatically equips Auto Defuser when looking at a trap",
+            category = "Dungeon",
+            subcategory = "Auto Trap Defuser"
+    )
+    public static boolean autoTrapDefuser = false;
+
+    @Switch(
+            name = "Auto defuser",
+            description = "Automatically defuses the trap",
+            category = "Dungeon",
+            subcategory = "Auto Trap Defuser"
+    )
+    public static boolean autoTrapDefuserAutoDefuse = false;
 
     //</editor-fold>
     //</editor-fold>
