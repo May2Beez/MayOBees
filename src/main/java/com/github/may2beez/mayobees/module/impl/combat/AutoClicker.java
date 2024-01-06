@@ -69,6 +69,7 @@ public class AutoClicker implements IModuleActive {
                 if (MayOBeesConfig.autoClickerType && mc.gameSettings.keyBindUseItem.isKeyDown()) { //right click
                     KeyBindUtils.rightClick();
                 }
+                nextClickDelay();
                 break;
             }
             case 1: {
@@ -79,6 +80,7 @@ public class AutoClicker implements IModuleActive {
                 if (MayOBeesConfig.autoClickerType) { //right click
                     KeyBindUtils.rightClick();
                 }
+                nextClickDelay();
                 break;
             }
             case 2: {
@@ -88,25 +90,11 @@ public class AutoClicker implements IModuleActive {
                 if (MayOBeesConfig.autoClickerType) { //right click
                     KeyBindUtils.rightClick();
                 }
+                nextClickDelay();
                 break;
             }
         }
     }
-
-    @SubscribeEvent
-    public void onLeftClick(ClickEvent.Left event) {
-        if (!isRunning()) return;
-        if (MayOBeesConfig.autoClickerType) return;
-        nextClickDelay();
-    }
-
-    @SubscribeEvent
-    public void onRightClick(ClickEvent.Right event) {
-        if (!isRunning()) return;
-        if (!MayOBeesConfig.autoClickerType) return;
-        nextClickDelay();
-    }
-
 
     private void nextClickDelay() {
         long nowMillis = System.currentTimeMillis();
