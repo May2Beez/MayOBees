@@ -1,7 +1,14 @@
 package com.github.may2beez.mayobees.util;
 
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class KeyBindUtils {
     private static final Minecraft mc = Minecraft.getMinecraft();
@@ -49,10 +56,6 @@ public class KeyBindUtils {
         }
     }
 
-    public static void updateKeys(boolean forward, boolean back, boolean right, boolean left, boolean attack) {
-        updateKeys(forward, back, right, left, attack, false, false);
-    }
-
     public static void setKeyBindState(KeyBinding key, boolean pressed) {
         if (pressed) {
             if (mc.currentScreen != null) {
@@ -67,43 +70,13 @@ public class KeyBindUtils {
         if (pressed) {
             if (!key.isKeyDown()) {
                 KeyBinding.onTick(key.getKeyCode());
+                KeyBinding.setKeyBindState(key.getKeyCode(), true);
             }
-            KeyBinding.setKeyBindState(key.getKeyCode(), true);
-
         } else {
-            KeyBinding.setKeyBindState(key.getKeyCode(), false);
+            if (key.isKeyDown()) {
+                KeyBinding.setKeyBindState(key.getKeyCode(), false);
+            }
         }
-
-    }
-
-
-    public static void updateKeys(boolean forward, boolean back, boolean right, boolean left, boolean attack, boolean crouch, boolean space) {
-        if (mc.currentScreen != null) {
-            stopMovement();
-            return;
-        }
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindForward.getKeyCode(), forward);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindBack.getKeyCode(), back);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindRight.getKeyCode(), right);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindLeft.getKeyCode(), left);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), attack);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), crouch);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindJump.getKeyCode(), space);
-    }
-
-    public static void updateKeys(boolean forward, boolean back, boolean right, boolean left, boolean attack, boolean crouch, boolean space, boolean sprint) {
-        if (mc.currentScreen != null) {
-            stopMovement();
-            return;
-        }
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindForward.getKeyCode(), forward);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindBack.getKeyCode(), back);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindRight.getKeyCode(), right);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindLeft.getKeyCode(), left);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), attack);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), crouch);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindJump.getKeyCode(), space);
-        KeyBinding.setKeyBindState(mc.gameSettings.keyBindSprint.getKeyCode(), sprint);
     }
 
     public static void stopMovement() {
@@ -111,47 +84,38 @@ public class KeyBindUtils {
     }
 
     public static void stopMovement(boolean ignoreAttack) {
-        if (mc.gameSettings.keyBindForward.isKeyDown())
-            KeyBinding.setKeyBindState(mc.gameSettings.keyBindForward.getKeyCode(), false);
-        if (mc.gameSettings.keyBindBack.isKeyDown())
-            KeyBinding.setKeyBindState(mc.gameSettings.keyBindBack.getKeyCode(), false);
-        if (mc.gameSettings.keyBindRight.isKeyDown())
-            KeyBinding.setKeyBindState(mc.gameSettings.keyBindRight.getKeyCode(), false);
-        if (mc.gameSettings.keyBindLeft.isKeyDown())
-            KeyBinding.setKeyBindState(mc.gameSettings.keyBindLeft.getKeyCode(), false);
+        realSetKeyBindState(mc.gameSettings.keyBindForward, false);
+        realSetKeyBindState(mc.gameSettings.keyBindBack, false);
+        realSetKeyBindState(mc.gameSettings.keyBindRight, false);
+        realSetKeyBindState(mc.gameSettings.keyBindLeft, false);
         if (!ignoreAttack) {
-            if (mc.gameSettings.keyBindAttack.isKeyDown())
-                KeyBinding.setKeyBindState(mc.gameSettings.keyBindAttack.getKeyCode(), false);
+            realSetKeyBindState(mc.gameSettings.keyBindAttack, false);
         }
-        if (mc.gameSettings.keyBindUseItem.isKeyDown())
-            KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
-        if (mc.gameSettings.keyBindSneak.isKeyDown())
-            KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), false);
-        if (mc.gameSettings.keyBindJump.isKeyDown())
-            KeyBinding.setKeyBindState(mc.gameSettings.keyBindJump.getKeyCode(), false);
-        System.out.println(mc.gameSettings.keyBindSprint.isKeyDown());
-        if (mc.gameSettings.keyBindSprint.isKeyDown())
-            KeyBinding.setKeyBindState(mc.gameSettings.keyBindSprint.getKeyCode(), false);
+        realSetKeyBindState(mc.gameSettings.keyBindUseItem, false);
+        realSetKeyBindState(mc.gameSettings.keyBindSneak, false);
+        realSetKeyBindState(mc.gameSettings.keyBindJump, false);
+        realSetKeyBindState(mc.gameSettings.keyBindSprint, false);
     }
 
     public static void holdThese(KeyBinding... keyBinding) {
         releaseAllExcept(keyBinding);
         for (KeyBinding key : keyBinding) {
             if (key != null)
-                KeyBinding.setKeyBindState(key.getKeyCode(), true);
+                realSetKeyBindState(key, true);
         }
     }
 
     public static void releaseAllExcept(KeyBinding... keyBinding) {
         for (KeyBinding key : allKeys) {
-            if (key != null && !contains(keyBinding, key))
-                KeyBinding.setKeyBindState(key.getKeyCode(), false);
+            if (key != null && !contains(keyBinding, key) && key.isKeyDown()) {
+                realSetKeyBindState(key, false);
+            }
         }
     }
 
     public static boolean contains(KeyBinding[] keyBinding, KeyBinding key) {
         for (KeyBinding keyBind : keyBinding) {
-            if (keyBind == key)
+            if (keyBind != null && keyBind.getKeyCode() == key.getKeyCode())
                 return true;
         }
         return false;
@@ -163,5 +127,40 @@ public class KeyBindUtils {
                 return false;
         }
         return true;
+    }
+
+    public static KeyBinding[] getHoldingKeybinds() {
+        KeyBinding[] keybinds = new KeyBinding[allKeys.length];
+        int i = 0;
+        for (KeyBinding key : allKeys) {
+            if (key != null && key.isKeyDown()) {
+                keybinds[i] = key;
+                i++;
+            }
+        }
+        return keybinds;
+    }
+
+    private static final Map<Integer, KeyBinding> keyBindMap = ImmutableMap.of(
+            0, mc.gameSettings.keyBindForward,
+            90, mc.gameSettings.keyBindLeft,
+            180, mc.gameSettings.keyBindBack,
+            -90, mc.gameSettings.keyBindRight
+    );
+
+    public static List<KeyBinding> getNeededKeyPresses(Vec3 orig, Vec3 dest) {
+        List<KeyBinding> keys = new ArrayList<>();
+
+        double[] delta = {orig.xCoord - dest.xCoord, orig.zCoord - dest.zCoord};
+        float requiredAngle = (float) (MathHelper.atan2(delta[0], -delta[1]) * (180.0 / Math.PI));
+
+        float angleDifference = AngleUtils.normalizeYaw(requiredAngle - mc.thePlayer.rotationYaw) * -1;
+
+        keyBindMap.forEach((yaw, key) -> {
+            if (Math.abs(yaw - angleDifference) < 67.5 || Math.abs(yaw - (angleDifference + 360.0)) < 67.5) {
+                keys.add(key);
+            }
+        });
+        return keys;
     }
 }

@@ -8,13 +8,22 @@ import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.InfoType;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
+import cc.polyfrost.oneconfig.utils.Multithreading;
+import com.github.may2beez.mayobees.handler.RotationHandler;
 import com.github.may2beez.mayobees.module.ModuleManager;
 import com.github.may2beez.mayobees.module.impl.other.Dev;
 import com.github.may2beez.mayobees.module.impl.player.GiftAura;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
 import com.github.may2beez.mayobees.module.impl.skills.AlchemyHelper;
 import com.github.may2beez.mayobees.util.LogUtils;
+import com.github.may2beez.mayobees.util.helper.RotationConfiguration;
+import com.github.may2beez.mayobees.util.helper.Target;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.MovingObjectPosition;
 import org.lwjgl.input.Keyboard;
+
+import java.util.concurrent.TimeUnit;
 
 public class MayOBeesConfig extends Config {
 
@@ -65,17 +74,17 @@ public class MayOBeesConfig extends Config {
                 mobAuraItemName = "Sword";
                 break;
             case 2:
-                mobAuraRange = 3f;
-                mobAuraFOV = 120;
+                mobAuraRange = 25f;
+                mobAuraFOV = 80;
                 mobAuraRotationSpeed = 300;
                 mobAuraRotationSpeedRandomizer = 100;
                 mobAuraCooldown = 500;
                 mobAuraCooldownRandomizer = 100;
-                mobAuraMouseButton = 1;
+                mobAuraMouseButton = 2;
                 mobAuraRotationMode = false;
                 mobAuraAttackMobs = true;
                 mobAuraAttackUntilDead = false;
-                mobAuraItemName = "bow";
+                mobAuraItemName = "Bow";
                 break;
         }
     }

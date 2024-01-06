@@ -9,7 +9,6 @@ import com.github.may2beez.mayobees.util.helper.RotationConfiguration;
 import com.github.may2beez.mayobees.util.helper.Target;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
@@ -183,14 +182,16 @@ public class MobAura implements IModuleActive {
         if (slot == -1) {
             return;
         }
-        if (MayOBeesConfig.mobAuraMouseButton == 1) {
+        if (MayOBeesConfig.mobAuraMouseButton == 0) {
+            KeyBindUtils.leftClick();
+        } else if (MayOBeesConfig.mobAuraMouseButton == 1) {
             KeyBindUtils.rightClick();
         } else if (MayOBeesConfig.mobAuraMouseButton == 2) {
-            KeyBindUtils.leftClick();
-        } else {
             if (!mc.gameSettings.keyBindUseItem.isKeyDown()) {
                 KeyBindUtils.holdThese(mc.gameSettings.keyBindUseItem);
             }
+        } else {
+            throw new IllegalStateException("Invalid mouse button!");
         }
         if (!MayOBeesConfig.mobAuraAttackUntilDead) {
             currentTarget.ifPresent(entityLivingBase -> hitTargets.add(new Tuple<>(entityLivingBase, System.currentTimeMillis())));
@@ -255,10 +256,8 @@ public class MobAura implements IModuleActive {
         Vec3 playerPos = mc.thePlayer.getPositionVector();
         Vec3 playerLeftLooking = AngleUtils.getVectorForRotation(0, mc.thePlayer.rotationYaw - MayOBeesConfig.mobAuraFOV / 2f);
         Vec3 playerRightLooking = AngleUtils.getVectorForRotation(0, mc.thePlayer.rotationYaw + MayOBeesConfig.mobAuraFOV / 2f);
-        Vec3 playerLeftLookingEnd;
-        Vec3 playerRightLookingEnd;
-        playerLeftLookingEnd = playerPos.addVector(playerLeftLooking.xCoord * MayOBeesConfig.mobAuraRange, playerLeftLooking.yCoord * MayOBeesConfig.mobAuraRange, playerLeftLooking.zCoord * MayOBeesConfig.mobAuraRange);
-        playerRightLookingEnd = playerPos.addVector(playerRightLooking.xCoord * MayOBeesConfig.mobAuraRange, playerRightLooking.yCoord * MayOBeesConfig.mobAuraRange, playerRightLooking.zCoord * MayOBeesConfig.mobAuraRange);
+        Vec3 playerLeftLookingEnd = playerPos.addVector(playerLeftLooking.xCoord * MayOBeesConfig.mobAuraRange, playerLeftLooking.yCoord * MayOBeesConfig.mobAuraRange, playerLeftLooking.zCoord * MayOBeesConfig.mobAuraRange);
+        Vec3 playerRightLookingEnd = playerPos.addVector(playerRightLooking.xCoord * MayOBeesConfig.mobAuraRange, playerRightLooking.yCoord * MayOBeesConfig.mobAuraRange, playerRightLooking.zCoord * MayOBeesConfig.mobAuraRange);
         RenderUtils.drawTracer(new Vec3(0, 0, 0), playerLeftLookingEnd, Color.WHITE);
         RenderUtils.drawTracer(new Vec3(0, 0, 0), playerRightLookingEnd, Color.WHITE);
     }
