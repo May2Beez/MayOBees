@@ -11,6 +11,7 @@ import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.utils.Multithreading;
 import com.github.may2beez.mayobees.handler.RotationHandler;
 import com.github.may2beez.mayobees.module.ModuleManager;
+import com.github.may2beez.mayobees.module.impl.combat.AutoClicker;
 import com.github.may2beez.mayobees.module.impl.other.Dev;
 import com.github.may2beez.mayobees.module.impl.player.GiftAura;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
@@ -28,6 +29,54 @@ import java.util.concurrent.TimeUnit;
 public class MayOBeesConfig extends Config {
 
     //<editor-fold desc="COMBAT">
+
+    @Dropdown(
+            name = "Mode of AutoClicker",
+            description = "The mode of the auto clicker",
+            category = "Combat",
+            subcategory = "Auto Clicker",
+            options = {"Holding Selected Mouse Button", "Holding Keybind", "Non-Stop"}
+    )
+    public static int autoClickerMode = 0;
+
+    @DualOption(
+            name = "AutoClicker Type",
+            description = "The type of auto clicker",
+            category = "Combat",
+            subcategory = "Auto Clicker",
+            left = "Left Click",
+            right = "Right Click"
+    )
+    public static boolean autoClickerType = false;
+
+    @KeyBind(
+            name = "AutoClicker Keybind",
+            description = "The keybind to use for the auto clicker",
+            category = "Combat",
+            subcategory = "Auto Clicker"
+    )
+    public static OneKeyBind autoClickerKeybind = new OneKeyBind(Keyboard.KEY_NONE);
+
+    @Slider(
+            name = "AutoClicker Minimum CPS",
+            description = "The CPS of the auto clicker",
+            category = "Combat",
+            subcategory = "Auto Clicker - Delays",
+            min = 1,
+            max = 20
+    )
+    public static int autoClickerMinCPS = 10;
+
+    @Slider(
+            name = "AutoClicker Maximum CPS",
+            description = "The CPS of the auto clicker",
+            category = "Combat",
+            subcategory = "Auto Clicker - Delays",
+            min = 1,
+            max = 20
+    )
+    public static int autoClickerMaxCPS = 15;
+
 
     @Dropdown(
             name = "Preset",
@@ -1050,6 +1099,11 @@ public class MayOBeesConfig extends Config {
 
         registerKeyBind(smartToggleKeybind, () -> {
             ModuleManager.getInstance().smartToggle();
+        });
+
+        registerKeyBind(autoClickerKeybind, () -> {
+            if (autoClickerMode != 1)
+                ModuleManager.getInstance().toggle(AutoClicker.getInstance());
         });
 
         registerKeyBind(alchemyHelperAutoSellPotionsToNPCKeybind, () -> {

@@ -2,6 +2,7 @@ package com.github.may2beez.mayobees.module;
 
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.handler.GameStateHandler;
+import com.github.may2beez.mayobees.module.impl.combat.AutoClicker;
 import com.github.may2beez.mayobees.module.impl.combat.MobAura;
 import com.github.may2beez.mayobees.module.impl.dungeon.AutoBoomTNT;
 import com.github.may2beez.mayobees.module.impl.other.GhostBlocks;
@@ -35,6 +36,7 @@ public class ModuleManager {
 
     public List<IModule> fillModules() {
         return Arrays.asList(
+                AutoClicker.getInstance(),
                 MobAura.getInstance(),
                 GhostBlocks.getInstance(),
                 GiftAura.getInstance(),
