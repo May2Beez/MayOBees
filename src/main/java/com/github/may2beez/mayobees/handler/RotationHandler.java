@@ -285,7 +285,7 @@ public class RotationHandler {
         }
 
         if (configuration.followTarget() && configuration.getTarget().isPresent() && delayBetweenTargetFollow.passed()) {
-            adjustTargetRotation();
+            adjustTargetRotation(false);
         }
         mc.thePlayer.rotationYaw = interpolate(startRotation.getYaw(), targetRotation.getYaw(), configuration.easeOutBack() ? this::easeOutBack : this::easeOutExpo);
         mc.thePlayer.rotationPitch = interpolate(startRotation.getPitch(), targetRotation.getPitch(), configuration.easeOutBack() ? this::easeOutBack : this::easeOutQuart);
@@ -312,7 +312,7 @@ public class RotationHandler {
         clientSideYaw = mc.thePlayer.rotationYaw;
         // rotating
         if (configuration.followTarget() && configuration.getTarget().isPresent() && !configuration.goingBackToClientSide() && delayBetweenTargetFollow.passed()) {
-            adjustTargetRotation();
+            adjustTargetRotation(true);
         }
         if (configuration.goingBackToClientSide()) {
             LogUtils.debug("Going back to client side");
@@ -337,7 +337,7 @@ public class RotationHandler {
         mc.thePlayer.rotationPitch = serverSidePitch;
     }
 
-    private void adjustTargetRotation() {
+    private void adjustTargetRotation(boolean serverSide) {
         Target target = configuration.getTarget().get();
         Rotation rot;
         if (target.getEntity() != null) {
@@ -353,8 +353,8 @@ public class RotationHandler {
         } else {
             throw new IllegalArgumentException("No target specified!");
         }
-        startRotation.setPitch(mc.thePlayer.rotationPitch);
-        startRotation.setYaw(mc.thePlayer.rotationYaw);
+        startRotation.setPitch(serverSide ? serverSidePitch : mc.thePlayer.rotationPitch);
+        startRotation.setYaw(serverSide ? serverSideYaw : mc.thePlayer.rotationYaw);
         startTime = System.currentTimeMillis();
         Rotation neededChange = getNeededChange(startRotation, rot);
         targetRotation.setYaw(startRotation.getYaw() + neededChange.getYaw());
