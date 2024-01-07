@@ -46,7 +46,7 @@ public class MobAura implements IModuleActive {
 
     @Override
     public String getName() {
-        return "Mob Killer";
+        return "Mob Aura";
     }
 
     @Getter
@@ -169,7 +169,7 @@ public class MobAura implements IModuleActive {
     }
 
     private void resetAttack() {
-        if (RotationHandler.getInstance().isRotating()) {
+        if (RotationHandler.getInstance().isRotating() && !RotationHandler.getInstance().getConfiguration().goingBackToClientSide()) {
             RotationHandler.getInstance().reset();
         }
         if (mc.gameSettings.keyBindUseItem.isKeyDown()) {
