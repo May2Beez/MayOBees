@@ -293,8 +293,11 @@ public class RotationHandler {
 
     @SubscribeEvent(receiveCanceled = true)
     public void onUpdatePre(MotionUpdateEvent.Pre event) {
-        if (!rotating || configuration == null || configuration.getRotationType() != RotationConfiguration.RotationType.SERVER)
+        if (!rotating || configuration == null || configuration.getRotationType() != RotationConfiguration.RotationType.SERVER) {
+            serverSidePitch = event.pitch;
+            serverSideYaw = event.yaw;
             return;
+        }
 
         if (System.currentTimeMillis() >= endTime) {
             // finish

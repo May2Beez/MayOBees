@@ -91,7 +91,7 @@ public class MobAura implements IModuleActive {
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
-        if (mc.thePlayer == null || mc.theWorld == null) return;
+        if (mc.thePlayer == null || mc.theWorld == null || mc.currentScreen != null) return;
         if (event.phase == TickEvent.Phase.START) return;
         if (!enabled) return;
         hitTargets.removeIf(tuple -> System.currentTimeMillis() - tuple.getSecond() > 1000);
