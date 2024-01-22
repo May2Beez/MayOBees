@@ -8,8 +8,6 @@ import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.InfoType;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
-import cc.polyfrost.oneconfig.utils.Multithreading;
-import com.github.may2beez.mayobees.handler.RotationHandler;
 import com.github.may2beez.mayobees.module.ModuleManager;
 import com.github.may2beez.mayobees.module.impl.combat.AutoClicker;
 import com.github.may2beez.mayobees.module.impl.other.Dev;
@@ -17,14 +15,7 @@ import com.github.may2beez.mayobees.module.impl.player.GiftAura;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
 import com.github.may2beez.mayobees.module.impl.skills.AlchemyHelper;
 import com.github.may2beez.mayobees.util.LogUtils;
-import com.github.may2beez.mayobees.util.helper.RotationConfiguration;
-import com.github.may2beez.mayobees.util.helper.Target;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.MovingObjectPosition;
 import org.lwjgl.input.Keyboard;
-
-import java.util.concurrent.TimeUnit;
 
 public class MayOBeesConfig extends Config {
 

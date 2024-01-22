@@ -307,7 +307,7 @@ public class BlockUtils {
         return true;
     }
 
-    private static boolean blockHasCollision(BlockPos blockPos) {
+    public static boolean blockHasCollision(BlockPos blockPos) {
         AxisAlignedBB axisAlignedBB = mc.theWorld.getBlockState(blockPos).getBlock().getCollisionBoundingBox(mc.theWorld, blockPos, mc.theWorld.getBlockState(blockPos));
         return !mc.theWorld.getBlockState(blockPos).getBlock().isPassable(mc.theWorld, blockPos) || axisAlignedBB != null;
     }
@@ -396,6 +396,7 @@ public class BlockUtils {
                 int j1 = MathHelper.floor_double(vec31.zCoord);
                 BlockPos blockpos = new BlockPos(l, i1, j1);
                 IBlockState iblockstate = getBlockState(blockpos);
+                if (iblockstate == null) return null;
                 Block block = iblockstate.getBlock();
                 if (!predicate.test(blockpos) && (!ignoreBlockWithoutBoundingBox || block.getCollisionBoundingBox(mc.theWorld, blockpos, iblockstate) != null) && block.canCollideCheck(iblockstate, stopOnLiquid) && (movingobjectposition = collisionRayTrace(block, blockpos, vec31, vec32, fullBlocks)) != null) {
                     return movingobjectposition;
@@ -476,6 +477,7 @@ public class BlockUtils {
                     j1 = MathHelper.floor_double(vec31.zCoord) - (enumfacing == EnumFacing.SOUTH ? 1 : 0);
                     blockpos = new BlockPos(l, i1, j1);
                     IBlockState iblockstate1 = getBlockState(blockpos);
+                    if (iblockstate1 == null) return null;
                     Block block1 = iblockstate1.getBlock();
                     if (ignoreBlockWithoutBoundingBox && block1.getCollisionBoundingBox(mc.theWorld, blockpos, iblockstate1) == null)
                         continue;

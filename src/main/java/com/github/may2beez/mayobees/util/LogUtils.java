@@ -14,7 +14,7 @@ public class LogUtils {
             System.out.println(StringUtils.stripControlCodes(prefix) + message);
             return;
         }
-        mc.thePlayer.addChatMessage(new ChatComponentText(prefix + "§f" + message));
+        sendMsg(prefix + "§f" + message);
     }
 
     public static void warn(String message) {
@@ -22,7 +22,7 @@ public class LogUtils {
             System.out.println(StringUtils.stripControlCodes(prefix) + message);
             return;
         }
-        mc.thePlayer.addChatMessage(new ChatComponentText(prefix + "§6" + message));
+        sendMsg(prefix + "§6" + message);
     }
 
     public static void error(String message) {
@@ -30,7 +30,7 @@ public class LogUtils {
             System.out.println(StringUtils.stripControlCodes(prefix) + message);
             return;
         }
-        mc.thePlayer.addChatMessage(new ChatComponentText(prefix + "§c" + message));
+        sendMsg(prefix + "§c" + message);
     }
 
     public static void debug(String message) {
@@ -38,6 +38,14 @@ public class LogUtils {
             System.out.println(StringUtils.stripControlCodes(prefix) + message);
             return;
         }
-        mc.thePlayer.addChatMessage(new ChatComponentText(prefix + "§7" + message));
+        sendMsg(prefix + "§7" + message);
+    }
+
+    private static void sendMsg(String message) {
+        try {
+            mc.thePlayer.addChatMessage(new ChatComponentText(message));
+        } catch (Exception e) {
+            System.out.println(message);
+        }
     }
 }

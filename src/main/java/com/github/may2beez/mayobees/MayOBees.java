@@ -7,6 +7,7 @@ import com.github.may2beez.mayobees.handler.GameStateHandler;
 import com.github.may2beez.mayobees.handler.RotationHandler;
 import com.github.may2beez.mayobees.module.ModuleManager;
 import com.github.may2beez.mayobees.module.impl.other.Failsafes;
+import com.github.may2beez.mayobees.pathfinder.FlyPathFinderExecutor;
 import com.github.may2beez.mayobees.util.helper.AudioManager;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -25,6 +26,7 @@ public class MayOBees {
         MinecraftForge.EVENT_BUS.register(GameStateHandler.getInstance());
         MinecraftForge.EVENT_BUS.register(AudioManager.getInstance());
         MinecraftForge.EVENT_BUS.register(Failsafes.getInstance());
+        MinecraftForge.EVENT_BUS.register(FlyPathFinderExecutor.getInstance());
         CommandManager.register(new MainCommand());
         ModuleManager.getInstance().getModules().forEach(MinecraftForge.EVENT_BUS::register);
     }
