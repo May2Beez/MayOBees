@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "client.MixinScoreboard",
-    "fml.MixinFMLHandshakeMessage"
+    "fml.MixinFMLHandshakeMessage",
+    "network.MixinNetworkManager"
   ],
   "client": [
     "client.EntityPlayerSPAccessor",

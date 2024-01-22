@@ -963,6 +963,23 @@ public class MayOBeesConfig extends Config {
     )
     public static boolean includeScoreboardTitle = false;
     //</editor-fold>
+
+    //<editor-fold desc="Packet listener">
+    @Switch(
+            name = "Listen to incoming packets",
+            description = "Listens to packets",
+            category = "Debug",
+            subcategory = "Packet listener"
+    )
+    public static boolean listenToIncomingPackets = false;
+    @Switch(
+            name = "Listen to outgoing packets",
+            description = "Listens to packets",
+            category = "Debug",
+            subcategory = "Packet listener"
+    )
+    public static boolean listenToOutgoingPackets = false;
+    //</editor-fold>
     //</editor-fold>
 
     //<editor-fold desc="OTHER">

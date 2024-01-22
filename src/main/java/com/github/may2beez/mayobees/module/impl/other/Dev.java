@@ -1,11 +1,13 @@
 package com.github.may2beez.mayobees.module.impl.other;
 
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
+import com.github.may2beez.mayobees.event.PacketEvent;
 import com.github.may2beez.mayobees.module.IModule;
 import com.github.may2beez.mayobees.util.LogUtils;
 import com.github.may2beez.mayobees.util.ScoreboardUtils;
 import com.github.may2beez.mayobees.util.TablistUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -191,6 +193,25 @@ public class Dev implements IModule {
 
     public String getCurrentTime() {
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="Packet listener">
+    @SubscribeEvent
+    public void onPacketReceive(PacketEvent.Receive event) {
+        if (MayOBeesConfig.listenToIncomingPackets) {
+            LogUtils.debug("Received packet: " + event.packet.getClass().getSimpleName());
+        }
+        System.out.println(event.packet.getClass().getSimpleName());
+        System.out.println(event.packet.toString());
+    }
+    @SubscribeEvent
+    public void onPacketSend(PacketEvent.Send event) {
+        if (MayOBeesConfig.listenToIncomingPackets) {
+            LogUtils.debug("Sent packet: " + event.packet.getClass().getSimpleName());
+        }
+        System.out.println(event.packet.getClass().getSimpleName());
+        System.out.println(event.packet.toString());
     }
     //</editor-fold>
 }
