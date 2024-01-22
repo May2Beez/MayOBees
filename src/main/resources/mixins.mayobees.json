@@ -6,7 +6,8 @@
   "mixins": [
     "client.MixinEntity",
     "client.MixinScoreboard",
-    "fml.MixinFMLHandshakeMessage"
+    "fml.MixinFMLHandshakeMessage",
+    "network.MixinNetworkManager"
   ],
   "client": [
     "client.EntityPlayerSPAccessor",
