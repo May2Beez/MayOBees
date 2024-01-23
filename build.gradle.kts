@@ -97,7 +97,6 @@ tasks.withType(Jar::class) {
         this["ForceLoadAsMod"] = "true"
         this["ModSide"] = "CLIENT"
         this["TweakOrder"] = "0"
-        this["ForceLoadAsMod"] = "true"
         // If you don't want mixins, remove these lines
         this["TweakClass"] = "cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker"
         this["MixinConfigs"] = "mixins.$modid.json"

@@ -831,6 +831,13 @@ public class MayOBeesConfig extends Config {
     )
     public static boolean debugMode = false;
 
+    @Switch(
+            name = "Fly Pathfinder Oringo Compatible",
+            description = "Makes the fly pathfinder compatible with Oringo",
+            category = "Debug"
+    )
+    public static boolean flyPathfinderOringoCompatible = false;
+
     //<editor-fold desc="Tablist">
     @DualOption(
             name = "Save Tablist",

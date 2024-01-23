@@ -1,6 +1,7 @@
 package com.github.may2beez.mayobees.pathfinder;
 
 import cc.polyfrost.oneconfig.utils.Multithreading;
+import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.handler.RotationHandler;
 import com.github.may2beez.mayobees.util.BlockUtils;
 import com.github.may2beez.mayobees.util.KeyBindUtils;
@@ -12,24 +13,25 @@ import com.github.may2beez.mayobees.util.helper.Target;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.pathfinding.PathFinder;
 import net.minecraft.pathfinding.PathPoint;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class FlyPathFinderExecutor {
     private static FlyPathFinderExecutor instance;
@@ -42,8 +44,9 @@ public class FlyPathFinderExecutor {
     }
 
     private final Minecraft mc = Minecraft.getMinecraft();
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
-
+    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledFuture<?> pathfinderTask;
+    private ScheduledFuture<?> timeoutTask;
     @Getter
     private State state = State.NONE;
 
@@ -56,46 +59,69 @@ public class FlyPathFinderExecutor {
     private Vec3 lastTargetScanned;
     private boolean follow;
     private boolean smooth;
-    private FlyNodeProcessor flyNodeProcessor = new FlyNodeProcessor();
+    private final FlyNodeProcessor flyNodeProcessor = new FlyNodeProcessor();
+    private final PathFinder pathFinder = new PathFinder(flyNodeProcessor);
     @Getter
     private float neededYaw = Integer.MIN_VALUE;
-    private Vec3 lookTarget;
+    private final int MAX_DISTANCE = 150;
 
     public void findPath(Vec3 pos, boolean follow, boolean smooth) {
         state = State.CALCULATING;
         this.follow = follow;
         this.target = pos;
         this.smooth = smooth;
-        executor.execute(() -> {
-            long startTime = System.currentTimeMillis();
-            if (flyNodeProcessor == null) flyNodeProcessor = new FlyNodeProcessor();
-            PathFinder pathFinder = new PathFinder(flyNodeProcessor);
-            List<Vec3> finalRoute = new ArrayList<>();
-            PathEntity route = pathFinder.createEntityPathTo(mc.theWorld, mc.thePlayer, new BlockPos(pos), 35);
-            if (route == null) {
-                state = State.FAILED;
-                LogUtils.error("Failed to find path to " + pos);
-                double distance = mc.thePlayer.getPositionVector().distanceTo(this.target);
-                if (distance > 35) {
-                    LogUtils.error("Distance to target is too far. Distance: " + distance + ", Max distance: 35");
-                    stop();
+        LogUtils.debug("Cache size: " + WorldCache.getInstance().getWorldCache().size());
+        try {
+            System.out.println("Starting pathfinding");
+            pathfinderTask = executor.schedule(() -> {
+                long startTime = System.currentTimeMillis();
+                int maxDistance = Math.min(MAX_DISTANCE, (int) mc.thePlayer.getPositionVector().distanceTo(pos) + 5);
+                LogUtils.debug("Max distance: " + maxDistance);
+                PathEntity route = pathFinder.createEntityPathTo(mc.theWorld, mc.thePlayer, new BlockPos(pos), maxDistance);
+                LogUtils.debug("Pathfinding took " + (System.currentTimeMillis() - startTime) + "ms");
+                if (route == null) {
+                    state = State.FAILED;
+                    LogUtils.error("Failed to find path to " + pos);
+                    double distance = mc.thePlayer.getPositionVector().distanceTo(this.target);
+                    if (distance > maxDistance) {
+                        LogUtils.error("Distance to target is too far. Distance: " + distance + ", Max distance: " + maxDistance);
+                        stop();
+                    }
+                    return;
                 }
-                return;
-            }
-            for (int i = 0; i < route.getCurrentPathLength(); i++) {
-                PathPoint pathPoint = route.getPathPointFromIndex(i);
-                finalRoute.add(new Vec3(pathPoint.xCoord + 0.5f, pathPoint.yCoord + 0.7f, pathPoint.zCoord + 0.5f));
-                LogUtils.debug("Path point " + i + ": " + pathPoint.xCoord + ", " + pathPoint.yCoord + ", " + pathPoint.zCoord);
-            }
-            if (smooth) {
-                finalRoute = findDirectionChangePoints(finalRoute);
-            }
-            LogUtils.debug("Pathfinding took " + (System.currentTimeMillis() - startTime) + "ms");
-            path = new CopyOnWriteArrayList<>(finalRoute);
-            state = State.PATHING;
-            lastTargetScanned = pos;
-            lastPositionScanned = mc.thePlayer.getPositionVector();
-        });
+                List<Vec3> finalRoute = new ArrayList<>();
+                for (int i = 0; i < route.getCurrentPathLength(); i++) {
+                    PathPoint pathPoint = route.getPathPointFromIndex(i);
+                    finalRoute.add(new Vec3(pathPoint.xCoord + 0.5f, pathPoint.yCoord + 0.3f, pathPoint.zCoord + 0.5f));
+                }
+                startTime = System.currentTimeMillis();
+                if (smooth) {
+                    finalRoute = smoothPath(finalRoute);
+                }
+                this.path = new CopyOnWriteArrayList<>(finalRoute);
+                state = State.PATHING;
+                lastTargetScanned = pos;
+                lastPositionScanned = mc.thePlayer.getPositionVector();
+                LogUtils.debug("Path smoothing took " + (System.currentTimeMillis() - startTime) + "ms");
+                if (timeoutTask != null) {
+                    timeoutTask.cancel(true);
+                }
+            }, 0, TimeUnit.MILLISECONDS);
+            System.out.println("Starting timeout");
+            timeoutTask = executor.schedule(() -> {
+                System.out.println("Timeout");
+                if (state == State.CALCULATING) {
+                    LogUtils.error("Pathfinding took too long");
+                    if (pathfinderTask != null) {
+                        pathfinderTask.cancel(true);
+                    }
+                }
+            }, 1_500, TimeUnit.MILLISECONDS);
+        } catch (RejectedExecutionException e) {
+            LogUtils.error("Pathfinding took too long");
+//            stop();
+            RotationHandler.getInstance().reset();
+        }
     }
 
     public void findPath(Entity target, boolean follow, boolean smooth) {
@@ -105,12 +131,13 @@ public class FlyPathFinderExecutor {
 
     private static boolean rayTraceBlocks(BlockPos start, BlockPos end) {
         for (int i = 0; i < 8; i++) {
+            System.out.println(i);
             Vec3 startVec = getBlockCorners(start)[i];
             Vec3 endVec = getBlockCorners(end)[i];
 
             MovingObjectPosition result = Minecraft.getMinecraft().theWorld.rayTraceBlocks(
-                    new Vec3(startVec.xCoord, startVec.yCoord, startVec.zCoord),
-                    new Vec3(endVec.xCoord, endVec.yCoord, endVec.zCoord));
+                    new Vec3(startVec.xCoord, startVec.yCoord + 0.35, startVec.zCoord),
+                    new Vec3(endVec.xCoord, endVec.yCoord + 0.35, endVec.zCoord));
             if (result != null && result.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
                 return true;
             }
@@ -134,32 +161,48 @@ public class FlyPathFinderExecutor {
         return corners;
     }
 
-    public static List<Vec3> findDirectionChangePoints(List<Vec3> path) {
-        long startTime = System.currentTimeMillis();
-        List<Vec3> newDirectionChangePoints = new ArrayList<>();
+    public List<Vec3> smoothPath(List<Vec3> path) {
         if (path.size() < 2) {
             return path;
         }
-
-        newDirectionChangePoints.add(path.get(0));
-
-        for (int i = 0; i < path.size(); i++) {
-            BlockPos currentPos = new BlockPos(path.get(i));
-
-            for (int j = i + 1; j < path.size(); j++) {
-                BlockPos otherPos = new BlockPos(path.get(j));
-                if (rayTraceBlocks(currentPos, otherPos)) {
-                    newDirectionChangePoints.add(path.get(j - 1));
-                    i = j - 2;
-                    break;
+        List<Vec3> smoothed = new ArrayList<>();
+        smoothed.add(path.get(0));
+        int lowerIndex = 0;
+        while (lowerIndex < path.size() - 2) {
+            Vec3 start = path.get(lowerIndex);
+            Vec3 lastValid = path.get(lowerIndex + 1);
+            for (int upperIndex = lowerIndex + 2; upperIndex < path.size(); upperIndex++) {
+                Vec3 end = path.get(upperIndex);
+                if (traversable(start, end) && traversable(start.addVector(0, 1, 0), end.addVector(0, 1, 0))) {
+                    lastValid = end;
                 }
+            }
+            smoothed.add(lastValid);
+            lowerIndex = path.indexOf(lastValid);
+        }
+
+        return smoothed;
+    }
+
+    private static final Vec3[] BLOCK_SIDE_MULTIPLIERS = new Vec3[]{
+            new Vec3(0.5, 0.5, 0.1),
+            new Vec3(0.5, 0.5, 0.9),
+            new Vec3(0.1, 0.5, 0.5),
+            new Vec3(0.9, 0.5, 0.5)
+    };
+
+    public boolean traversable(Vec3 from, Vec3 to) {
+        for (Vec3 offset : BLOCK_SIDE_MULTIPLIERS) {
+            Vec3 fromVec = new Vec3(from.xCoord + 0.5f + offset.xCoord, from.yCoord + 0.5 + offset.yCoord, from.zCoord + 0.5 + offset.zCoord);
+            Vec3 toVec = new Vec3(to.xCoord + 0.5 + offset.xCoord, to.yCoord + 0.5 + offset.yCoord, to.zCoord + 0.5 + offset.zCoord);
+            MovingObjectPosition trace = mc.theWorld.rayTraceBlocks(fromVec, toVec, false, true, false);
+
+            if (trace != null) {
+                return false;
             }
         }
 
-        newDirectionChangePoints.add(path.get(path.size() - 1));
-        long endTime = System.currentTimeMillis();
-        LogUtils.debug("Direction change points found in " + (endTime - startTime) + "ms");
-        return newDirectionChangePoints;
+        return true;
     }
 
     public boolean isPathing() {
@@ -170,12 +213,25 @@ public class FlyPathFinderExecutor {
         path = null;
         target = null;
         targetEntity = null;
-        lookTarget = null;
         state = State.NONE;
-        flyNodeProcessor.resetCache();
         KeyBindUtils.stopMovement();
         neededYaw = Integer.MIN_VALUE;
         RotationHandler.getInstance().reset();
+        if (pathfinderTask != null) {
+            pathfinderTask.cancel(true);
+            pathfinderTask = null;
+        }
+        if (timeoutTask != null) {
+            timeoutTask.cancel(true);
+            timeoutTask = null;
+        }
+    }
+
+    @SubscribeEvent
+    public void onWorldChange(WorldEvent.Unload event) {
+        if (state == State.PATHING) {
+            stop();
+        }
     }
 
     @SubscribeEvent
@@ -189,17 +245,9 @@ public class FlyPathFinderExecutor {
         if (lastTargetScanned != null && lastTargetScanned.distanceTo(target) < 0.5 && lastPositionScanned != null && lastPositionScanned.distanceTo(mc.thePlayer.getPositionVector()) < 0.5)
             return;
 
-        if (lookTarget != null && !RotationHandler.getInstance().isRotating()) {
-            RotationHandler.getInstance().easeTo(new RotationConfiguration(
-                    new Target(lookTarget),
-                    1_000,
-                    null
-            ).followTarget(true).randomness(true));
-        }
-
         if (this.targetEntity != null) {
             findPath(this.targetEntity, this.follow, this.smooth);
-            if (RotationHandler.getInstance().isRotating() && lookTarget == null) return;
+            if (RotationHandler.getInstance().isRotating()) return;
             RotationHandler.getInstance().easeTo(new RotationConfiguration(
                     new Target(this.targetEntity),
                     1_000,
@@ -207,7 +255,7 @@ public class FlyPathFinderExecutor {
             ).followTarget(true).randomness(true));
         } else {
             findPath(this.target, this.follow, this.smooth);
-            if (RotationHandler.getInstance().isRotating() && lookTarget == null) return;
+            if (RotationHandler.getInstance().isRotating()) return;
             RotationHandler.getInstance().easeTo(new RotationConfiguration(
                     new Target(this.target),
                     1_000,
@@ -221,6 +269,7 @@ public class FlyPathFinderExecutor {
         if (event.phase == TickEvent.Phase.END) return;
         if (state == State.NONE) return;
         if (state == State.FAILED) {
+            KeyBindUtils.stopMovement();
             neededYaw = Integer.MIN_VALUE;
             return;
         }
@@ -230,8 +279,6 @@ public class FlyPathFinderExecutor {
             return;
         }
         if (path == null) {
-            KeyBindUtils.stopMovement();
-            neededYaw = Integer.MIN_VALUE;
             return;
         }
         Vec3 current = mc.thePlayer.getPositionVector();
@@ -240,22 +287,21 @@ public class FlyPathFinderExecutor {
             LogUtils.info("Arrived at destination");
             return;
         }
-        Vec3 closestNode = path.stream().min((v1, v2) -> (int) (v1.distanceTo(current) - v2.distanceTo(current))).orElse(null);
+        Vec3 closestNode = path.stream().min(Comparator.comparingDouble((Vec3 v) -> v.distanceTo(current))).orElse(path.get(0));
         int index = path.indexOf(closestNode);
-        Vec3 next = path.get(Math.max(Math.min(index, path.size() - 2), 0) + 1);
-        if (current.distanceTo(next) < 1 && path.size() > index + 2) {
+        Vec3 next = path.get(Math.min(index + 1, path.size() - 1));
+        if (current.distanceTo(next) < 1 && path.size() > index + 2 && rayTraceBlocks(new BlockPos(current), new BlockPos(next))) {
             next = path.get(index + 2);
         }
-        lookTarget = next.addVector(0, 0.7 + Math.random() * 0.2 - 0.1, 0);
 
-        if (mc.thePlayer.onGround && next.yCoord - current.yCoord > 0.75) {
+        if (mc.thePlayer.onGround && next.yCoord - current.yCoord > 0.25) {
             mc.thePlayer.jump();
             Multithreading.schedule(() -> {
                 mc.thePlayer.capabilities.isFlying = true;
                 mc.thePlayer.sendPlayerAbilities();
             }, (long) (50 + Math.random() * 50), TimeUnit.MILLISECONDS);
             return;
-        } else if (next.yCoord - current.yCoord > 0.75) {
+        } else if (next.yCoord - current.yCoord > 0.25) {
             if (!mc.thePlayer.capabilities.isFlying) {
                 KeyBindUtils.stopMovement();
                 return;
@@ -263,14 +309,23 @@ public class FlyPathFinderExecutor {
         }
 
         Rotation rotation = RotationHandler.getInstance().getRotation(current, next);
-        if (next.yCoord - current.yCoord > 0.75) {
-            KeyBindUtils.holdThese(mc.gameSettings.keyBindJump, mc.gameSettings.keyBindForward);
-        } else if (next.yCoord - current.yCoord < -0.75 && mc.thePlayer.capabilities.isFlying && doesntHaveBlockUnderneath(current)) {
-            KeyBindUtils.holdThese(mc.gameSettings.keyBindSneak, mc.gameSettings.keyBindForward);
+        List<KeyBinding> keyBindings = new ArrayList<>();
+        List<KeyBinding> neededKeys = KeyBindUtils.getNeededKeyPresses(rotation.getYaw());
+        // if sprint in pathfinder
+        mc.thePlayer.setSprinting(neededKeys.contains(mc.gameSettings.keyBindForward));
+        if (MayOBeesConfig.flyPathfinderOringoCompatible) {
+            keyBindings.addAll(neededKeys);
+            neededYaw = Integer.MIN_VALUE;
         } else {
-            KeyBindUtils.holdThese(mc.gameSettings.keyBindForward);
+            neededYaw = rotation.getYaw();
+            keyBindings.add(mc.gameSettings.keyBindForward);
         }
-        neededYaw = rotation.getYaw();
+        if (next.yCoord - current.yCoord > 0.25) {
+            keyBindings.add(mc.gameSettings.keyBindJump);
+        } else if (next.yCoord - current.yCoord < -0.25 && mc.thePlayer.capabilities.isFlying && doesntHaveBlockUnderneath(current)) {
+            keyBindings.add(mc.gameSettings.keyBindSneak);
+        }
+        KeyBindUtils.holdThese(keyBindings.toArray(new KeyBinding[0]));
     }
 
     private boolean doesntHaveBlockUnderneath(Vec3 current) {
@@ -283,6 +338,21 @@ public class FlyPathFinderExecutor {
     public void onDraw(RenderWorldLastEvent event) {
         if (path == null) return;
         RenderManager renderManager = mc.getRenderManager();
+        Vec3 current = mc.thePlayer.getPositionVector();
+        Vec3 closestNode = path.stream().min(Comparator.comparingDouble(
+                (Vec3 v) -> v.distanceTo(current))).orElse(path.get(0));
+        int index = path.indexOf(closestNode);
+        Vec3 next = path.get(Math.min(index + 1, path.size() - 1));
+        if (current.distanceTo(next) < 1 && path.size() > index + 2 && rayTraceBlocks(new BlockPos(current), new BlockPos(next))) {
+            next = path.get(index + 2);
+        }
+        AxisAlignedBB closest = new AxisAlignedBB(closestNode.xCoord - 0.05, closestNode.yCoord - 0.05, closestNode.zCoord - 0.05, closestNode.xCoord + 0.05, closestNode.yCoord + 0.05, closestNode.zCoord + 0.05);
+        AxisAlignedBB nextBB = new AxisAlignedBB(next.xCoord - 0.05, next.yCoord - 0.05, next.zCoord - 0.05, next.xCoord + 0.05, next.yCoord + 0.05, next.zCoord + 0.05);
+        RenderManager rendermanager = Minecraft.getMinecraft().getRenderManager();
+        closest = closest.offset(-rendermanager.viewerPosX, -rendermanager.viewerPosY, -rendermanager.viewerPosZ);
+        nextBB = nextBB.offset(-rendermanager.viewerPosX, -rendermanager.viewerPosY, -rendermanager.viewerPosZ);
+        RenderUtils.drawBox(closest, Color.GREEN);
+        RenderUtils.drawBox(nextBB, Color.BLUE);
         for (int i = 0; i < path.size() - 1; i++) {
             Vec3 from = new Vec3(path.get(i).xCoord, path.get(i).yCoord, path.get(i).zCoord);
             Vec3 to = new Vec3(path.get(i + 1).xCoord, path.get(i + 1).yCoord, path.get(i + 1).zCoord);

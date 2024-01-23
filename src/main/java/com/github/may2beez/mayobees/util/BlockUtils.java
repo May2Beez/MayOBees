@@ -1,6 +1,7 @@
 package com.github.may2beez.mayobees.util;
 
 import com.github.may2beez.mayobees.handler.RotationHandler;
+import com.github.may2beez.mayobees.pathfinder.WorldCache;
 import com.github.may2beez.mayobees.util.helper.Rotation;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
@@ -13,9 +14,6 @@ import net.minecraft.util.*;
 
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import static cc.polyfrost.oneconfig.libs.universal.UMath.wrapAngleTo180;
 
 
 public class BlockUtils {
@@ -308,8 +306,48 @@ public class BlockUtils {
     }
 
     public static boolean blockHasCollision(BlockPos blockPos) {
-        AxisAlignedBB axisAlignedBB = mc.theWorld.getBlockState(blockPos).getBlock().getCollisionBoundingBox(mc.theWorld, blockPos, mc.theWorld.getBlockState(blockPos));
-        return !mc.theWorld.getBlockState(blockPos).getBlock().isPassable(mc.theWorld, blockPos) || axisAlignedBB != null;
+        IBlockState blockState = mc.theWorld.getBlockState(blockPos);
+        Block block = blockState.getBlock();
+        if (block.equals(Blocks.air) || block.equals(Blocks.water) || block.equals(Blocks.flowing_water) || block.equals(Blocks.lava) || block.equals(Blocks.flowing_lava)) {
+            return false;
+        }
+        if (block.equals(Blocks.glass_pane) || block.equals(Blocks.stained_glass_pane)) {
+            return true;
+        }
+
+        if (block instanceof BlockDoor) {
+            return false;
+        }
+
+        if (!block.isPassable(mc.theWorld, blockPos)) {
+            return true;
+        }
+        AxisAlignedBB axisAlignedBB = block.getCollisionBoundingBox(mc.theWorld, blockPos, blockState);
+        return axisAlignedBB != null;
+    }
+
+    public static boolean blockHasTopCollision(BlockPos blockPos) {
+        IBlockState blockState = mc.theWorld.getBlockState(blockPos);
+        Block block = blockState.getBlock();
+        if (block.equals(Blocks.air) || block.equals(Blocks.water) || block.equals(Blocks.flowing_water) || block.equals(Blocks.lava) || block.equals(Blocks.flowing_lava)) {
+            return false;
+        }
+        if (block.equals(Blocks.glass_pane) || block.equals(Blocks.stained_glass_pane)) {
+            return true;
+        }
+        if (block instanceof BlockSlab && !block.equals(Blocks.double_stone_slab) && !block.equals(Blocks.double_wooden_slab) && !block.equals(Blocks.double_stone_slab2)) {
+            return blockState.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.TOP;
+        }
+
+        if (block instanceof BlockFenceGate) {
+            return blockState.getValue(BlockFenceGate.OPEN);
+        }
+
+        if (block instanceof BlockTrapDoor) {
+            return blockState.getValue(BlockTrapDoor.OPEN) || blockState.getValue(BlockTrapDoor.HALF) == BlockTrapDoor.DoorHalf.TOP;
+        }
+
+        return block.isPassable(mc.theWorld, blockPos);
     }
 
     public static boolean canWalkThroughDoor(Direction direction) {
@@ -632,5 +670,38 @@ public class BlockUtils {
         BACKWARD,
         LEFT,
         RIGHT
+    }
+
+    public static boolean isFree(int x, int y, int z) {
+        return isFree(x, y, z, false);
+    }
+
+    public static boolean isFree(int x, int y, int z, boolean blockChange) {
+        BlockPos blockpos = new BlockPos(x, y, z);
+        if (!blockChange) {
+            PathNodeType pathnodetype = WorldCache.getInstance().getWorldCache().get(blockpos);
+            if (pathnodetype != null) {
+                return pathnodetype == PathNodeType.OPEN;
+            }
+        }
+        boolean flag1 = blockHasCollision(blockpos);
+        boolean flag2 = blockHasCollision(blockpos.up());
+        boolean flag3 = blockHasTopCollision(blockpos.up(2));
+        if (flag1) {
+            WorldCache.getInstance().getWorldCache().put(blockpos, PathNodeType.BLOCKED);
+        }
+        if (flag2) {
+            WorldCache.getInstance().getWorldCache().put(blockpos.up(), PathNodeType.BLOCKED);
+        }
+        if (flag1 || flag2) {
+            return false;
+        }
+        WorldCache.getInstance().getWorldCache().put(blockpos, PathNodeType.OPEN);
+        return true;
+    }
+
+    public enum PathNodeType {
+        OPEN,
+        BLOCKED
     }
 }

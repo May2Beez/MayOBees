@@ -168,4 +168,16 @@ public class KeyBindUtils {
         });
         return keys;
     }
+
+    public static List<KeyBinding> getNeededKeyPresses(float neededYaw) {
+        List<KeyBinding> keys = new ArrayList<>();
+        neededYaw = AngleUtils.normalizeYaw(neededYaw - mc.thePlayer.rotationYaw) * -1;
+        float finalNeededYaw = neededYaw;
+        keyBindMap.forEach((yaw, key) -> {
+            if (Math.abs(yaw - finalNeededYaw) < 67.5 || Math.abs(yaw - (finalNeededYaw + 360.0)) < 67.5) {
+                keys.add(key);
+            }
+        });
+        return keys;
+    }
 }
