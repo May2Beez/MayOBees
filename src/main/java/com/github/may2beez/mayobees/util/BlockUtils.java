@@ -311,12 +311,20 @@ public class BlockUtils {
         if (block.equals(Blocks.air) || block.equals(Blocks.water) || block.equals(Blocks.flowing_water) || block.equals(Blocks.lava) || block.equals(Blocks.flowing_lava)) {
             return false;
         }
-        if (block.equals(Blocks.glass_pane) || block.equals(Blocks.stained_glass_pane)) {
+        if (block instanceof BlockStainedGlass || block instanceof BlockStainedGlassPane) {
+            return true;
+        }
+
+        if (block instanceof BlockSlab && !block.equals(Blocks.double_stone_slab) && !block.equals(Blocks.double_wooden_slab) && !block.equals(Blocks.double_stone_slab2)) {
+            return blockState.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.BOTTOM;
+        }
+
+        if (block instanceof BlockFence) {
             return true;
         }
 
         if (block instanceof BlockDoor) {
-            return false;
+            return true;
         }
 
         if (!block.isPassable(mc.theWorld, blockPos)) {
@@ -329,12 +337,6 @@ public class BlockUtils {
     public static boolean blockHasTopCollision(BlockPos blockPos) {
         IBlockState blockState = mc.theWorld.getBlockState(blockPos);
         Block block = blockState.getBlock();
-        if (block.equals(Blocks.air) || block.equals(Blocks.water) || block.equals(Blocks.flowing_water) || block.equals(Blocks.lava) || block.equals(Blocks.flowing_lava)) {
-            return false;
-        }
-        if (block.equals(Blocks.glass_pane) || block.equals(Blocks.stained_glass_pane)) {
-            return true;
-        }
         if (block instanceof BlockSlab && !block.equals(Blocks.double_stone_slab) && !block.equals(Blocks.double_wooden_slab) && !block.equals(Blocks.double_stone_slab2)) {
             return blockState.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.TOP;
         }
@@ -347,7 +349,7 @@ public class BlockUtils {
             return blockState.getValue(BlockTrapDoor.OPEN) || blockState.getValue(BlockTrapDoor.HALF) == BlockTrapDoor.DoorHalf.TOP;
         }
 
-        return block.isPassable(mc.theWorld, blockPos);
+        return blockHasCollision(blockPos);
     }
 
     public static boolean canWalkThroughDoor(Direction direction) {
@@ -693,7 +695,10 @@ public class BlockUtils {
         if (flag2) {
             WorldCache.getInstance().getWorldCache().put(blockpos.up(), PathNodeType.BLOCKED);
         }
-        if (flag1 || flag2) {
+        if (flag3) {
+            WorldCache.getInstance().getWorldCache().put(blockpos.up(2), PathNodeType.BLOCKED);
+        }
+        if (flag1 || flag2 || flag3) {
             return false;
         }
         WorldCache.getInstance().getWorldCache().put(blockpos, PathNodeType.OPEN);

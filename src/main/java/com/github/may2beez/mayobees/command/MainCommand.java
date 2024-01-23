@@ -22,7 +22,7 @@ public class MainCommand {
     }
 
     @SubCommand
-    private void findpath2(String name, boolean follow, boolean smooth) {
+    private void pathFindToMob(String name, boolean follow, boolean smooth) {
         List<Entity> entities = Minecraft.getMinecraft().theWorld.getEntities(EntityLiving.class, entity -> entity.getName().equals(name));
         if (entities.isEmpty()) {
             LogUtils.error("Could not find entity with name " + name);
@@ -34,22 +34,22 @@ public class MainCommand {
     }
 
     @SubCommand
-    private void findpath2(String name, boolean follow) {
-        findpath2(name, follow, false);
+    private void pathFindToMob(String name, boolean follow) {
+        pathFindToMob(name, follow, false);
     }
 
     @SubCommand
-    private void findpath(int x, int y, int z) {
-        findpath(x, y, z, false, false);
+    private void pathFind(int x, int y, int z) {
+        pathFind(x, y, z, false, false);
     }
 
     @SubCommand
-    private void findpath(int x, int y, int z, boolean follow) {
-        findpath(x, y, z, follow, false);
+    private void pathFind(int x, int y, int z, boolean follow) {
+        pathFind(x, y, z, follow, false);
     }
 
     @SubCommand()
-    private void findpath(int x, int y, int z, boolean follow, boolean smooth) {
+    private void pathFind(int x, int y, int z, boolean follow, boolean smooth) {
         Vec3 blockpos = new Vec3(x, y, z);
         FlyPathFinderExecutor.getInstance().findPath(blockpos, follow, smooth);
     }
