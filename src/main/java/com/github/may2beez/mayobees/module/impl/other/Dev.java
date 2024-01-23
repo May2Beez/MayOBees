@@ -202,16 +202,12 @@ public class Dev implements IModule {
         if (MayOBeesConfig.listenToIncomingPackets) {
             LogUtils.debug("Received packet: " + event.packet.getClass().getSimpleName());
         }
-        System.out.println(event.packet.getClass().getSimpleName());
-        System.out.println(event.packet.toString());
     }
     @SubscribeEvent
     public void onPacketSend(PacketEvent.Send event) {
         if (MayOBeesConfig.listenToIncomingPackets) {
             LogUtils.debug("Sent packet: " + event.packet.getClass().getSimpleName());
         }
-        System.out.println(event.packet.getClass().getSimpleName());
-        System.out.println(event.packet.toString());
     }
     //</editor-fold>
 }

@@ -59,6 +59,7 @@ public class FlyPathFinderExecutor {
     private FlyNodeProcessor flyNodeProcessor = new FlyNodeProcessor();
     @Getter
     private float neededYaw = Integer.MIN_VALUE;
+    private Vec3 lookTarget;
 
     public void findPath(Vec3 pos, boolean follow, boolean smooth) {
         state = State.CALCULATING;
@@ -169,6 +170,7 @@ public class FlyPathFinderExecutor {
         path = null;
         target = null;
         targetEntity = null;
+        lookTarget = null;
         state = State.NONE;
         flyNodeProcessor.resetCache();
         KeyBindUtils.stopMovement();
@@ -180,16 +182,24 @@ public class FlyPathFinderExecutor {
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) return;
         if (target == null) return;
-        tick = (tick + 1) % 12;
+        tick = (tick + 1) % 10;
 
         if (tick != 0) return;
         if (state == State.CALCULATING) return;
         if (lastTargetScanned != null && lastTargetScanned.distanceTo(target) < 0.5 && lastPositionScanned != null && lastPositionScanned.distanceTo(mc.thePlayer.getPositionVector()) < 0.5)
             return;
 
+        if (lookTarget != null && !RotationHandler.getInstance().isRotating()) {
+            RotationHandler.getInstance().easeTo(new RotationConfiguration(
+                    new Target(lookTarget),
+                    1_000,
+                    null
+            ).followTarget(true).randomness(true));
+        }
+
         if (this.targetEntity != null) {
             findPath(this.targetEntity, this.follow, this.smooth);
-            if (RotationHandler.getInstance().isRotating()) return;
+            if (RotationHandler.getInstance().isRotating() && lookTarget == null) return;
             RotationHandler.getInstance().easeTo(new RotationConfiguration(
                     new Target(this.targetEntity),
                     1_000,
@@ -197,7 +207,7 @@ public class FlyPathFinderExecutor {
             ).followTarget(true).randomness(true));
         } else {
             findPath(this.target, this.follow, this.smooth);
-            if (RotationHandler.getInstance().isRotating()) return;
+            if (RotationHandler.getInstance().isRotating() && lookTarget == null) return;
             RotationHandler.getInstance().easeTo(new RotationConfiguration(
                     new Target(this.target),
                     1_000,
@@ -230,17 +240,13 @@ public class FlyPathFinderExecutor {
             LogUtils.info("Arrived at destination");
             return;
         }
-        if (path.size() < 2) {
-            KeyBindUtils.stopMovement();
-            neededYaw = Integer.MIN_VALUE;
-            return;
-        }
         Vec3 closestNode = path.stream().min((v1, v2) -> (int) (v1.distanceTo(current) - v2.distanceTo(current))).orElse(null);
         int index = path.indexOf(closestNode);
         Vec3 next = path.get(Math.max(Math.min(index, path.size() - 2), 0) + 1);
         if (current.distanceTo(next) < 1 && path.size() > index + 2) {
             next = path.get(index + 2);
         }
+        lookTarget = next.addVector(0, 0.7 + Math.random() * 0.2 - 0.1, 0);
 
         if (mc.thePlayer.onGround && next.yCoord - current.yCoord > 0.75) {
             mc.thePlayer.jump();
@@ -252,22 +258,19 @@ public class FlyPathFinderExecutor {
         } else if (next.yCoord - current.yCoord > 0.75) {
             if (!mc.thePlayer.capabilities.isFlying) {
                 KeyBindUtils.stopMovement();
-                neededYaw = Integer.MIN_VALUE;
                 return;
             }
         }
 
+        Rotation rotation = RotationHandler.getInstance().getRotation(current, next);
         if (next.yCoord - current.yCoord > 0.75) {
-            neededYaw = Integer.MIN_VALUE;
             KeyBindUtils.holdThese(mc.gameSettings.keyBindJump, mc.gameSettings.keyBindForward);
         } else if (next.yCoord - current.yCoord < -0.75 && mc.thePlayer.capabilities.isFlying && doesntHaveBlockUnderneath(current)) {
-            neededYaw = Integer.MIN_VALUE;
             KeyBindUtils.holdThese(mc.gameSettings.keyBindSneak, mc.gameSettings.keyBindForward);
         } else {
-            Rotation rotation = RotationHandler.getInstance().getRotation(current, next);
-            neededYaw = rotation.getYaw();
             KeyBindUtils.holdThese(mc.gameSettings.keyBindForward);
         }
+        neededYaw = rotation.getYaw();
     }
 
     private boolean doesntHaveBlockUnderneath(Vec3 current) {

@@ -6,8 +6,6 @@ import net.minecraft.util.MathHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(value = Entity.class, priority = Integer.MAX_VALUE)
 public abstract class MixinEntity{
@@ -43,5 +41,4 @@ public abstract class MixinEntity{
             this.motionZ += forward * f2 + strafe * f1;
         }
     }
-
 }
