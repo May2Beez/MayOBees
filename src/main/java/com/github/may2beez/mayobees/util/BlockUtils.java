@@ -11,6 +11,7 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.*;
+import net.minecraft.world.IBlockAccess;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -298,7 +299,7 @@ public class BlockUtils {
         BlockPos blockPosStart = getRelativeBlockPos(0, 1, 0);
         for (int y = blockPosStart.getY(); y < 100; y++) {
             BlockPos blockPos = new BlockPos(blockPosStart.getX(), y, blockPosStart.getZ());
-            if (blockHasCollision(blockPos)) {
+            if (blockHasCollision(blockPos, mc.theWorld.getBlockState(blockPos), mc.theWorld.getBlockState(blockPos).getBlock())) {
                 return false;
             }
         }
@@ -306,11 +307,14 @@ public class BlockUtils {
     }
 
     public static boolean blockHasCollision(BlockPos blockPos) {
-        IBlockState blockState = mc.theWorld.getBlockState(blockPos);
-        Block block = blockState.getBlock();
+        return blockHasCollision(blockPos, mc.theWorld.getBlockState(blockPos), mc.theWorld.getBlockState(blockPos).getBlock());
+    }
+
+    public static boolean blockHasCollision(BlockPos blockPos, IBlockState blockState, Block block) {
         if (block.equals(Blocks.air) || block.equals(Blocks.water) || block.equals(Blocks.flowing_water) || block.equals(Blocks.lava) || block.equals(Blocks.flowing_lava)) {
             return false;
         }
+
         if (block instanceof BlockStainedGlass || block instanceof BlockStainedGlassPane) {
             return true;
         }
@@ -332,24 +336,6 @@ public class BlockUtils {
         }
         AxisAlignedBB axisAlignedBB = block.getCollisionBoundingBox(mc.theWorld, blockPos, blockState);
         return axisAlignedBB != null;
-    }
-
-    public static boolean blockHasTopCollision(BlockPos blockPos) {
-        IBlockState blockState = mc.theWorld.getBlockState(blockPos);
-        Block block = blockState.getBlock();
-        if (block instanceof BlockSlab && !block.equals(Blocks.double_stone_slab) && !block.equals(Blocks.double_wooden_slab) && !block.equals(Blocks.double_stone_slab2)) {
-            return blockState.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.TOP;
-        }
-
-        if (block instanceof BlockFenceGate) {
-            return blockState.getValue(BlockFenceGate.OPEN);
-        }
-
-        if (block instanceof BlockTrapDoor) {
-            return blockState.getValue(BlockTrapDoor.OPEN) || blockState.getValue(BlockTrapDoor.HALF) == BlockTrapDoor.DoorHalf.TOP;
-        }
-
-        return blockHasCollision(blockPos);
     }
 
     public static boolean canWalkThroughDoor(Direction direction) {
@@ -674,34 +660,20 @@ public class BlockUtils {
         RIGHT
     }
 
-    public static boolean isFree(int x, int y, int z) {
-        return isFree(x, y, z, false);
-    }
-
-    public static boolean isFree(int x, int y, int z, boolean blockChange) {
+    public static boolean isFree(float x, float y, float z, IBlockAccess blockaccess) {
         BlockPos blockpos = new BlockPos(x, y, z);
-        if (!blockChange) {
-            PathNodeType pathnodetype = WorldCache.getInstance().getWorldCache().get(blockpos);
-            if (pathnodetype != null) {
-                return pathnodetype == PathNodeType.OPEN;
-            }
+        IBlockState blockState = blockaccess.getBlockState(blockpos);
+        Block block = blockState.getBlock();
+        WorldCache.CacheEntry pathnodetype = WorldCache.getInstance().getWorldCache().get(blockpos);
+        if (pathnodetype != null) {
+            if (pathnodetype.getBlock().equals(blockaccess.getBlockState(blockpos).getBlock()))
+                return pathnodetype.getPathNodeType() == PathNodeType.OPEN;
         }
-        boolean flag1 = blockHasCollision(blockpos);
-        boolean flag2 = blockHasCollision(blockpos.up());
-        boolean flag3 = blockHasTopCollision(blockpos.up(2));
-        if (flag1) {
-            WorldCache.getInstance().getWorldCache().put(blockpos, PathNodeType.BLOCKED);
-        }
-        if (flag2) {
-            WorldCache.getInstance().getWorldCache().put(blockpos.up(), PathNodeType.BLOCKED);
-        }
-        if (flag3) {
-            WorldCache.getInstance().getWorldCache().put(blockpos.up(2), PathNodeType.BLOCKED);
-        }
-        if (flag1 || flag2 || flag3) {
+        if (blockHasCollision(blockpos, blockState, block)) {
+            WorldCache.getInstance().getWorldCache().put(blockpos, new WorldCache.CacheEntry(block, blockpos, PathNodeType.BLOCKED));
             return false;
         }
-        WorldCache.getInstance().getWorldCache().put(blockpos, PathNodeType.OPEN);
+        WorldCache.getInstance().getWorldCache().put(blockpos, new WorldCache.CacheEntry(block, blockpos, PathNodeType.OPEN));
         return true;
     }
 
