@@ -203,6 +203,7 @@ public class FlyPathFinderExecutor {
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) return;
         if (target == null) return;
+        if (path == null || path.isEmpty()) return;
         tick = (tick + 1) % 10;
 
         if (tick != 0) return;
@@ -216,7 +217,7 @@ public class FlyPathFinderExecutor {
         else
             target = new Target(this.target);
 
-        Vec3 lastElement = path.get(path.size() - 1);
+        Vec3 lastElement = path.get(Math.max(0, path.size() - 1));
         if (mc.thePlayer.getPositionVector().distanceTo(lastElement) < 1) {
             if (RotationHandler.getInstance().isRotating()) {
                 RotationHandler.getInstance().reset();
@@ -292,14 +293,13 @@ public class FlyPathFinderExecutor {
                 return;
             }
         }
-        Vec3 next = getNext(current);
+        Vec3 next = getNext();
 
         Rotation rotation = RotationHandler.getInstance().getRotation(current, next);
         List<KeyBinding> keyBindings = new ArrayList<>();
         List<KeyBinding> neededKeys = KeyBindUtils.getNeededKeyPresses(rotation.getYaw());
 
         // if sprint in pathfinder
-        mc.thePlayer.setSprinting(neededKeys.contains(mc.gameSettings.keyBindForward) && current.distanceTo(next) > 5);
 
         if (MayOBeesConfig.flyPathfinderOringoCompatible) {
             keyBindings.addAll(neededKeys);
@@ -309,20 +309,35 @@ public class FlyPathFinderExecutor {
             keyBindings.add(mc.gameSettings.keyBindForward);
         }
 
+        double distanceX = next.xCoord - mc.thePlayer.posX + 0.5;
+        double distanceY = next.yCoord - mc.thePlayer.posY + 0.1;
+        double distanceZ = next.zCoord - mc.thePlayer.posZ + 0.5;
+        // swap X and Z based on looking direction
+        float yaw = neededYaw * (float) Math.PI / 180.0f;
+        double relativeDistanceX = distanceX * Math.cos(yaw) + distanceZ * Math.sin(yaw);
+        double relativeDistanceZ = -distanceX * Math.sin(yaw) + distanceZ * Math.cos(yaw);
+        VerticalDirection verticalDirection = shouldChangeHeight(relativeDistanceX, relativeDistanceZ);
+
         if (mc.thePlayer.capabilities.allowFlying) { // flying + walking
-            System.out.println("Difference in y: " + (next.yCoord - current.yCoord));
             if (shouldJump(next, current)) {
                 mc.thePlayer.jump();
-                System.out.println("Jumping");
             } else if (fly(next, current)) return;
-            if ((next.yCoord - current.yCoord > 0.2 || (!traversable(current.addVector(0, -0.05, 0), next) && next.yCoord - current.yCoord > 0.1)) && (next.yCoord - current.yCoord > 0.3 || ((EntityPlayerAccessor) mc.thePlayer).getFlyToggleTimer() == 0)) {
+            if (verticalDirection.equals(VerticalDirection.HIGHER)) {
                 keyBindings.add(mc.gameSettings.keyBindJump);
-                System.out.println("Flying up");
-            } else if ((next.yCoord - current.yCoord < -0.2 || (!traversable(current.addVector(0, 0.05, 0), next) && next.yCoord - current.yCoord < -0.1)) && mc.thePlayer.capabilities.isFlying && doesntHaveBlockUnderneath(current)) {
-                keyBindings.add(mc.gameSettings.keyBindSneak);
-                System.out.println("Sneaking down");
+            } else if (verticalDirection.equals(VerticalDirection.LOWER)) {
+                if (!mc.thePlayer.onGround && mc.thePlayer.capabilities.isFlying) {
+                    keyBindings.add(mc.gameSettings.keyBindSneak);
+                }
             } else {
-                System.out.println("Not jumping or sneaking");
+                if (distanceY > 0.25) {
+                    keyBindings.add(mc.gameSettings.keyBindJump);
+                } else if (distanceY > 0.10 && ((EntityPlayerAccessor) mc.thePlayer).getFlyToggleTimer() == 0) {
+                    keyBindings.add(mc.gameSettings.keyBindJump);
+                } else if (distanceY < -0.15) {
+                    if (!mc.thePlayer.onGround && mc.thePlayer.capabilities.isFlying) {
+                        keyBindings.add(mc.gameSettings.keyBindSneak);
+                    }
+                }
             }
         } else { // only walking
             if (shouldJump(next, current)) {
@@ -330,7 +345,36 @@ public class FlyPathFinderExecutor {
             }
         }
 
+        mc.thePlayer.setSprinting(neededKeys.contains(mc.gameSettings.keyBindForward) && !keyBindings.contains(mc.gameSettings.keyBindSneak) && current.distanceTo(next) > 6);
+
         KeyBindUtils.holdThese(keyBindings.toArray(new KeyBinding[0]));
+    }
+
+    public VerticalDirection shouldChangeHeight(double relativeDistanceX, double relativeDistanceZ) {
+        if (Math.abs(relativeDistanceX) < 0.75 && Math.abs(relativeDistanceZ) < 0.75) {
+            return VerticalDirection.NONE;
+        }
+        BlockPos relative = new BlockPos(0, 0, 1);
+        if (mc.thePlayer.posY % 1 > 0.5
+                && !BlockUtils.isFree(relative.getX(), relative.getY(), relative.getZ(), mc.theWorld)
+                && !BlockUtils.isFree(relative.getX(), relative.getY() + 1, relative.getZ(), mc.theWorld)
+                && !BlockUtils.isFree(relative.getX(), relative.getY() + 2, relative.getZ(), mc.theWorld)
+        ) {
+            return VerticalDirection.HIGHER;
+        } else if (mc.thePlayer.posY % 1 < 0.5 && mc.thePlayer.posY % 1 > 0.201
+                && !BlockUtils.isFree(relative.getX(), relative.getY() + 2, relative.getZ(), mc.theWorld)
+                && !BlockUtils.isFree(relative.getX(), relative.getY() + 1, relative.getZ(), mc.theWorld)
+                && !BlockUtils.isFree(relative.getX(), relative.getY(), relative.getZ(), mc.theWorld)
+        ) {
+            return VerticalDirection.LOWER;
+        }
+        return VerticalDirection.NONE;
+    }
+
+    public enum VerticalDirection {
+        HIGHER,
+        LOWER,
+        NONE
     }
 
     private boolean checkForStuck(Vec3 positionVec3) {
@@ -379,16 +423,12 @@ public class FlyPathFinderExecutor {
         return false;
     }
 
-    private boolean doesntHaveBlockUnderneath(Vec3 current) {
-        return traversable(current, current.addVector(0, -0.5, 0));
-    }
-
     @SubscribeEvent
     public void onDraw(RenderWorldLastEvent event) {
         if (path == null) return;
         RenderManager renderManager = mc.getRenderManager();
         Vec3 current = mc.thePlayer.getPositionVector();
-        Vec3 next = getNext(current);
+        Vec3 next = getNext();
         AxisAlignedBB currenNode = new AxisAlignedBB(current.xCoord - 0.05, current.yCoord - 0.05, current.zCoord - 0.05, current.xCoord + 0.05, current.yCoord + 0.05, current.zCoord + 0.05);
         AxisAlignedBB nextBB = new AxisAlignedBB(next.xCoord - 0.05, next.yCoord - 0.05, next.zCoord - 0.05, next.xCoord + 0.05, next.yCoord + 0.05, next.zCoord + 0.05);
         RenderManager rendermanager = Minecraft.getMinecraft().getRenderManager();
@@ -405,23 +445,12 @@ public class FlyPathFinderExecutor {
         }
     }
 
-    private Vec3 getNext(Vec3 current) {
-        Vec3 next = path.get(0);
-        if (path.size() > 2) {
-            for (Vec3 vec3 : path) {
-                if ((traversable(current, vec3) &&
-                        traversable(current.addVector(0, 0.8, 0), vec3.addVector(0, 0.8, 0)) &&
-                        traversable(current.addVector(0, 1, 0), vec3.addVector(0, 1, 0)) &&
-                        traversable(current.addVector(0, 1.8, 0), vec3.addVector(0, 1.8, 0)))) {
-                    next = vec3;
-                } else {
-                    break;
-                }
-            }
-        } else {
-            next = path.get(1);
+    private Vec3 getNext() {
+        try {
+            return path.get(1);
+        } catch (IndexOutOfBoundsException e) {
+            return path.get(path.size() - 1);
         }
-        return next;
     }
 
     public enum State {

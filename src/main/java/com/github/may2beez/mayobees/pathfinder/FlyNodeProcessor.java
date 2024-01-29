@@ -2,8 +2,6 @@ package com.github.may2beez.mayobees.pathfinder;
 
 import cc.polyfrost.oneconfig.libs.checker.nullness.qual.Nullable;
 import com.github.may2beez.mayobees.util.BlockUtils;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.pathfinding.PathPoint;
 import net.minecraft.util.BlockPos;
@@ -15,7 +13,13 @@ public class FlyNodeProcessor extends NodeProcessor {
 
     @Override
     public PathPoint getPathPointTo(Entity entityIn) {
-        return this.openPoint(MathHelper.floor_double(entityIn.getEntityBoundingBox().minX), MathHelper.floor_double(entityIn.getEntityBoundingBox().minY + 0.5D), MathHelper.floor_double(entityIn.getEntityBoundingBox().minZ));
+        BlockPos pos = new BlockPos(entityIn);
+        if (!BlockUtils.isFree(pos.getX(), pos.getY(), pos.getZ(), blockaccess)) {
+            BlockPos previousPosition = WorldCache.getInstance().getLastPos();
+            return this.openPoint(previousPosition.getX(), MathHelper.floor_double(previousPosition.getY() + 0.5D), previousPosition.getZ());
+        }
+        BlockPos relative = BlockUtils.getRelativeBlockPos(0, 0, 0);
+        return this.openPoint(relative.getX(), MathHelper.floor_double(relative.getY() + 0.5D), relative.getZ());
     }
 
     @Override

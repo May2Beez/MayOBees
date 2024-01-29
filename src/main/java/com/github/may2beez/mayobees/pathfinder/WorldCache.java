@@ -1,6 +1,7 @@
 package com.github.may2beez.mayobees.pathfinder;
 
 import com.github.may2beez.mayobees.event.BlockChangeEvent;
+import com.github.may2beez.mayobees.event.MotionUpdateEvent;
 import com.github.may2beez.mayobees.event.PacketEvent;
 import com.github.may2beez.mayobees.handler.GameStateHandler;
 import com.github.may2beez.mayobees.util.BlockUtils;
@@ -30,6 +31,10 @@ public class WorldCache {
     private final HashMap<Coordinate, Chunk> chunkCache = new HashMap<>();
     private final List<Class<? extends Block>> directionDependentBlocks = Lists.newArrayList(BlockDoor.class, BlockTrapDoor.class, BlockStairs.class);
 
+    @Getter
+    private BlockPos currentPos;
+    @Getter
+    private BlockPos lastPos;
     public static WorldCache getInstance() {
         if (instance == null) {
             instance = new WorldCache();
@@ -39,6 +44,17 @@ public class WorldCache {
 
     private final HashMap<BlockPos, CacheEntry> worldCache = new HashMap<>();
     private final Minecraft mc = Minecraft.getMinecraft();
+
+    @SubscribeEvent
+    public void onMotionUpdateEvent(MotionUpdateEvent event) {
+        if (currentPos == null) {
+            currentPos = new BlockPos(mc.thePlayer);
+            lastPos = currentPos;
+        } else if (!currentPos.equals(new BlockPos(mc.thePlayer))) {
+            lastPos = currentPos;
+            currentPos = new BlockPos(mc.thePlayer);
+        }
+    }
 
     @SubscribeEvent
     public void onBlockChange(BlockChangeEvent event) {

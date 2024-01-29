@@ -320,7 +320,7 @@ public class BlockUtils {
         }
 
         if (block instanceof BlockSlab && !block.equals(Blocks.double_stone_slab) && !block.equals(Blocks.double_wooden_slab) && !block.equals(Blocks.double_stone_slab2)) {
-            return blockState.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.BOTTOM;
+            return true;
         }
 
         if (block instanceof BlockFence) {

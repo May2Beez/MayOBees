@@ -289,7 +289,6 @@ public class MayOBeesConfig extends Config {
 
     //</editor-fold>
 
-
     //<editor-fold desc="DUNGEON">
     //<editor-fold desc="Auto Boom TNT">
     @Switch(
@@ -328,7 +327,6 @@ public class MayOBeesConfig extends Config {
 
     //</editor-fold>
     //</editor-fold>
-
 
     //<editor-fold desc="RENDER">
     //<editor-fold desc="Chest ESP">
@@ -560,6 +558,12 @@ public class MayOBeesConfig extends Config {
             type = InfoType.INFO
     )
     public boolean infoSmartToggle7 = false;
+
+    @Switch(
+            name = "Auto Sprint",
+            category = "Misc"
+    )
+    public static boolean autoSprint = false;
 
     //</editor-fold>
 
