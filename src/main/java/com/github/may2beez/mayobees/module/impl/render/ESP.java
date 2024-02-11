@@ -167,7 +167,7 @@ public class ESP implements IModule {
                 AxisAlignedBB bb = block.getSelectedBoundingBox(mc.theWorld, tileEntityChest.getPos()).expand(0.002, 0.002, 0.002).offset(-mc.getRenderManager().viewerPosX, -mc.getRenderManager().viewerPosY, -mc.getRenderManager().viewerPosZ);
                 RenderUtils.drawBox(bb, MayOBeesConfig.chestESPColor.toJavaColor());
                 if (MayOBeesConfig.chestESPTracers) {
-                    RenderUtils.drawTracer(new Vec3(tileEntityChest.getPos().getX() + 0.5, tileEntityChest.getPos().getY() + 0.5, tileEntityChest.getPos().getZ() + 0.5), MayOBeesConfig.chestESPColor.toJavaColor());
+                    RenderUtils.drawTracer(new Vec3(tileEntityChest.getPos().getX() + 0.5 - mc.getRenderManager().viewerPosX, tileEntityChest.getPos().getY() + 0.5 - mc.getRenderManager().viewerPosY, tileEntityChest.getPos().getZ() + 0.5 - mc.getRenderManager().viewerPosZ), MayOBeesConfig.chestESPColor.toJavaColor());
                 }
             }
         }
@@ -200,7 +200,7 @@ public class ESP implements IModule {
             double y = closestFairySoulBb.minY + (closestFairySoulBb.maxY - closestFairySoulBb.minY) / 2;
             double z = closestFairySoulBb.minZ + (closestFairySoulBb.maxZ - closestFairySoulBb.minZ) / 2;
             if (fairySoulESPTracers) {
-                RenderUtils.drawTracer(new Vec3(x, y, z), fairySoulESPColor.toJavaColor());
+                RenderUtils.drawTracer(new Vec3(x - mc.getRenderManager().viewerPosX, y - mc.getRenderManager().viewerPosY, z - mc.getRenderManager().viewerPosZ), fairySoulESPColor.toJavaColor());
             }
             if (fairySoulESPShowDistance) {
                 double distance = Math.sqrt(mc.thePlayer.getDistanceSqToCenter(new BlockPos(closestFairySoulBb.minX + 0.5, closestFairySoulBb.minY + 0.5, closestFairySoulBb.minZ + 0.5)));
@@ -233,7 +233,7 @@ public class ESP implements IModule {
             bb = bb.offset(-mc.getRenderManager().viewerPosX, -mc.getRenderManager().viewerPosY, -mc.getRenderManager().viewerPosZ);
             RenderUtils.drawBox(bb, MayOBeesConfig.fairySoulESPColor.toJavaColor());
             if (MayOBeesConfig.fairySoulESPTracers) {
-                RenderUtils.drawTracer(new Vec3(entityArmorStand.posX, entityArmorStand.posY + entityArmorStand.getEyeHeight(), entityArmorStand.posZ), MayOBeesConfig.fairySoulESPColor.toJavaColor());
+                RenderUtils.drawTracer(new Vec3(entityArmorStand.posX - mc.getRenderManager().viewerPosX, entityArmorStand.posY + entityArmorStand.getEyeHeight() - mc.getRenderManager().viewerPosY, entityArmorStand.posZ - mc.getRenderManager().viewerPosZ), MayOBeesConfig.fairySoulESPColor.toJavaColor());
             }
             if (MayOBeesConfig.fairySoulESPShowDistance) {
                 double distance = Math.sqrt(mc.thePlayer.getDistanceSqToCenter(new BlockPos(entityArmorStand.posX, entityArmorStand.posY + entityArmorStand.getEyeHeight(), entityArmorStand.posZ)));
@@ -251,7 +251,7 @@ public class ESP implements IModule {
             if (clickedGifts.contains(entityArmorStand.getPosition())) return;
             RenderUtils.drawHeadBox(entityArmorStand, MayOBeesConfig.giftESPColor.toJavaColor());
             if (MayOBeesConfig.giftESPTracers) {
-                RenderUtils.drawTracer(new Vec3(entityArmorStand.posX, entityArmorStand.posY + entityArmorStand.getEyeHeight(), entityArmorStand.posZ), MayOBeesConfig.giftESPColor.toJavaColor());
+                RenderUtils.drawTracer(new Vec3(entityArmorStand.posX - mc.getRenderManager().viewerPosX, entityArmorStand.posY + entityArmorStand.getEyeHeight() - mc.getRenderManager().viewerPosY, entityArmorStand.posZ - mc.getRenderManager().viewerPosZ), MayOBeesConfig.giftESPColor.toJavaColor());
             }
             if (MayOBeesConfig.giftESPShowDistance) {
                 double distance = Math.sqrt(mc.thePlayer.getDistanceSqToCenter(new BlockPos(entityArmorStand.posX, entityArmorStand.posY + entityArmorStand.getEyeHeight(), entityArmorStand.posZ)));

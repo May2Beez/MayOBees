@@ -200,6 +200,6 @@ public class RenderUtils {
         double renderPosX = to.xCoord - renderManager.viewerPosX;
         double renderPosY = to.yCoord - renderManager.viewerPosY;
         double renderPosZ = to.zCoord - renderManager.viewerPosZ;
-        drawTracer(new Vec3(-renderPosX, Minecraft.getMinecraft().thePlayer.getEyeHeight() - renderPosY, -renderPosZ), to, color);
+        drawTracer(new Vec3(0, Minecraft.getMinecraft().thePlayer.getEyeHeight(), 0), to, color);
     }
 }
