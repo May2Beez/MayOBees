@@ -258,8 +258,8 @@ public class MobAura implements IModuleActive {
         Vec3 playerRightLooking = AngleUtils.getVectorForRotation(0, mc.thePlayer.rotationYaw + MayOBeesConfig.mobAuraFOV / 2f);
         Vec3 playerLeftLookingEnd = playerPos.addVector(playerLeftLooking.xCoord * MayOBeesConfig.mobAuraRange, playerLeftLooking.yCoord * MayOBeesConfig.mobAuraRange, playerLeftLooking.zCoord * MayOBeesConfig.mobAuraRange);
         Vec3 playerRightLookingEnd = playerPos.addVector(playerRightLooking.xCoord * MayOBeesConfig.mobAuraRange, playerRightLooking.yCoord * MayOBeesConfig.mobAuraRange, playerRightLooking.zCoord * MayOBeesConfig.mobAuraRange);
-        RenderUtils.drawTracer(new Vec3(0, 0, 0), playerLeftLookingEnd, Color.WHITE);
-        RenderUtils.drawTracer(new Vec3(0, 0, 0), playerRightLookingEnd, Color.WHITE);
+        RenderUtils.drawTracer(new Vec3(0, 0, 0), playerLeftLookingEnd.addVector(-mc.getRenderManager().viewerPosX, -mc.getRenderManager().viewerPosY, -mc.getRenderManager().viewerPosZ), Color.WHITE);
+        RenderUtils.drawTracer(new Vec3(0, 0, 0), playerRightLookingEnd.addVector(-mc.getRenderManager().viewerPosX, -mc.getRenderManager().viewerPosY, -mc.getRenderManager().viewerPosZ), Color.WHITE);
     }
 
     @SubscribeEvent
