@@ -6,6 +6,7 @@ import com.github.may2beez.mayobees.module.impl.combat.AutoClicker;
 import com.github.may2beez.mayobees.module.impl.combat.MobAura;
 import com.github.may2beez.mayobees.module.impl.dungeon.AutoBoomTNT;
 import com.github.may2beez.mayobees.module.impl.other.GhostBlocks;
+import com.github.may2beez.mayobees.module.impl.player.Brush;
 import com.github.may2beez.mayobees.module.impl.player.GiftAura;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
 import com.github.may2beez.mayobees.module.impl.skills.*;
@@ -46,7 +47,8 @@ public class ModuleManager {
                 Foraging.getInstance(),
                 FillChestWithSaplingMacro.getInstance(),
                 FillForagingSackMacro.getInstance(),
-                AutoBoomTNT.getInstance()
+                AutoBoomTNT.getInstance(),
+                Brush.getInstance()
         );
     }
 
@@ -97,6 +99,10 @@ public class ModuleManager {
             if (heldItem.getDisplayName().contains("Foraging Sack")) {
                 toggle(FillForagingSackMacro.getInstance());
             }
+        }
+
+        if (heldItem.getDisplayName().contains("Aspect") && (heldItem.getDisplayName().contains("Void") || heldItem.getDisplayName().contains("End"))) {
+            toggle(Brush.getInstance());
         }
     }
 }

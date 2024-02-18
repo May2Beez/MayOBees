@@ -11,6 +11,7 @@ import cc.polyfrost.oneconfig.config.data.ModType;
 import com.github.may2beez.mayobees.module.ModuleManager;
 import com.github.may2beez.mayobees.module.impl.combat.AutoClicker;
 import com.github.may2beez.mayobees.module.impl.other.Dev;
+import com.github.may2beez.mayobees.module.impl.player.Brush;
 import com.github.may2beez.mayobees.module.impl.player.GiftAura;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
 import com.github.may2beez.mayobees.module.impl.skills.AlchemyHelper;
@@ -558,6 +559,14 @@ public class MayOBeesConfig extends Config {
             type = InfoType.INFO
     )
     public boolean infoSmartToggle7 = false;
+
+    @Info(
+            text = "Brush - Hold Aspect of the Void or Aspect of the End in the hand. If you want to TP backwards, start while holding Sneak",
+            size = 2,
+            category = "Misc",
+            type = InfoType.INFO
+    )
+    public boolean infoSmartToggle8 = false;
 
     @Switch(
             name = "Auto Sprint",
@@ -1120,6 +1129,55 @@ public class MayOBeesConfig extends Config {
     //</editor-fold>
     //</editor-fold>
 
+    //<editor-fold desc="PLAYER">
+    //<editor-fold desc="Brush">
+
+    @KeyBind(
+            name = "Add New Brush Waypoint List",
+            category = "Player",
+            subcategory = "Brush"
+    )
+    public static OneKeyBind addNewBrushWaypointListKeybind = new OneKeyBind(Keyboard.KEY_NONE);
+
+    @KeyBind(
+            name = "Add Brush Waypoint",
+            category = "Player",
+            subcategory = "Brush"
+    )
+    public static OneKeyBind addBrushWaypointKeybind = new OneKeyBind(Keyboard.KEY_NONE);
+
+    @KeyBind(
+            name = "Remove Brush Waypoint",
+            category = "Player",
+            subcategory = "Brush"
+    )
+    public static OneKeyBind removeBrushWaypointKeybind = new OneKeyBind(Keyboard.KEY_NONE);
+
+    @Button(
+            name = "Clear Brush Waypoints",
+            text = "Clear",
+            description = "Clears all brush waypoints",
+            category = "Player",
+            subcategory = "Brush",
+            size = 2
+    )
+    public static void clearBrushWaypoints() {
+        Brush.getInstance().clearWaypoints();
+    }
+
+    @Slider(
+            name = "Delay After TP (ms)",
+            description = "The delay after teleporting",
+            category = "Player",
+            subcategory = "Brush",
+            min = 0,
+            max = 1000,
+            step = 10
+    )
+    public static int delayAfterTP = 100;
+    //</editor-fold>
+    //</editor-fold>
+
     public MayOBeesConfig() {
         super(new Mod("MayOBees", ModType.HYPIXEL), "/mayobees/config.json");
         initialize();
@@ -1139,6 +1197,18 @@ public class MayOBeesConfig extends Config {
         registerKeyBind(alchemyHelperAutoSellPotionsToNPCKeybind, () -> {
             LogUtils.info("[Alchemy Helper] Selling to NPC: " + (!AlchemyHelper.getInstance().isSellingPotions() ? "Enabled" : "Disabled"));
             AlchemyHelper.getInstance().setSellingPotions(!AlchemyHelper.getInstance().isSellingPotions());
+        });
+
+        registerKeyBind(addBrushWaypointKeybind, () -> {
+            Brush.getInstance().addWaypoint();
+        });
+
+        registerKeyBind(removeBrushWaypointKeybind, () -> {
+            Brush.getInstance().removeWaypoint();
+        });
+
+        registerKeyBind(addNewBrushWaypointListKeybind, () -> {
+            Brush.getInstance().addNewBrushWaypointList();
         });
     }
 }

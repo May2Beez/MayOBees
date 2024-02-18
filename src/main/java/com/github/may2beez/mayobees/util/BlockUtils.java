@@ -1,7 +1,6 @@
 package com.github.may2beez.mayobees.util;
 
 import com.github.may2beez.mayobees.handler.RotationHandler;
-import com.github.may2beez.mayobees.pathfinder.WorldCache;
 import com.github.may2beez.mayobees.util.helper.Rotation;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
@@ -658,23 +657,6 @@ public class BlockUtils {
         BACKWARD,
         LEFT,
         RIGHT
-    }
-
-    public static boolean isFree(float x, float y, float z, IBlockAccess blockaccess) {
-        BlockPos blockpos = new BlockPos(x, y, z);
-        IBlockState blockState = blockaccess.getBlockState(blockpos);
-        Block block = blockState.getBlock();
-        WorldCache.CacheEntry pathnodetype = WorldCache.getInstance().getWorldCache().get(blockpos);
-        if (pathnodetype != null) {
-            if (pathnodetype.getBlock().equals(blockaccess.getBlockState(blockpos).getBlock()))
-                return pathnodetype.getPathNodeType() == PathNodeType.OPEN;
-        }
-        if (blockHasCollision(blockpos, blockState, block)) {
-            WorldCache.getInstance().getWorldCache().put(blockpos, new WorldCache.CacheEntry(block, blockpos, PathNodeType.BLOCKED));
-            return false;
-        }
-        WorldCache.getInstance().getWorldCache().put(blockpos, new WorldCache.CacheEntry(block, blockpos, PathNodeType.OPEN));
-        return true;
     }
 
     public enum PathNodeType {
