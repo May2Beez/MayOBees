@@ -14,6 +14,7 @@ import com.github.may2beez.mayobees.util.helper.Rotation;
 import com.github.may2beez.mayobees.util.helper.RotationConfiguration;
 import com.github.may2beez.mayobees.util.helper.Target;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.util.BlockPos;
@@ -30,9 +31,13 @@ import java.util.Optional;
 
 public class Brush implements IModuleActive {
     private static Brush instance;
+    @Getter
     private final List<WaypointList> waypoints = new ArrayList<>();
     private final Clock delay = new Clock();
     private boolean teleported = true;
+    @Setter
+    @Getter
+    private int currentWaypointList = -1;
 
     public static Brush getInstance() {
         if (instance == null) {
@@ -73,7 +78,10 @@ public class Brush implements IModuleActive {
 
     public void addWaypoint() {
         BlockPos pos = BlockUtils.getRelativeBlockPos(0, -1, 0);
-        waypoints.get(waypoints.size() - 1).addWaypoint(pos);
+        if (waypoints.isEmpty()) {
+            addNewBrushWaypointList();
+        }
+        waypoints.get(currentWaypointList).addWaypoint(pos);
         LogUtils.info("[Brush] Added waypoint at " + pos + " to list no. " + (waypoints.size() - 1) + "!");
     }
 
@@ -90,6 +98,7 @@ public class Brush implements IModuleActive {
 
     public void addNewBrushWaypointList() {
         waypoints.add(new WaypointList());
+        currentWaypointList = waypoints.size() - 1;
         LogUtils.info("[Brush] Added new waypoint list!");
     }
 
@@ -98,13 +107,29 @@ public class Brush implements IModuleActive {
         LogUtils.info("[Brush] Cleared waypoints!");
     }
 
+    private final Color blockedVisionColor = new Color(255, 0, 0, 125);
+
     @SubscribeEvent
     public void onRender(RenderWorldLastEvent event) {
         for (WaypointList list : waypoints) {
-            int index = 1;
+            int index = 0;
+            BlockPos prev = null;
             for (BlockPos pos : list.waypoints) {
                 RenderUtils.drawBlockBox(pos, list.color);
-                RenderUtils.drawText("List " + (waypoints.indexOf(list) + 1) + ", Block " + index, pos.getX() + 0.5f, pos.getY() + 1.5f, pos.getZ() + 0.5f, 0.5f);
+                RenderUtils.drawText("List " + (waypoints.indexOf(list)) + ", Block " + index, pos.getX() + 0.5f, pos.getY() + 1.5f, pos.getZ() + 0.5f, 0.5f);
+
+                if (prev != null) {
+                    Vec3 direction = new Vec3(pos.getX() - prev.getX(), pos.getY() - prev.getY(), pos.getZ() - prev.getZ());
+                    Vec3 from = new Vec3(prev.getX() + 0.5, prev.getY() + 0.5, prev.getZ() + 0.5);
+                    from = from.add(direction.normalize());
+                    Vec3 to = new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+                    MovingObjectPosition mop = mc.theWorld.rayTraceBlocks(from, to, false, true, false);
+                    if (mop != null && mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && !mop.getBlockPos().equals(pos) && !mop.getBlockPos().equals(prev)) {
+                        RenderUtils.drawBlockBox(mop.getBlockPos(), blockedVisionColor);
+                    }
+                }
+
+                prev = pos;
                 index++;
             }
         }
@@ -160,6 +185,7 @@ public class Brush implements IModuleActive {
         }
 
         BlockPos nextPos;
+        Vec3 nextVec;
 
         if (backwards) {
             nextPos = list.get().waypoints.get(currentIndex - 1);
@@ -167,28 +193,36 @@ public class Brush implements IModuleActive {
             nextPos = list.get().waypoints.get(currentIndex + 1);
         }
 
-        Rotation rotation = RotationHandler.getInstance().getRotation(nextPos);
+        nextVec = new Vec3(nextPos.getX() + 0.5, nextPos.getY() + 0.75, nextPos.getZ() + 0.5);
+
+        MovingObjectPosition mop = mc.theWorld.rayTraceBlocks(mc.thePlayer.getPositionEyes(1), nextVec, false, true, false);
+        if (mop == null || mop.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK || !mop.getBlockPos().equals(nextPos)) {
+            LogUtils.warn("[Brush] Not visible, trying to find visible point!");
+            List<Vec3> visiblePoints = BlockUtils.getVisiblePoints(nextPos, true);
+            if (visiblePoints.isEmpty()) {
+                LogUtils.error("[Brush] Obstacle in the way!");
+                ModuleManager.getInstance().toggle(this);
+                return;
+            }
+            nextVec = visiblePoints.get(0);
+        }
+
+        Rotation rotation = RotationHandler.getInstance().getRotation(nextVec);
         if (RotationHandler.getInstance().shouldRotate(rotation)) {
             RotationHandler.getInstance().easeTo(new RotationConfiguration(
-                    new Target(nextPos),
+                    new Target(nextVec),
                     (long) (300 + Math.random() * 100),
                     null
             ));
             return;
         }
 
-        if (mc.thePlayer.getDistance(nextPos.getX(), nextPos.getY(), nextPos.getZ()) > 61) {
+        if (mc.thePlayer.getDistance(nextVec.xCoord, nextVec.yCoord, nextVec.zCoord) > 61) {
             LogUtils.error("[Brush] Next waypoint is too far away!");
             ModuleManager.getInstance().toggle(this);
             return;
         }
 
-        MovingObjectPosition mop = mc.theWorld.rayTraceBlocks(mc.thePlayer.getPositionVector().addVector(0, mc.thePlayer.getEyeHeight(), 0), new Vec3(nextPos.getX() + 0.5, nextPos.getY() + 0.5, nextPos.getZ() + 0.5));
-        if (mop == null || mop.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK || !mop.getBlockPos().equals(nextPos)) {
-            LogUtils.error("[Brush] Obstacle in the way!");
-            ModuleManager.getInstance().toggle(this);
-            return;
-        }
 
         KeyBindUtils.rightClick();
         started = true;

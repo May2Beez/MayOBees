@@ -652,6 +652,29 @@ public class BlockUtils {
         return blocks;
     }
 
+    public static List<Vec3> getVisiblePoints(Vec3 vec3, boolean any) {
+        return getVisiblePoints(new BlockPos(vec3), any);
+    }
+
+    public static List<Vec3> getVisiblePoints(BlockPos blockPos, boolean any) {
+        List<Vec3> points = new ArrayList<>();
+        for (float x = 0.05f; x < 1f; x += 0.05f) {
+            for (float y = 0.05f; y < 1f; y += 0.05f) {
+                for (float z = 0.05f; z < 1f; z += 0.05f) {
+                    Vec3 point = new Vec3(blockPos.getX() + x, blockPos.getY() + y, blockPos.getZ() + z);
+                    MovingObjectPosition mop = mc.theWorld.rayTraceBlocks(mc.thePlayer.getPositionEyes(1.0f), point, false, true, true);
+                    if (mop != null && mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && mop.getBlockPos().equals(blockPos)) {
+                        points.add(point);
+                        if (any) {
+                            return points;
+                        }
+                    }
+                }
+            }
+        }
+        return points;
+    }
+
     public enum Direction {
         FORWARD,
         BACKWARD,
