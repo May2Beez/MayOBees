@@ -1175,6 +1175,18 @@ public class MayOBeesConfig extends Config {
             step = 10
     )
     public static int delayAfterTP = 100;
+
+    @Slider(
+            name = "Delay before TP, after rotation (ms)",
+            description = "The delay before teleporting. Mostly your ping",
+            category = "Player",
+            subcategory = "Brush",
+            min = 0,
+            max = 1000,
+            step = 10
+    )
+    public static int delayBeforeTP = 100;
+
     //</editor-fold>
     //</editor-fold>
 

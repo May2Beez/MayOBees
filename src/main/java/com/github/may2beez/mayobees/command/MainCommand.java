@@ -34,10 +34,10 @@ public class MainCommand {
             if (waypoint < 0) {
                 waypoint = 0;
             }
-            if (waypoint >= Brush.getInstance().getWaypoints().size()) {
-                waypoint = Brush.getInstance().getWaypoints().size() - 1;
-            }
             int currentList = Brush.getInstance().getCurrentWaypointList();
+            if (waypoint >= Brush.getInstance().getWaypoints().get(currentList).getWaypoints().size()) {
+                waypoint = Brush.getInstance().getWaypoints().get(currentList).getWaypoints().size() - 1;
+            }
             Brush.getInstance().getWaypoints().get(currentList).getWaypoints().set(waypoint, Brush.getInstance().getWaypoints().get(currentList).getWaypoints().get(waypoint).add(xOffset, yOffset, zOffset));
             LogUtils.info("Offset waypoint " + waypoint + " by " + xOffset + " " + yOffset + " " + zOffset);
         }

@@ -209,11 +209,13 @@ public class Brush implements IModuleActive {
 
         Rotation rotation = RotationHandler.getInstance().getRotation(nextVec);
         if (RotationHandler.getInstance().shouldRotate(rotation)) {
+            long time = (long) (300 + Math.random() * 100);
             RotationHandler.getInstance().easeTo(new RotationConfiguration(
                     new Target(nextVec),
-                    (long) (300 + Math.random() * 100),
+                    time,
                     null
             ));
+            delay.schedule(time + MayOBeesConfig.delayBeforeTP);
             return;
         }
 
