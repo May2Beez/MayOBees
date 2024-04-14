@@ -58,6 +58,8 @@ public class AutoHarp implements IModuleActive {
             enabled = true;
             onEnable();
             LogUtils.debug("Harp Enabled");
+        }else{
+            enabled = false;
         }
     }
 
