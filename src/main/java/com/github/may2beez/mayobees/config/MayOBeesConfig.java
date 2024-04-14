@@ -1188,6 +1188,17 @@ public class MayOBeesConfig extends Config {
     public static int delayBeforeTP = 100;
 
     //</editor-fold>
+    //<editor-fold desc="Auto hard">
+
+    @Switch(
+            name = "Auto Harp",
+            description = "Automatically Completes Harp",
+            category = "Player",
+            subcategory = "Auto Harp"
+    )
+    public static boolean autoHarpEnable = false;
+
+    //</editor-fold>
     //</editor-fold>
 
     public MayOBeesConfig() {

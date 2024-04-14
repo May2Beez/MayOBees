@@ -10,6 +10,7 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.play.client.C0EPacketClickWindow;
 import net.minecraft.util.StringUtils;
 
 import java.util.ArrayList;
@@ -379,6 +380,7 @@ public class InventoryUtils {
     public static enum ClickMode {
         PICKUP,
         QUICK_MOVE,
-        SWAP
+        SWAP,
+        CLONE
     }
 }
