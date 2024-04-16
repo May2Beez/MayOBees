@@ -184,7 +184,7 @@ public class AutoBazaar implements IModuleActive {
                 changeState(BuyState.WAITING_FOR_GUI);
                 break;
             case BUYING_ITEM:
-                if (!hasClickTimerEnded()) return;
+//                if (!hasClickTimerEnded()) return;
                 if (buyButtonText == null) {
                     disable(false, FailReason.UNUSABLE);
                     return;
@@ -221,7 +221,7 @@ public class AutoBazaar implements IModuleActive {
         String boughtMessage = String.format("[Bazaar] Bought %dx %s for", this.buyAmount, this.itemToBuy);
 
         if (message.startsWith(boughtMessage) && buyState == BuyState.VERIFYING_PURCHASE) {
-            changeState(BuyState.DISABLING);
+            changeState(BuyState.DISABLING, 150L, false);
         }
     }
 
