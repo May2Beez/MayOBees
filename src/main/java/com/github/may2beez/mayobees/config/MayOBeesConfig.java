@@ -1188,7 +1188,7 @@ public class MayOBeesConfig extends Config {
     public static int delayBeforeTP = 100;
 
     //</editor-fold>
-    //<editor-fold desc="Auto hard">
+    //<editor-fold desc="Auto harp">
 
     @Switch(
             name = "Auto Harp",
@@ -1196,8 +1196,45 @@ public class MayOBeesConfig extends Config {
             category = "Player",
             subcategory = "Auto Harp"
     )
-    public static boolean autoHarpEnable = false;
+    public static boolean autoHarp = false;
 
+    //</editor-fold>
+
+    // Todo: Global Delay for everything?
+    //<editor-fold desc="Visitor Helper">
+    @Switch(
+            name = "Visitor Helper", category = "Player", subcategory = "Visitor Helper",
+            description = "Enable Visitor Helper"
+    )
+    public static boolean visitorHelper = false;
+
+    @Slider(
+            name = "Max Spend Threshold (In Thousands)", category = "Player", subcategory = "Visitor Helper",
+            description = "Maximum Amount of Coins Allowed To Spend Per Visitor (in thousands, 0 = no limit)",
+            min = 0f, max = 7000f
+    )
+    public static int visitorHelperSpendThreshold = 0;
+
+    @Slider(
+            name = "GUI Delay", category = "Player", subcategory = "Visitor Helper",
+            description = "The delay between clicking during GUI macros (in milliseconds)",
+            min = 250f, max = 1000f
+    )
+    public static int visitorHelperGuiDelay = 400;
+
+    @Slider(
+            name = "Additional random GUI Delay", category = "Player", subcategory = "Visitor Helper",
+            description = "The maximum random time added to the delay time between clicking during GUI macros (in milliseconds)",
+            min = 0f, max = 1000f
+    )
+    public static int visitorHelperGuiDelayRandomness = 350;
+
+    @Slider(
+            name = "Max wait time before stopping (should be > clickTime + randomTime)", category = "Player", subcategory = "Visitor Helper",
+            description = "The maximum time to wait before stopping the module (in milliseconds)",
+            min = 0f, max = 2000f
+    )
+    public static int visitorHelperGuiTimeoutTime = 750;
     //</editor-fold>
     //</editor-fold>
 

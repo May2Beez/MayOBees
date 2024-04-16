@@ -1,6 +1,7 @@
 package com.github.may2beez.mayobees.module.impl.player;
 
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
+import com.github.may2beez.mayobees.event.GuiClosedEvent;
 import com.github.may2beez.mayobees.event.PacketEvent;
 import com.github.may2beez.mayobees.module.IModuleActive;
 import com.github.may2beez.mayobees.util.InventoryUtils;
@@ -28,7 +29,7 @@ public class AutoHarp implements IModuleActive {
     private boolean enabled = false;
     private boolean hasGuiUpdated = false;
     private long lastPacketReceiveTime = 0;
-    private int lagSpikeThreshold = 100;
+    private final int lagSpikeThreshold = 100;
     private ItemStack[] slots = new ItemStack[7];
 
     @Override
@@ -43,30 +44,37 @@ public class AutoHarp implements IModuleActive {
 
     @Override
     public void onEnable() {
+        enabled = true;
         hasGuiUpdated = false;
         slots = new ItemStack[7];
     }
 
     @Override
     public void onDisable() {
-        onEnable();
+        enabled = false;
+        hasGuiUpdated = false;
+        slots = new ItemStack[7];
     }
 
     @SubscribeEvent
-    void onGuiOpen(GuiScreenEvent.InitGuiEvent.Post event) {
-        if (!MayOBeesConfig.autoHarpEnable) return;
+    public void onGuiOpen(GuiScreenEvent.InitGuiEvent.Post event) {
+        if (!MayOBeesConfig.autoHarp || isRunning()) return;
         String inventoryName = InventoryUtils.getInventoryName();
         if (inventoryName != null && inventoryName.startsWith("Harp - ")) {
-            enabled = true;
             onEnable();
             LogUtils.debug("Harp Enabled");
-        }else{
-            enabled = false;
         }
     }
 
     @SubscribeEvent
-    void onPacketReceive(PacketEvent.Receive event) {
+    public void onGuiClose(GuiClosedEvent event){
+        if(!isRunning()) return;
+        onDisable();
+        LogUtils.debug("Harp Gui Closed");
+    }
+
+    @SubscribeEvent
+    public void onPacketReceive(PacketEvent.Receive event) {
         if (!isRunning()) return;
 
         long currentTime = System.currentTimeMillis();
