@@ -9,6 +9,7 @@ import com.github.may2beez.mayobees.module.impl.other.GhostBlocks;
 import com.github.may2beez.mayobees.module.impl.player.AutoHarp;
 import com.github.may2beez.mayobees.module.impl.player.Brush;
 import com.github.may2beez.mayobees.module.impl.player.GiftAura;
+import com.github.may2beez.mayobees.module.impl.player.VisitorHelper;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
 import com.github.may2beez.mayobees.module.impl.skills.*;
 import com.github.may2beez.mayobees.util.InventoryUtils;
@@ -50,7 +51,8 @@ public class ModuleManager {
                 FillForagingSackMacro.getInstance(),
                 AutoBoomTNT.getInstance(),
                 Brush.getInstance(),
-                AutoHarp.getInstance()
+                AutoHarp.getInstance(),
+                VisitorHelper.getInstance()
         );
     }
 
