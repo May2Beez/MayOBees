@@ -155,7 +155,6 @@ public class VisitorHelper implements IModuleActive {
             LogUtils.error("No Item To Buy.");
             return;
         }
-        InventoryUtils.closeScreen();
         AutoBazaar.getInstance().buy(config);
     }
 }
