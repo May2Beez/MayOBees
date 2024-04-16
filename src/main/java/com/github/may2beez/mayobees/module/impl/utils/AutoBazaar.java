@@ -111,10 +111,13 @@ public class AutoBazaar implements IModuleActive {
                 break;
             case OPENING_BZ:
                 mc.thePlayer.sendChatMessage("/bz " + itemToBuy);
-                changeState(BuyState.WAITING_FOR_GUI, 2000, false);
+                changeState(BuyState.WAITING_FOR_GUI);
                 break;
             case WAITING_FOR_GUI:
-                hasClickTimerEnded();
+                if (hasTimeoutTimerEnded()) {
+                    disable(false, FailReason.UNUSABLE);
+                    return;
+                }
                 if (!(mc.currentScreen instanceof GuiChest)) return;
 
                 changeState(BuyState.NAVIGATING_GUI);
@@ -184,7 +187,6 @@ public class AutoBazaar implements IModuleActive {
                 changeState(BuyState.WAITING_FOR_GUI);
                 break;
             case BUYING_ITEM:
-//                if (!hasClickTimerEnded()) return;
                 if (buyButtonText == null) {
                     disable(false, FailReason.UNUSABLE);
                     return;
@@ -192,15 +194,17 @@ public class AutoBazaar implements IModuleActive {
 
                 int slotIndex = InventoryUtils.getSlotIdOfItemInContainer(buyButtonText);
                 if (slotIndex == -1 || slotIndex > mc.thePlayer.openContainer.inventorySlots.size() - 37) {
-                    disable(false, FailReason.UNUSABLE);
+                    if (hasTimeoutTimerEnded()) {
+                        disable(false, FailReason.UNUSABLE);
+                    }
                     return;
                 }
 
                 InventoryUtils.clickContainerSlot(slotIndex, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.PICKUP);
-                changeState(BuyState.VERIFYING_PURCHASE, 2000, false);
+                changeState(BuyState.VERIFYING_PURCHASE);
                 break;
             case VERIFYING_PURCHASE:
-                if (hasClickTimerEnded()) {
+                if (hasTimeoutTimerEnded()) {
                     disable(false, FailReason.UNUSABLE);
                 }
                 break;
