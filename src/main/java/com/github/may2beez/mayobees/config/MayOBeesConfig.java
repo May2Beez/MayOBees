@@ -1196,7 +1196,7 @@ public class MayOBeesConfig extends Config {
             category = "Player",
             subcategory = "Auto Harp"
     )
-    public static boolean autoHarpEnable = false;
+    public static boolean autoHarp = false;
 
     //</editor-fold>
 

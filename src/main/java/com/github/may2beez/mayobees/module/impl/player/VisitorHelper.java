@@ -2,6 +2,7 @@ package com.github.may2beez.mayobees.module.impl.player;
 
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.event.GuiClosedEvent;
+import com.github.may2beez.mayobees.handler.GameStateHandler;
 import com.github.may2beez.mayobees.module.impl.utils.helper.BazaarConfig;
 import com.github.may2beez.mayobees.module.impl.utils.AutoBazaar;
 import com.github.may2beez.mayobees.mixin.gui.GuiContainerAccessor;
@@ -82,9 +83,10 @@ public class VisitorHelper implements IModuleActive {
 
     @SubscribeEvent
     public void detectVisitorGui(GuiScreenEvent event) {
-        if (!MayOBeesConfig.visitorHelper || !(event.gui instanceof GuiChest) || isRunning() || !shouldCheck) return;
+        if (!MayOBeesConfig.visitorHelper || !(event.gui instanceof GuiChest) || isRunning() || !shouldCheck || GameStateHandler.getInstance().getLocation() != GameStateHandler.Location.GARDEN)
+            return;
         Slot lastSlot = InventoryUtils.getSlotOfIdInContainer(((GuiChest) event.gui).inventorySlots.inventorySlots.size() - 37);
-        if(lastSlot == null || !lastSlot.getHasStack()) return;
+        if (lastSlot == null || !lastSlot.getHasStack()) return;
         shouldCheck = false;
         // Todo: Better Detection Method
         List<Slot> visitorGuiButtons = InventoryUtils.getIndexesOfItemsFromContainer(visitorGuiButtonPredicate);
@@ -121,8 +123,7 @@ public class VisitorHelper implements IModuleActive {
                 break;
             }
             onEnable();
-        }
-        else{
+        } else {
             LogUtils.debug("No Slot Found");
         }
     }

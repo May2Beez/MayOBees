@@ -115,7 +115,7 @@ public class AutoBazaar implements IModuleActive {
                 break;
             case WAITING_FOR_GUI:
                 if (hasTimeoutTimerEnded()) {
-                    disable(false, FailReason.UNUSABLE);
+                    disable(FailReason.UNUSABLE);
                     return;
                 }
                 if (!(mc.currentScreen instanceof GuiChest)) return;
@@ -123,9 +123,9 @@ public class AutoBazaar implements IModuleActive {
                 changeState(BuyState.NAVIGATING_GUI);
                 break;
             case NAVIGATING_GUI:
-                if (!hasClickTimerEnded()) return;
+                if (hasClickTimerNotEnded()) return;
                 if (!(mc.currentScreen instanceof GuiChest)) {
-                    if (hasTimeoutTimerEnded()) disable(false, FailReason.UNUSABLE);
+                    if (hasTimeoutTimerEnded()) disable(FailReason.UNUSABLE);
                     return;
                 }
 
@@ -133,7 +133,7 @@ public class AutoBazaar implements IModuleActive {
 
                 String button = getButtonNameToClick(inventoryName, itemToBuy);
                 if (button == null) {
-                    disable(false, FailReason.UNUSABLE);
+                    disable(FailReason.UNUSABLE);
                     return;
                 }
 
@@ -147,10 +147,7 @@ public class AutoBazaar implements IModuleActive {
                         return;
                     }
                     if (customBtn.getSecond()) {
-                        if (isManipulated(customBtn.getFirst(), spendThreshold)) {
-                            disable(false, FailReason.MANIPULATED);
-                            return;
-                        }
+                        if (cantBuyItem(customBtn.getFirst(), spendThreshold)) return;
 
                         buyButtonText = customBtn.getFirst();
                         changeState(BuyState.BUYING_ITEM);
@@ -165,15 +162,15 @@ public class AutoBazaar implements IModuleActive {
 
                 Slot itemSlot = InventoryUtils.getSlotOfItemInContainer(slotToClick, true);
                 if (itemSlot == null || itemSlot.slotNumber > mc.thePlayer.openContainer.inventorySlots.size() - 37) {
-                    disable(false, FailReason.UNUSABLE);
+                    disable(FailReason.UNUSABLE);
                     return;
                 }
                 InventoryUtils.clickContainerSlot(itemSlot.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.PICKUP);
                 break;
             case EDITING_SIGN:
-                if (!hasClickTimerEnded()) return;
+                if (hasClickTimerNotEnded()) return;
                 if (!(mc.currentScreen instanceof GuiEditSign)) {
-                    if (hasTimeoutTimerEnded()) disable(false, FailReason.UNUSABLE);
+                    if (hasTimeoutTimerEnded()) disable(FailReason.UNUSABLE);
                     return;
                 }
 
@@ -181,21 +178,21 @@ public class AutoBazaar implements IModuleActive {
                 changeState(BuyState.CONFIRMING_SIGN);
                 break;
             case CONFIRMING_SIGN:
-                if (!hasClickTimerEnded()) return;
+                if (hasClickTimerNotEnded()) return;
 
                 SignUtils.confirmSign();
                 changeState(BuyState.WAITING_FOR_GUI);
                 break;
             case BUYING_ITEM:
                 if (buyButtonText == null) {
-                    disable(false, FailReason.UNUSABLE);
+                    disable(FailReason.UNUSABLE);
                     return;
                 }
 
                 int slotIndex = InventoryUtils.getSlotIdOfItemInContainer(buyButtonText);
                 if (slotIndex == -1 || slotIndex > mc.thePlayer.openContainer.inventorySlots.size() - 37) {
                     if (hasTimeoutTimerEnded()) {
-                        disable(false, FailReason.UNUSABLE);
+                        disable(FailReason.UNUSABLE);
                     }
                     return;
                 }
@@ -205,11 +202,11 @@ public class AutoBazaar implements IModuleActive {
                 break;
             case VERIFYING_PURCHASE:
                 if (hasTimeoutTimerEnded()) {
-                    disable(false, FailReason.UNUSABLE);
+                    disable(FailReason.UNUSABLE);
                 }
                 break;
             case DISABLING:
-                if (!hasClickTimerEnded()) return;
+                if (hasClickTimerNotEnded()) return;
                 InventoryUtils.closeScreen();
                 disable(true, FailReason.NONE);
                 break;
@@ -244,12 +241,16 @@ public class AutoBazaar implements IModuleActive {
         }
     }
 
-    private boolean hasClickTimerEnded() {
-        return timer.isScheduled() && timer.passed();
+    private boolean hasClickTimerNotEnded() {
+        return !timer.isScheduled() || !timer.passed();
     }
 
     private boolean hasTimeoutTimerEnded() {
         return timeoutTimer.isScheduled() && timeoutTimer.isPaused();
+    }
+
+    private void disable(FailReason reason) {
+        disable(false, reason);
     }
 
     private void disable(boolean succeeded, FailReason reason) {
@@ -290,6 +291,7 @@ public class AutoBazaar implements IModuleActive {
     enum FailReason {
         MANIPULATED("Item Price Exceeded the max spend threshold. Increase it or check if item was manipulated or not."),
         UNUSABLE("Could not find item / open gui. Pleas Report to the developer if this is a bug."),
+        POOR("Can't get rich smh."),
         NONE("AutoBazaar bought the item successfully.");
         private final String failReason;
 
@@ -336,20 +338,37 @@ public class AutoBazaar implements IModuleActive {
         return defaultBtn;
     }
 
-    private boolean isManipulated(String buttonName, int spendThreshold) {
+    // Todo: Consider Breaking it up into different functions
+    private boolean cantBuyItem(String buttonName, int spendThreshold) {
         if (spendThreshold == 0) return false;
         Slot buySlot = InventoryUtils.getSlotOfItemInContainer(buttonName, true);
-        if (buySlot == null) return true; // this should never happen
+        if (buySlot == null || !buySlot.getHasStack()) {
+            disable(FailReason.UNUSABLE);
+            return true; // this should never happen
+        }
 
         String lore = String.join(" ", InventoryUtils.getItemLore(buySlot.getStack())).replace(",", "");
+
+        if (lore.contains("You don't have enough Coins!")) {
+            disable(FailReason.POOR);
+            return true;
+        }
+
         Matcher matcher = totalCostPattern.matcher(lore);
 
-        if (!matcher.find()) return true;
+        if (!matcher.find()) {
+            disable(FailReason.UNUSABLE);
+            return true;
+        }
 
         float amount = Float.parseFloat(matcher.group(1));
         LogUtils.debug("Price: " + amount);
         LogUtils.debug("Spend Threshold: " + spendThreshold);
-        return amount > spendThreshold;
+        if (amount > spendThreshold) {
+            disable(FailReason.MANIPULATED);
+            return true;
+        }
+        return false;
     }
 
     // Todo: Use a global one
