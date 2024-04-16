@@ -2,8 +2,8 @@ package com.github.may2beez.mayobees.module.impl.player;
 
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.event.GuiClosedEvent;
-import com.github.may2beez.mayobees.feature.helper.BazaarConfig;
-import com.github.may2beez.mayobees.feature.impl.AutoBazaar;
+import com.github.may2beez.mayobees.module.impl.utils.helper.BazaarConfig;
+import com.github.may2beez.mayobees.module.impl.utils.AutoBazaar;
 import com.github.may2beez.mayobees.mixin.gui.GuiContainerAccessor;
 import com.github.may2beez.mayobees.module.IModuleActive;
 import com.github.may2beez.mayobees.util.InventoryUtils;
@@ -51,6 +51,7 @@ public class VisitorHelper implements IModuleActive {
     };
 
     private boolean enabled = false;
+    private boolean shouldCheck = true;
 
     @Override
     public boolean isRunning() {
@@ -65,22 +66,26 @@ public class VisitorHelper implements IModuleActive {
     @Override
     public void onEnable() {
         enabled = true;
-        config = new BazaarConfig(MayOBeesConfig.visitorHelperGuiDelay,
-            MayOBeesConfig.visitorHelperGuiDelayRandomness,
-            MayOBeesConfig.visitorHelperGuiTimeoutTime)
-            .setSpendThreshold(MayOBeesConfig.visitorHelperSpendThreshold * 1000);
+        config = new BazaarConfig(itemToBuy.getFirst(),
+                itemToBuy.getSecond(),
+                MayOBeesConfig.visitorHelperSpendThreshold * 1000,
+                MayOBeesConfig.visitorHelperGuiDelay,
+                MayOBeesConfig.visitorHelperGuiDelayRandomness,
+                MayOBeesConfig.visitorHelperGuiTimeoutTime);
     }
 
     @Override
     public void onDisable() {
         enabled = false;
+        shouldCheck = true;
     }
 
     @SubscribeEvent
     public void detectVisitorGui(GuiScreenEvent event) {
-        if (!MayOBeesConfig.visitorHelper) return;
-        if (!(event.gui instanceof GuiChest) || isRunning()) return;
-
+        if (!MayOBeesConfig.visitorHelper || !(event.gui instanceof GuiChest) || isRunning() || !shouldCheck) return;
+        Slot lastSlot = InventoryUtils.getSlotOfIdInContainer(((GuiChest) event.gui).inventorySlots.inventorySlots.size() - 37);
+        if(lastSlot == null || !lastSlot.getHasStack()) return;
+        shouldCheck = false;
         // Todo: Better Detection Method
         List<Slot> visitorGuiButtons = InventoryUtils.getIndexesOfItemsFromContainer(visitorGuiButtonPredicate);
 
@@ -117,24 +122,27 @@ public class VisitorHelper implements IModuleActive {
             }
             onEnable();
         }
+        else{
+            LogUtils.debug("No Slot Found");
+        }
     }
 
     @SubscribeEvent
     public void onGuiClose(GuiClosedEvent event) {
-        if (!(mc.currentScreen instanceof GuiChest) || !isRunning()) return;
+        if (!(mc.currentScreen instanceof GuiChest) || (!isRunning() && shouldCheck)) return;
 
         LogUtils.debug("GuiClosed");
         onDisable();
     }
 
     @SubscribeEvent
-    void onRender(GuiScreenEvent.BackgroundDrawnEvent event) {
+    public void onRender(GuiScreenEvent.BackgroundDrawnEvent event) {
         if (!(event.gui instanceof GuiChest) || !isRunning() || button == null) return;
         button.drawButton(mc, MouseUtils.getX(), MouseUtils.getY());
     }
 
     @SubscribeEvent
-    void onClick(GuiScreenEvent.MouseInputEvent event) {
+    public void onClick(GuiScreenEvent.MouseInputEvent event) {
         if (!(event.gui instanceof GuiChest) || !isRunning() || !Mouse.isButtonDown(0) && !Mouse.getEventButtonState() || button == null)
             return;
         if (!button.mousePressed(mc, MouseUtils.getX(), MouseUtils.getY())) return;
@@ -148,7 +156,6 @@ public class VisitorHelper implements IModuleActive {
             return;
         }
         InventoryUtils.closeScreen();
-        LogUtils.debug("Name: " + itemToBuy.getFirst() + ", Amt: " + itemToBuy.getSecond());
-        AutoBazaar.getInstance().buy(config.setItemToBuy(itemToBuy.getFirst()).setBuyAmount(itemToBuy.getSecond()));
+        AutoBazaar.getInstance().buy(config);
     }
 }

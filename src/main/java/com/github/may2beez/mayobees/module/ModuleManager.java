@@ -12,6 +12,7 @@ import com.github.may2beez.mayobees.module.impl.player.GiftAura;
 import com.github.may2beez.mayobees.module.impl.player.VisitorHelper;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
 import com.github.may2beez.mayobees.module.impl.skills.*;
+import com.github.may2beez.mayobees.module.impl.utils.AutoBazaar;
 import com.github.may2beez.mayobees.util.InventoryUtils;
 import com.github.may2beez.mayobees.util.LogUtils;
 import lombok.Getter;
@@ -52,7 +53,8 @@ public class ModuleManager {
                 AutoBoomTNT.getInstance(),
                 Brush.getInstance(),
                 AutoHarp.getInstance(),
-                VisitorHelper.getInstance()
+                VisitorHelper.getInstance(),
+                AutoBazaar.getInstance()
         );
     }
 

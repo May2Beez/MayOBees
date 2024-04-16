@@ -4,7 +4,6 @@ import cc.polyfrost.oneconfig.utils.commands.CommandManager;
 import com.github.may2beez.mayobees.command.MainCommand;
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.event.MotionUpdateEvent;
-import com.github.may2beez.mayobees.feature.FeatureManager;
 import com.github.may2beez.mayobees.handler.GameStateHandler;
 import com.github.may2beez.mayobees.handler.RotationHandler;
 import com.github.may2beez.mayobees.module.ModuleManager;
@@ -36,7 +35,6 @@ public class MayOBees {
         MinecraftForge.EVENT_BUS.register(Dev.getInstance());
         CommandManager.register(new MainCommand());
         ModuleManager.getInstance().getModules().forEach(MinecraftForge.EVENT_BUS::register);
-        FeatureManager.getInstance().getFeatures().forEach(MinecraftForge.EVENT_BUS::register);
     }
 
     @SubscribeEvent

@@ -1,8 +1,9 @@
-package com.github.may2beez.mayobees.feature.impl;
+package com.github.may2beez.mayobees.module.impl.utils;
 
-import com.github.may2beez.mayobees.feature.IFeature;
-import com.github.may2beez.mayobees.feature.helper.BazaarConfig;
+import com.github.may2beez.mayobees.module.IModuleActive;
+import com.github.may2beez.mayobees.module.impl.utils.helper.BazaarConfig;
 import com.github.may2beez.mayobees.util.InventoryUtils;
+import com.github.may2beez.mayobees.util.LogUtils;
 import com.github.may2beez.mayobees.util.helper.Clock;
 import com.github.may2beez.mayobees.util.helper.SignUtils;
 import kotlin.Pair;
@@ -20,7 +21,7 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class AutoBazaar implements IFeature {
+public class AutoBazaar implements IModuleActive {
     private static AutoBazaar instance;
 
     public static AutoBazaar getInstance() {
@@ -87,8 +88,8 @@ public class AutoBazaar implements IFeature {
 
         this.config = config;
         if (config.verifyConfig()) {
-            info("Something is wrong with BazaarConfig. Contact developer.");
-            info(config.toString());
+            LogUtils.info("Something is wrong with BazaarConfig. Contact developer.");
+            LogUtils.info(config.toString());
             return;
         }
 
@@ -97,11 +98,11 @@ public class AutoBazaar implements IFeature {
         this.buyAmount = config.buyAmount;
         this.spendThreshold = config.spendThreshold;
 
-        log("Enabling");
+        LogUtils.debug("Enabling");
     }
 
     @SubscribeEvent
-    void onTick(TickEvent.ClientTickEvent event) {
+    public void onTick(TickEvent.ClientTickEvent event) {
         if (!isRunning()) return;
 
         switch (buyState) {
@@ -138,7 +139,7 @@ public class AutoBazaar implements IFeature {
                 if (button.equals("Custom Amount")) {
                     Pair<String, Boolean> customBtn = getCustomAmountButton(inventoryName, itemToBuy);
                     if (customBtn.getFirst() == null) {
-                        log("Could not find button. Waiting.");
+                        LogUtils.debug("Could not find button. Waiting.");
                         changeState(BuyState.NAVIGATING_GUI, 200, false);
                         return;
                     }
@@ -212,7 +213,7 @@ public class AutoBazaar implements IFeature {
     }
 
     @SubscribeEvent
-    void onChat(ClientChatReceivedEvent event) {
+    public void onChat(ClientChatReceivedEvent event) {
         if (event.type != 0 || !isRunning()) return;
         if (event.message == null) return;
 
@@ -251,9 +252,9 @@ public class AutoBazaar implements IFeature {
         hasSucceeded = succeeded;
         hasFailed = !hasSucceeded;
         failReason = reason;
-        log("Disabling. Succeeded: " + succeeded);
+        LogUtils.debug("Disabling. Succeeded: " + succeeded);
         if (failReason != FailReason.NONE) {
-            error(reason.failReason);
+            LogUtils.error(reason.failReason);
         }
 
         onDisable();
@@ -342,8 +343,8 @@ public class AutoBazaar implements IFeature {
         if (!matcher.find()) return true;
 
         float amount = Float.parseFloat(matcher.group(1));
-        log("Price: " + amount);
-        log("Spend Threshold: " + spendThreshold);
+        LogUtils.debug("Price: " + amount);
+        LogUtils.debug("Spend Threshold: " + spendThreshold);
         return amount > spendThreshold;
     }
 

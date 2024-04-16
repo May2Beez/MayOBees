@@ -6,8 +6,8 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
 import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommandGroup;
 import com.github.may2beez.mayobees.MayOBees;
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
-import com.github.may2beez.mayobees.feature.helper.BazaarConfig;
-import com.github.may2beez.mayobees.feature.impl.AutoBazaar;
+import com.github.may2beez.mayobees.module.impl.utils.helper.BazaarConfig;
+import com.github.may2beez.mayobees.module.impl.utils.AutoBazaar;
 import com.github.may2beez.mayobees.module.impl.player.Brush;
 import com.github.may2beez.mayobees.util.LogUtils;
 

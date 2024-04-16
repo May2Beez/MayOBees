@@ -1,9 +1,20 @@
-package com.github.may2beez.mayobees.feature.helper;
+package com.github.may2beez.mayobees.module.impl.utils.helper;
+
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 // Just to make it reusable
 public class BazaarConfig {
+    @Setter
+    @Accessors(chain = true)
     public String itemToBuy;
+
+    @Setter
+    @Accessors(chain = true)
     public int buyAmount;
+
+    @Setter
+    @Accessors(chain = true)
     public int spendThreshold = 0;
     public int guiClickDelay;
     public int guiClickDelayRandomness;
@@ -26,26 +37,6 @@ public class BazaarConfig {
 
     public boolean verifyConfig() {
         return itemToBuy == null || buyAmount <= 0 || spendThreshold < 0 || guiClickDelay <= 0 || guiClickDelayRandomness <= 0 || guiWaitTimeout <= 0;
-    }
-
-    public BazaarConfig setItemToBuy(String name){
-        this.itemToBuy = name;
-        return this;
-    }
-
-    public BazaarConfig setBuyAmount(int buyAmount){
-        this.buyAmount = buyAmount;
-        return this;
-    }
-
-    public BazaarConfig setSpendThreshold(int spendThreshold){
-        this.spendThreshold = spendThreshold;
-        return this;
-    }
-
-    public void clearBasics(){
-        this.itemToBuy = null;
-        this.buyAmount = -1;
     }
 
     @Override
