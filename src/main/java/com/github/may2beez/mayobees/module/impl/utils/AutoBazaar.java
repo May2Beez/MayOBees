@@ -122,7 +122,7 @@ public class AutoBazaar implements IModuleActive {
             case NAVIGATING_GUI:
                 if (!hasClickTimerEnded()) return;
                 if (!(mc.currentScreen instanceof GuiChest)) {
-                    disable(false, FailReason.UNUSABLE);
+                    if (hasTimeoutTimerEnded()) disable(false, FailReason.UNUSABLE);
                     return;
                 }
 
@@ -170,7 +170,7 @@ public class AutoBazaar implements IModuleActive {
             case EDITING_SIGN:
                 if (!hasClickTimerEnded()) return;
                 if (!(mc.currentScreen instanceof GuiEditSign)) {
-                    disable(false, FailReason.UNUSABLE);
+                    if (hasTimeoutTimerEnded()) disable(false, FailReason.UNUSABLE);
                     return;
                 }
 
@@ -200,12 +200,12 @@ public class AutoBazaar implements IModuleActive {
                 changeState(BuyState.VERIFYING_PURCHASE, 2000, false);
                 break;
             case VERIFYING_PURCHASE:
-                if (timer.isScheduled() && timer.passed()) {
+                if (hasClickTimerEnded()) {
                     disable(false, FailReason.UNUSABLE);
                 }
                 break;
             case DISABLING:
-                if (timer.isScheduled() && !timer.passed()) return;
+                if (!hasClickTimerEnded()) return;
                 InventoryUtils.closeScreen();
                 disable(true, FailReason.NONE);
                 break;
@@ -241,11 +241,11 @@ public class AutoBazaar implements IModuleActive {
     }
 
     private boolean hasClickTimerEnded() {
-        if (timeoutTimer.isScheduled() && timeoutTimer.passed()) {
-            disable(false, FailReason.UNUSABLE);
-            return false;
-        }
         return timer.isScheduled() && timer.passed();
+    }
+
+    private boolean hasTimeoutTimerEnded() {
+        return timeoutTimer.isScheduled() && timeoutTimer.isPaused();
     }
 
     private void disable(boolean succeeded, FailReason reason) {

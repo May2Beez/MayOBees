@@ -36,7 +36,7 @@ public class BazaarConfig {
     }
 
     public boolean verifyConfig() {
-        return itemToBuy == null || buyAmount <= 0 || spendThreshold < 0 || guiClickDelay <= 0 || guiClickDelayRandomness <= 0 || guiWaitTimeout <= 0;
+        return itemToBuy == null || buyAmount <= 0 || spendThreshold < 0 || guiClickDelay <= 0 || guiClickDelayRandomness < 0 || guiWaitTimeout < 0;
     }
 
     @Override
