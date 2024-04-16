@@ -39,10 +39,7 @@ public class VisitorHelper implements IModuleActive {
     private final Minecraft mc = Minecraft.getMinecraft();
     // Credits: Farmhelper
     private final Pattern requiredPattern = Pattern.compile("^(.*?)(?:\\sx(\\d+))?$");
-    private final BazaarConfig config = new BazaarConfig(MayOBeesConfig.visitorHelperGuiDelay,
-            MayOBeesConfig.visitorHelperGuiDelayRandomness,
-            MayOBeesConfig.visitorHelperGuiTimeoutTime)
-            .setSpendThreshold(MayOBeesConfig.visitorHelperSpendThreshold * 1000);
+    private BazaarConfig config;
     private GuiButton button;
     private Pair<String, Integer> itemToBuy;
     private final Predicate<Slot> visitorGuiButtonPredicate = slot -> {
@@ -68,7 +65,10 @@ public class VisitorHelper implements IModuleActive {
     @Override
     public void onEnable() {
         enabled = true;
-        config.clearBasics();
+        config = new BazaarConfig(MayOBeesConfig.visitorHelperGuiDelay,
+            MayOBeesConfig.visitorHelperGuiDelayRandomness,
+            MayOBeesConfig.visitorHelperGuiTimeoutTime)
+            .setSpendThreshold(MayOBeesConfig.visitorHelperSpendThreshold * 1000);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class VisitorHelper implements IModuleActive {
         List<Slot> visitorGuiButtons = InventoryUtils.getIndexesOfItemsFromContainer(visitorGuiButtonPredicate);
 
         if (visitorGuiButtons.size() == 2) {
-            LogUtils.info("Visitors Gui Opened.");
+            LogUtils.debug("Visitors Gui Opened.");
 
             GuiContainerAccessor gui = ((GuiContainerAccessor) event.gui);
             int width = gui.getXSize();
@@ -123,7 +123,7 @@ public class VisitorHelper implements IModuleActive {
     public void onGuiClose(GuiClosedEvent event) {
         if (!(mc.currentScreen instanceof GuiChest) || !isRunning()) return;
 
-        LogUtils.info("GuiClosed");
+        LogUtils.debug("GuiClosed");
         onDisable();
     }
 
@@ -148,7 +148,7 @@ public class VisitorHelper implements IModuleActive {
             return;
         }
         InventoryUtils.closeScreen();
-        LogUtils.info("Name: " + itemToBuy.getFirst() + ", Amt: " + itemToBuy.getSecond());
+        LogUtils.debug("Name: " + itemToBuy.getFirst() + ", Amt: " + itemToBuy.getSecond());
         AutoBazaar.getInstance().buy(config.setItemToBuy(itemToBuy.getFirst()).setBuyAmount(itemToBuy.getSecond()));
     }
 }
