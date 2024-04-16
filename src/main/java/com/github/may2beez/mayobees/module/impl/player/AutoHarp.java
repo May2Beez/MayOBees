@@ -27,6 +27,8 @@ public class AutoHarp implements IModuleActive {
     private final Minecraft mc = Minecraft.getMinecraft();
     private boolean enabled = false;
     private boolean hasGuiUpdated = false;
+    private long lastPacketReceiveTime = 0;
+    private int lagSpikeThreshold = 100;
     private ItemStack[] slots = new ItemStack[7];
 
     @Override
@@ -66,6 +68,10 @@ public class AutoHarp implements IModuleActive {
     @SubscribeEvent
     void onPacketReceive(PacketEvent.Receive event) {
         if (!isRunning()) return;
+
+        long currentTime = System.currentTimeMillis();
+        boolean time = currentTime - lastPacketReceiveTime > lagSpikeThreshold;
+
         if (event.packet instanceof S2FPacketSetSlot) {
             S2FPacketSetSlot packet = (S2FPacketSetSlot) event.packet;
             int slotIndex = packet.func_149173_d();
@@ -75,6 +81,18 @@ public class AutoHarp implements IModuleActive {
             slots[slotIndex - 37] = packet.func_149174_e();
             return;
         }
+
+        if (time && !hasGuiUpdated) {
+            for (int i = 0; i < 7; i++) {
+                if (slots[i] != null && Block.getBlockFromItem(slots[i].getItem()) == Blocks.quartz_block) {
+                    InventoryUtils.clickContainerSlot(i + 37, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.CLONE);
+                    break;
+                }
+            }
+        }
+
+        lastPacketReceiveTime = currentTime;
+
         if (hasGuiUpdated) return;
         hasGuiUpdated = true;
         for (int i = 0; i < 7; i++) {
