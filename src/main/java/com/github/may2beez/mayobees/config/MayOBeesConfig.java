@@ -8,6 +8,7 @@ import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.InfoType;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
+import com.github.may2beez.mayobees.hud.ForagingSkillTrackerHUD;
 import com.github.may2beez.mayobees.module.ModuleManager;
 import com.github.may2beez.mayobees.module.impl.combat.AutoClicker;
 import com.github.may2beez.mayobees.module.impl.other.Dev;
@@ -809,6 +810,13 @@ public class MayOBeesConfig extends Config {
     )
     public static int monkeyLevel = 0;
 
+    @HUD(
+            name = "Skill Tracker (Foraging Macro)",
+            category = "Skills",
+            subcategory = "Foraging - Options"
+    )
+    public static ForagingSkillTrackerHUD foragingSkillTrackerHUD = new ForagingSkillTrackerHUD();
+
     //</editor-fold>
 
     //<editor-fold desc="Fishing">
@@ -1046,6 +1054,37 @@ public class MayOBeesConfig extends Config {
             subcategory = "Failsafe"
     )
     public static boolean stopMacrosOnWorldChange = true;
+
+    @Slider(
+            name = "Teleport Check Distance Sensitivity",
+            description = "The Minimum Distance Change Required To Trigger failsafe",
+            category = "Other",
+            subcategory = "Failsafe",
+            min = 0,
+            max = 20
+    )
+    public static int failsafeTeleportCheckDistanceSensitivity = 1;
+
+    @Slider(
+            name = "Rotation Check Yaw Sensitivity",
+            description = "The Minimum Yaw Change Required To Trigger failsafe",
+            category = "Other",
+            subcategory = "Failsafe",
+            min = 1,
+            max = 20
+    )
+    public static int failsafeRotationCheckYawSensitivity = 1;
+
+
+    @Slider(
+            name = "Rotation Check Pitch Sensitivity",
+            description = "The Minimum Pitch Change Required To Trigger failsafe",
+            category = "Other",
+            subcategory = "Failsafe",
+            min = 1,
+            max = 20
+    )
+    public static int failsafeRotationCheckPitchSensitivity = 1;
 
     //</editor-fold>
 

@@ -1,6 +1,7 @@
 package com.github.may2beez.mayobees.handler;
 
 import com.github.may2beez.mayobees.util.InventoryUtils;
+import com.github.may2beez.mayobees.util.LogUtils;
 import com.github.may2beez.mayobees.util.ScoreboardUtils;
 import com.github.may2beez.mayobees.util.TablistUtils;
 import lombok.Getter;
@@ -57,6 +58,7 @@ public class GameStateHandler {
                 location = Location.DUNGEON;
                 return;
             }
+            if(!line.startsWith("Area: ")) continue;
             Matcher matcher = areaPattern.matcher(line);
             if (matcher.find()) {
                 String area = matcher.group(1);

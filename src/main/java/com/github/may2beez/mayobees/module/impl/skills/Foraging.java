@@ -1,6 +1,7 @@
 package com.github.may2beez.mayobees.module.impl.skills;
 
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
+import com.github.may2beez.mayobees.event.UpdateTablistEvent;
 import com.github.may2beez.mayobees.handler.RotationHandler;
 import com.github.may2beez.mayobees.module.IModuleActive;
 import com.github.may2beez.mayobees.util.*;
@@ -23,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Foraging implements IModuleActive {
     private static Foraging instance;
@@ -48,7 +51,7 @@ public class Foraging implements IModuleActive {
         PLACE_BONE,
         FIND_ROD,
         THROW_ROD,
-        THROW_BREAK_DELAY,
+        FIND_TREECAPITATOR,
         BREAK,
         SWITCH
     }
@@ -64,6 +67,8 @@ public class Foraging implements IModuleActive {
 
     private boolean enabled = false;
     private long lastBreakTime = 0;
+    public long startTime = 0;
+    public long stopTime = 0;
 
     public boolean isRunning() {
         return enabled;
@@ -74,6 +79,7 @@ public class Foraging implements IModuleActive {
         enabled = true;
         if (MayOBeesConfig.mouseUngrab)
             UngrabUtils.ungrabMouse();
+        startTime = System.currentTimeMillis() - (stopTime - startTime);
         dirtBlocks.clear();
         dirtBlocks.addAll(getDirts());
         currentTarget = null;
@@ -85,6 +91,7 @@ public class Foraging implements IModuleActive {
 
     @Override
     public void onDisable() {
+        stopTime = System.currentTimeMillis();
         KeyBindUtils.stopMovement();
         enabled = false;
         UngrabUtils.regrabMouse();
@@ -320,7 +327,7 @@ public class Foraging implements IModuleActive {
                 if (MayOBeesConfig.foragingUseRod) {
                     macroState = MacroState.FIND_ROD;
                 } else {
-                    macroState = MacroState.BREAK;
+                    macroState = MacroState.FIND_TREECAPITATOR;
                 }
                 break;
             case FIND_ROD:
@@ -337,15 +344,16 @@ public class Foraging implements IModuleActive {
             case THROW_ROD:
                 KeyBindUtils.rightClick();
                 waitTimer.schedule();
-                macroState = MacroState.THROW_BREAK_DELAY;
+                macroState = MacroState.FIND_TREECAPITATOR;
                 break;
-            case THROW_BREAK_DELAY:
+            case FIND_TREECAPITATOR:
                 int treecapitator = InventoryUtils.getSlotIdOfItemInHotbar("Treecapitator");
                 if (treecapitator == -1) {
                     LogUtils.error("No Treecapitator found in hotbar!");
                     onDisable();
                     break;
                 }
+                waitTimer.schedule();
                 mc.thePlayer.inventory.currentItem = treecapitator;
                 macroState = MacroState.BREAK;
                 break;
@@ -353,7 +361,8 @@ public class Foraging implements IModuleActive {
                 if (lastBreakTime != 0 && System.currentTimeMillis() - lastBreakTime < (2000 - (MayOBeesConfig.monkeyLevel / 100f * 2000 * 0.5)))
                     return;
                 MovingObjectPosition objectMouseOver = mc.objectMouseOver;
-                if (objectMouseOver == null || objectMouseOver.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) return;
+                if (objectMouseOver == null || objectMouseOver.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK)
+                    return;
                 BlockPos blockPos = objectMouseOver.getBlockPos();
                 Block block = mc.theWorld.getBlockState(blockPos).getBlock();
                 if (!(block instanceof BlockLog)) return;
@@ -429,5 +438,34 @@ public class Foraging implements IModuleActive {
     public void onWorldChange(WorldEvent.Unload event) {
         if (!isRunning()) return;
         onDisable();
+    }
+
+    // Skill Tracker
+    private final Pattern skillPattern = Pattern.compile("(\\d+):\\s([\\d.]+)%");
+    private float lastSkillPercentage = 0;
+    public float totalXpGained = 0; // This Session
+
+    @SubscribeEvent
+    public void onTablistUpdate(UpdateTablistEvent event) {
+        if (!isRunning()) return;
+        for (String line : event.tablist) {
+            if (!line.contains("Foraging ")) continue;
+            Matcher matcher = skillPattern.matcher(line);
+            if (!matcher.find()) {
+                LogUtils.error("Cannot find skill and level from string: " + line);
+                return;
+            }
+            int foragingLevel = Integer.parseInt(matcher.group(1));
+            float skillPercentage = Float.parseFloat(matcher.group(2));
+            if (lastSkillPercentage != 0) {
+                if (skillPercentage < lastSkillPercentage) {
+                    totalXpGained += SkillUtils.xpRequiredToReach[foragingLevel - 1] * ((100 - lastSkillPercentage) / 100f);
+                    lastSkillPercentage = 0;
+                }
+                totalXpGained += SkillUtils.xpRequiredToReach[foragingLevel] * ((skillPercentage - lastSkillPercentage) / 100f);
+            }
+            lastSkillPercentage = skillPercentage;
+            break;
+        }
     }
 }
