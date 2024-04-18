@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ForagingSkillTrackerHUD extends BasicHud {
+    private transient String upTimeString = "0h 0m 0s";
+    private transient String xpPerHourString = "0";
     @Color(
             name = "Text Color"
     )
@@ -25,6 +27,7 @@ public class ForagingSkillTrackerHUD extends BasicHud {
     )
     protected int textType = 0;
     private final List<String> lines = new ArrayList<>();
+
     public ForagingSkillTrackerHUD() {
         super(true, 10, 10, 1, true, true, 4, 5, 5, new OneColor(0, 0, 0, 150), false, 2, new OneColor(0, 0, 0, 127));
     }
@@ -67,17 +70,22 @@ public class ForagingSkillTrackerHUD extends BasicHud {
 
     private void loadLines() {
         this.lines.clear();
-
         Foraging foraging = Foraging.getInstance();
-        int upTime = (int) ((foraging.isRunning() ? System.currentTimeMillis() - foraging.startTime : foraging.stopTime - foraging.startTime) / 1e3);
-        int remainingSeconds = upTime % 3600;
-        String uptimeString = String.format("%02dh %02dm %02ds", (upTime / 3600), (remainingSeconds / 60), (remainingSeconds % 60));
+        if (foraging.isRunning()) {
+            int upTime = (int) ((System.currentTimeMillis() - foraging.startTime) / 1e3);
+            int remainingSeconds = upTime % 3600;
+            upTimeString = String.format("%02dh %02dm %02ds", (upTime / 3600), (remainingSeconds / 60), (remainingSeconds % 60));
+            xpPerHourString = NumberFormat.getInstance().format((int) ((foraging.totalXpGained * 3600L) / Math.max(1, upTime)));
+
+        } else if (!upTimeString.endsWith(" (Paused)") && foraging.totalXpGained > 0) {
+            upTimeString += " (Paused)";
+        }
 
         if (foraging.isRunning() && foraging.totalXpGained <= 0) {
             this.lines.add("Please Ensure You Have Turned On Foraging Skill in Tablist Widget.");
         }
-        this.lines.add("UpTime: " + uptimeString + (upTime > 0 && !foraging.isRunning() ? " (Paused)" : ""));
-        this.lines.add("Total Xp Gained: " + NumberFormat.getInstance().format(foraging.totalXpGained));
-        this.lines.add("Xp / H: " + NumberFormat.getInstance().format((foraging.totalXpGained * 3600) / Math.max(1, upTime)));
+        this.lines.add("UpTime: " + upTimeString);
+        this.lines.add("Total Xp Gained: " + NumberFormat.getInstance().format((int) foraging.totalXpGained));
+        this.lines.add("Xp / H: " + xpPerHourString);
     }
 }

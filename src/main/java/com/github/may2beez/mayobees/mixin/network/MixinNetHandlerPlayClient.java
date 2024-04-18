@@ -41,9 +41,7 @@ public class MixinNetHandlerPlayClient {
     }
 
     @Unique
-    private final List<String> farmHelperV2$previousTablist = new ArrayList<>();
-    @Unique
-    private final List<String> farmHelperV2$previousFooter = new ArrayList<>();
+    private final List<String> mayobees$previousTablist = new ArrayList<>();
 
     @Inject(method = "handlePlayerListItem", at = @At(value = "RETURN"))
     public void handlePlayerListItem(S38PacketPlayerListItem packetIn, CallbackInfo ci) {
@@ -56,9 +54,9 @@ public class MixinNetHandlerPlayClient {
         for (NetworkPlayerInfo info : players) {
             tablist.add(StringUtils.stripControlCodes(tabOverlay.getPlayerName(info)));
         }
-        if (tablist.equals(farmHelperV2$previousTablist)) return;
-        farmHelperV2$previousTablist.clear();
-        farmHelperV2$previousTablist.addAll(tablist);
+        if (tablist.equals(mayobees$previousTablist)) return;
+        mayobees$previousTablist.clear();
+        mayobees$previousTablist.addAll(tablist);
         TablistUtils.setCachedTablist(tablist);
         MinecraftForge.EVENT_BUS.post(new UpdateTablistEvent(tablist, System.currentTimeMillis()));
     }

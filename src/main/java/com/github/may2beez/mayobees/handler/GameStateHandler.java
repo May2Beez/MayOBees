@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class GameStateHandler {
-    private static GameStateHandler INSTANCE;
+    private static GameStateHandler instance;
     private final Minecraft mc = Minecraft.getMinecraft();
     private final Pattern areaPattern = Pattern.compile("Area:\\s(.+)");
     @Getter
@@ -25,10 +25,10 @@ public class GameStateHandler {
     @Getter
     private String serverIP;
     public static GameStateHandler getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new GameStateHandler();
+        if (instance == null) {
+            instance = new GameStateHandler();
         }
-        return INSTANCE;
+        return instance;
     }
 
     @SubscribeEvent

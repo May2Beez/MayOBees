@@ -8,10 +8,12 @@ import com.github.may2beez.mayobees.util.LogUtils;
 import com.github.may2beez.mayobees.util.helper.AudioManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +30,10 @@ public class Failsafes {
     }
     private static final Minecraft mc = Minecraft.getMinecraft();
     private static final String[] teleportItems = new String[] {"Void", "Hyperion", "Aspect"};
+
+    // I always come up with the most weird ways to do shit
+    public final List<double[]> rotationChecks = new ArrayList<>();
+    public final List<double[]> teleportChecks = new ArrayList<>();
 
     @SubscribeEvent
     public void onWorldChange(WorldEvent.Unload event) {
@@ -54,12 +60,16 @@ public class Failsafes {
 
         S08PacketPlayerPosLook packet = (S08PacketPlayerPosLook) event.packet;
 
-        float yawDiff = Math.abs(packet.getYaw() - mc.thePlayer.rotationYaw);
-        float pitchDiff = Math.abs(packet.getPitch() - mc.thePlayer.rotationPitch);
+        double yawDiff = Math.abs(packet.getYaw() - mc.thePlayer.rotationYaw);
+        double pitchDiff = Math.abs(packet.getPitch() - mc.thePlayer.rotationPitch);
         if(yawDiff == 360 && pitchDiff == 0) return;
 
-        LogUtils.warn("Micro Rotation Detected. YawChange: " + yawDiff + ", PitchChange: " + pitchDiff);
+        // Second (wanted something simple), YawDiff, PitchDiff
+        rotationChecks.add(new double[]{System.currentTimeMillis() / 1e3, yawDiff, pitchDiff});
+
+        LogUtils.warn("Rotation Detected. YawChange: " + yawDiff + ", PitchChange: " + pitchDiff);
         if(yawDiff < MayOBeesConfig.failsafeRotationCheckYawSensitivity && pitchDiff < MayOBeesConfig.failsafeRotationCheckPitchSensitivity){
+            LogUtils.warn("It was a micro rotation. Ignoring For now.");
             return;
         }
 
@@ -89,6 +99,8 @@ public class Failsafes {
 
         double teleportDistance = playerPos.distanceTo(packetPos);
 
+        teleportChecks.add(new double[]{System.currentTimeMillis() / 1e6, teleportDistance});
+
         LogUtils.warn("Teleported " + teleportDistance + " blocks!");
         if(teleportDistance < MayOBeesConfig.failsafeTeleportCheckDistanceSensitivity){
             LogUtils.warn("Ignoring.");
@@ -102,5 +114,10 @@ public class Failsafes {
 
         LogUtils.warn("[Failsafes] Teleport check!");
         AudioManager.getInstance().playSound();
+    }
+
+    public void clearMacroCheckHistory(){
+        this.rotationChecks.clear();
+        this.teleportChecks.clear();
     }
 }

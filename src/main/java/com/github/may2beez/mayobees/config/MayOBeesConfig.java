@@ -1086,6 +1086,23 @@ public class MayOBeesConfig extends Config {
     )
     public static int failsafeRotationCheckPitchSensitivity = 1;
 
+    @Switch(
+            name = "Fix Micro Rotations",
+            description = "Whether macro should micro rotations from macro check or not",
+            category = "Other",
+            subcategory = "Failsafe"
+    )
+    public static boolean failsafeFixMicroRotation = true;
+
+    @Slider(
+            name = "Micro Rotation Fix Delay (In Seconds)",
+            description = "Time to wait before fixing micro rotation",
+            category = "Description",
+            subcategory = "Failsafe",
+            min = 0, max = 600
+    )
+    public static int failsafeDelayBeforeRotationFix = 60;
+
     //</editor-fold>
 
     //<editor-fold desc="Gift Aura">

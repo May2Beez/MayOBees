@@ -4,16 +4,19 @@ import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.event.UpdateTablistEvent;
 import com.github.may2beez.mayobees.handler.RotationHandler;
 import com.github.may2beez.mayobees.module.IModuleActive;
+import com.github.may2beez.mayobees.module.impl.other.Failsafes;
 import com.github.may2beez.mayobees.util.*;
 import com.github.may2beez.mayobees.util.helper.Rotation;
 import com.github.may2beez.mayobees.util.helper.RotationConfiguration;
 import com.github.may2beez.mayobees.util.helper.Target;
 import com.github.may2beez.mayobees.util.helper.Timer;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockLog;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.*;
+import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -61,6 +64,7 @@ public class Foraging implements IModuleActive {
 
     public Vec3 currentTarget;
     private final ArrayList<Vec3> dirtBlocks = new ArrayList<>();
+    private EnumFacing startFacing = null;
 
     private final Timer stuckTimer = new Timer();
     private boolean stuck = false;
@@ -82,6 +86,7 @@ public class Foraging implements IModuleActive {
         startTime = System.currentTimeMillis() - (stopTime - startTime);
         dirtBlocks.clear();
         dirtBlocks.addAll(getDirts());
+        startFacing = mc.thePlayer.getHorizontalFacing();
         currentTarget = null;
         macroState = MacroState.LOOK;
         lastBreakTime = 0;
@@ -95,6 +100,8 @@ public class Foraging implements IModuleActive {
         KeyBindUtils.stopMovement();
         enabled = false;
         UngrabUtils.regrabMouse();
+        Failsafes.getInstance().clearMacroCheckHistory();
+        startFacing = null;
     }
 
     private static final Timer waitTimer = new Timer();
@@ -247,15 +254,16 @@ public class Foraging implements IModuleActive {
         switch (macroState) {
             case LOOK:
                 int saplingSlot = InventoryUtils.getSlotIdOfItemInHotbar("Sapling");
-                if (saplingSlot == -1) {
+                if (saplingSlot == -1 || mc.thePlayer.inventory.getStackInSlot(saplingSlot).stackSize < 4) {
                     LogUtils.error("No saplings found in hotbar!");
                     onDisable();
                     return;
                 }
+
                 mc.thePlayer.inventory.currentItem = saplingSlot;
                 if (MayOBeesConfig.foragingMode) {
-                    Rotation rotation = new Rotation(AngleUtils.getClosest(), 18.5f);
-                    if (RotationHandler.getInstance().shouldRotate(rotation)) {
+                    Rotation rotation = new Rotation(startFacing.getHorizontalIndex() * 90, 18.5f);
+                    if (RotationHandler.getInstance().shouldRotate(rotation) || shouldFixMicroRotation()) {
                         RotationHandler.getInstance().easeTo(new RotationConfiguration(rotation, (long) (MayOBeesConfig.getRandomizedForagingMacroRotationSpeed() * 1.5f), RotationConfiguration.RotationType.CLIENT, null));
                     } else {
                         macroState = MacroState.PLACE;
@@ -309,7 +317,7 @@ public class Foraging implements IModuleActive {
                 return;
             case FIND_BONE:
                 int boneMeal = InventoryUtils.getSlotIdOfItemInHotbar("Bone Meal");
-                if (boneMeal == -1) {
+                if (boneMeal == -1 || mc.thePlayer.inventory.getStackInSlot(boneMeal).stackSize < 1) {
                     LogUtils.error("No Bone Meal found in hotbar!");
                     onDisable();
                     return;
@@ -396,9 +404,16 @@ public class Foraging implements IModuleActive {
 
     private boolean isStuck() {
         if (stuck) {
+            // Will continue checking do something abt that maybe
+            if (stuckCausedByMicroTeleport()) {
+                LogUtils.warn("Might have gotten stuck because you got teleported. Disabling");
+                onDisable();
+                return true;
+            }
             Vec3 closest = null;
             Vec3 player = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.eyeHeight, mc.thePlayer.posZ);
             for (Vec3 dirt : dirtBlocks) {
+                BlockPos dirtPos = new BlockPos(dirt.addVector(0, -1, 0));
                 Block block = mc.theWorld.getBlockState(new BlockPos(dirt.xCoord, dirt.yCoord + 0.1, dirt.zCoord)).getBlock();
                 BlockPos blockPos = new BlockPos(dirt.xCoord, dirt.yCoord + 0.1, dirt.zCoord);
                 if ((block instanceof BlockLog) || block == Blocks.sapling) {
@@ -406,7 +421,14 @@ public class Foraging implements IModuleActive {
                     if (closest == null || player.squareDistanceTo(distance) <= player.squareDistanceTo(closest))
                         closest = distance;
                 }
+
+                if (!(mc.theWorld.getBlockState(dirtPos).getBlock() instanceof BlockDirt)) {
+                    LogUtils.error("Broke Dirt by Mistake at Position: " + dirtPos);
+                    onDisable();
+                    return true;
+                }
             }
+
             int treecapitator = InventoryUtils.getSlotIdOfItemInHotbar("Treecapitator");
             if (treecapitator == -1) {
                 LogUtils.error("No Treecapitator found in hotbar!");
@@ -440,8 +462,13 @@ public class Foraging implements IModuleActive {
         onDisable();
     }
 
-    // Skill Tracker
-    private final Pattern skillPattern = Pattern.compile("(\\d+):\\s([\\d.]+)%");
+    // Tablist Tracker (Foraging 22: 59.2%)
+    private final Pattern foragingTabPattern = Pattern.compile("(\\d+):\\s([\\d.]+)%");
+    // Foraging (10.20%)
+    private final Pattern foragingChatPattern1 = Pattern.compile("(\\w+)\\s\\(([\\d.]+)%\\)");
+    // Foraging (100/2k)xp
+    private final Pattern foragingChatPattern2 = Pattern.compile("(\\w+)\\s\\(([\\d.]+)/([\\d.]+)(\\w?)\\)");
+    private int foragingLevel = 0;
     private float lastSkillPercentage = 0;
     public float totalXpGained = 0; // This Session
 
@@ -450,22 +477,54 @@ public class Foraging implements IModuleActive {
         if (!isRunning()) return;
         for (String line : event.tablist) {
             if (!line.contains("Foraging ")) continue;
-            Matcher matcher = skillPattern.matcher(line);
+            Matcher matcher = foragingTabPattern.matcher(line);
             if (!matcher.find()) {
                 LogUtils.error("Cannot find skill and level from string: " + line);
                 return;
             }
-            int foragingLevel = Integer.parseInt(matcher.group(1));
-            float skillPercentage = Float.parseFloat(matcher.group(2));
-            if (lastSkillPercentage != 0) {
-                if (skillPercentage < lastSkillPercentage) {
-                    totalXpGained += SkillUtils.xpRequiredToReach[foragingLevel - 1] * ((100 - lastSkillPercentage) / 100f);
-                    lastSkillPercentage = 0;
-                }
-                totalXpGained += SkillUtils.xpRequiredToReach[foragingLevel] * ((skillPercentage - lastSkillPercentage) / 100f);
-            }
-            lastSkillPercentage = skillPercentage;
+            foragingLevel = Integer.parseInt(matcher.group(1));
             break;
         }
+    }
+
+    @SubscribeEvent
+    public void onChat(ClientChatReceivedEvent event) {
+        if (event.type != 2 || !isRunning()) return;
+        String message = StringUtils.stripControlCodes(event.message.getUnformattedText());
+
+        Matcher matcher1 = foragingChatPattern1.matcher(message);
+        float percentage;
+        if (matcher1.find()) {
+            if (!matcher1.group(1).equals("Foraging")) return;
+            percentage = Float.parseFloat(matcher1.group(2));
+        } else {
+            Matcher matcher2 = foragingChatPattern2.matcher(message.replace(",", ""));
+            if (!matcher2.find() || !matcher2.group(1).equals("Foraging")) return;
+            percentage = Float.parseFloat(matcher2.group(2)) / (Float.parseFloat(matcher2.group(3)) * (matcher2.group(4) != null ? 10 : 0.01f));
+            LogUtils.info("Found. Name: " + matcher2.group(1) + ", Percentage: " + percentage);
+        }
+
+        if (foragingLevel != 0 && lastSkillPercentage != 0) {
+            if (percentage < lastSkillPercentage) {
+                totalXpGained += SkillUtils.xpRequiredToReach[foragingLevel - 1] * ((100 - lastSkillPercentage) / 100f);
+                lastSkillPercentage = 0;
+            }
+            totalXpGained += SkillUtils.xpRequiredToReach[foragingLevel] * ((percentage - lastSkillPercentage) / 100f);
+        }
+        lastSkillPercentage = percentage;
+    }
+
+    private boolean shouldFixMicroRotation() {
+        Failsafes failsafe = Failsafes.getInstance();
+        if (failsafe.rotationChecks.isEmpty()) return false;
+        return (System.currentTimeMillis() / 1e6 - failsafe.rotationChecks.get(0)[0]) > MayOBeesConfig.failsafeDelayBeforeRotationFix;
+    }
+
+    private boolean stuckCausedByMicroTeleport() {
+        Failsafes failsafe = Failsafes.getInstance();
+        if (failsafe.teleportChecks.isEmpty()) return false;
+        double timeSinceLastTeleport = System.currentTimeMillis() / 1e6 - failsafe.teleportChecks.get(0)[0];
+        LogUtils.warn("Time Since Last Teleport Check: " + timeSinceLastTeleport);
+        return timeSinceLastTeleport > 5; // 5 sec
     }
 }
