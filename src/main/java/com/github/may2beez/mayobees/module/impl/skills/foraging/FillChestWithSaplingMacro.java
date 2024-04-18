@@ -1,4 +1,4 @@
-package com.github.may2beez.mayobees.module.impl.skills;
+package com.github.may2beez.mayobees.module.impl.skills.foraging;
 
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.module.IModuleActive;

@@ -13,10 +13,22 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TablistUtils {
 
-    private static final Ordering<NetworkPlayerInfo> playerOrdering = Ordering.from(new PlayerComparator());
+    public static final Ordering<NetworkPlayerInfo> playerOrdering = Ordering.from(new PlayerComparator());
+
+    private static final CopyOnWriteArrayList<String> cachedTablist = new CopyOnWriteArrayList<>();
+
+    public static List<String> getTabList() {
+        return cachedTablist;
+    }
+
+    public static void setCachedTablist(List<String> tablist) {
+        cachedTablist.clear();
+        cachedTablist.addAll(tablist);
+    }
 
     public static List<String> getTabListPlayersUnprocessed() {
         try {
@@ -59,22 +71,22 @@ public class TablistUtils {
         }
     }
 
-    public static List<String> getTabList() {
-        try {
-            List<NetworkPlayerInfo> players =
-                    playerOrdering.sortedCopy(Minecraft.getMinecraft().thePlayer.sendQueue.getPlayerInfoMap());
-
-            List<String> result = new ArrayList<>();
-
-            for (NetworkPlayerInfo info : players) {
-                String name = Minecraft.getMinecraft().ingameGUI.getTabList().getPlayerName(info);
-                result.add(StringUtils.stripControlCodes(name));
-            }
-            return result;
-        } catch (Exception e) {
-            return new ArrayList<>();
-        }
-    }
+//    public static List<String> getTabList() {
+//        try {
+//            List<NetworkPlayerInfo> players =
+//                    playerOrdering.sortedCopy(Minecraft.getMinecraft().thePlayer.sendQueue.getPlayerInfoMap());
+//
+//            List<String> result = new ArrayList<>();
+//
+//            for (NetworkPlayerInfo info : players) {
+//                String name = Minecraft.getMinecraft().ingameGUI.getTabList().getPlayerName(info);
+//                result.add(StringUtils.stripControlCodes(name));
+//            }
+//            return result;
+//        } catch (Exception e) {
+//            return new ArrayList<>();
+//        }
+//    }
 
     @SideOnly(Side.CLIENT)
     static class PlayerComparator implements Comparator<NetworkPlayerInfo> {
