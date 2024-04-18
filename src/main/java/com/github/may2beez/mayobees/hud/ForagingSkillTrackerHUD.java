@@ -7,7 +7,7 @@ import cc.polyfrost.oneconfig.hud.BasicHud;
 import cc.polyfrost.oneconfig.libs.universal.UMatrixStack;
 import cc.polyfrost.oneconfig.platform.Platform;
 import cc.polyfrost.oneconfig.renderer.TextRenderer;
-import com.github.may2beez.mayobees.module.impl.skills.Foraging;
+import com.github.may2beez.mayobees.module.impl.skills.foraging.Foraging;
 import net.minecraft.client.Minecraft;
 
 import java.text.NumberFormat;
