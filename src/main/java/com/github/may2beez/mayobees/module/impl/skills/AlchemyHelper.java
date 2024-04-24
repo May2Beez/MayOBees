@@ -140,6 +140,9 @@ public class AlchemyHelper implements IModule {
                             case 2: {
                                 putItem(INGREDIENT_SLOT, "Enchanted Blaze Rod", MayOBeesConfig.getRandomizedDelayBetweenIngredientsGuiActions());
                             }
+                            case 3: {
+                                putItem(INGREDIENT_SLOT, "Enchanted Gold Block", MayOBeesConfig.getRandomizedDelayBetweenIngredientsGuiActions());
+                            }
                         }
                     }
                 }
