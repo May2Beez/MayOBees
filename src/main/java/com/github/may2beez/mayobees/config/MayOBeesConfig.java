@@ -614,6 +614,16 @@ public class MayOBeesConfig extends Config {
     )
     public static int alchemyHelperMaxIngredientType = 0;
 
+    @Dropdown(
+            name = "Glowstone Type",
+            description = "The glowstone type to use",
+            category = "Skills",
+            subcategory = "Alchemy Helper - Options",
+            options = {"None", "Enchanted Glowstone Dust", "Enchanted Glowstone"},
+            size = 2
+    )
+    public static int alchemyHelperMaxGlowstoneType = 0;
+
     @Switch(
             name = "Auto pick up finish potions",
             description = "Automatically picks up finish potions",
