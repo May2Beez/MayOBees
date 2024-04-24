@@ -145,6 +145,16 @@ public class AlchemyHelper implements IModule {
                             }
                         }
                     }
+                    else if (potionName.endsWith("V Potion")) {
+                        switch (MayOBeesConfig.alchemyHelperMaxGlowstoneType) {
+                            case 1: {
+                                putItem(INGREDIENT_SLOT, "Enchanted Glowstone Dust", MayOBeesConfig.getRandomizedDelayBetweenIngredientsGuiActions());
+                            }
+                            case 2: {
+                                putItem(INGREDIENT_SLOT, "Enchanted Glowstone", MayOBeesConfig.getRandomizedDelayBetweenIngredientsGuiActions());
+                            }
+                        }
+                    }
                 }
             }
         }
