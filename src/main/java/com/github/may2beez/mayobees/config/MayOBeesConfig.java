@@ -609,10 +609,20 @@ public class MayOBeesConfig extends Config {
             description = "The max ingredient type to use",
             category = "Skills",
             subcategory = "Alchemy Helper - Options",
-            options = {"None", "Enchanted Sugar Cane", "Enchanted Blaze Rod"},
+            options = {"None", "Enchanted Sugar Cane", "Enchanted Blaze Rod", "Enchanted Gold Block"},
             size = 2
     )
     public static int alchemyHelperMaxIngredientType = 0;
+
+    @Dropdown(
+            name = "Glowstone Type",
+            description = "The glowstone type to use",
+            category = "Skills",
+            subcategory = "Alchemy Helper - Options",
+            options = {"None", "Enchanted Glowstone Dust", "Enchanted Glowstone"},
+            size = 2
+    )
+    public static int alchemyHelperMaxGlowstoneType = 0;
 
     @Switch(
             name = "Auto pick up finish potions",
