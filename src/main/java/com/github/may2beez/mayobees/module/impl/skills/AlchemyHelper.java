@@ -274,6 +274,8 @@ public class AlchemyHelper implements IModule {
         if (stackSize == 1) {
             InventoryUtils.clickContainerSlot(itemNameSlot.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.QUICK_MOVE);
             if (MayOBeesConfig.alchemyHelperAutoCloseGUIAfterPuttingIngredients) {
+                currentBrewingStand.ingredientName = itemName;
+                currentBrewingStand.timeToFinish.schedule(20_000);
                 InventoryUtils.closeScreen();
             }
         } else {
