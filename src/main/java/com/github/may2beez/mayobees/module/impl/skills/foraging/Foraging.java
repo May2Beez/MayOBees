@@ -403,56 +403,56 @@ public class Foraging implements IModuleActive {
     }
 
     private boolean isStuck() {
-        if (stuck) {
-            // Will continue checking do something abt that maybe
-            if (stuckCausedByMicroTeleport()) {
-                LogUtils.warn("Might have gotten stuck because you got teleported. Disabling");
-                onDisable();
-                return true;
-            }
-            Vec3 closest = null;
-            Vec3 player = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.eyeHeight, mc.thePlayer.posZ);
-            for (Vec3 dirt : dirtBlocks) {
-                BlockPos dirtPos = new BlockPos(dirt.addVector(0, -1, 0));
-                Block block = mc.theWorld.getBlockState(new BlockPos(dirt.xCoord, dirt.yCoord + 0.1, dirt.zCoord)).getBlock();
-                BlockPos blockPos = new BlockPos(dirt.xCoord, dirt.yCoord + 0.1, dirt.zCoord);
-                if ((block instanceof BlockLog) || block == Blocks.sapling) {
-                    Vec3 distance = new Vec3(blockPos.getX() + 0.5D + getBetween(-0.1f, 0.1f), (blockPos.getY() + (block.getBlockBoundsMaxY() * 0.75) + getBetween(-0.1f, 0.1f)), blockPos.getZ() + 0.5D + getBetween(-0.1f, 0.1f));
-                    if (closest == null || player.squareDistanceTo(distance) <= player.squareDistanceTo(closest))
-                        closest = distance;
-                }
+        if (!stuck) return false;
 
-                if (!(mc.theWorld.getBlockState(dirtPos).getBlock() instanceof BlockDirt)) {
-                    LogUtils.error("Broke Dirt by Mistake at Position: " + dirtPos);
-                    onDisable();
-                    return true;
-                }
-            }
-
-            int treecapitator = InventoryUtils.getSlotIdOfItemInHotbar("Treecapitator");
-            if (treecapitator == -1) {
-                LogUtils.error("No Treecapitator found in hotbar!");
-                onDisable();
-                return true;
-            }
-
-            mc.thePlayer.inventory.currentItem = treecapitator;
-
-            MovingObjectPosition mop = mc.objectMouseOver;
-
-            boolean shouldBreak = mop != null && mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && !mc.theWorld.getBlockState(mop.getBlockPos()).getBlock().equals(Blocks.dirt);
-            KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindAttack, shouldBreak);
-
-            if (closest != null) {
-                RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(closest), MayOBeesConfig.getRandomizedForagingMacroRotationSpeed(), RotationConfiguration.RotationType.CLIENT, null));
-            } else {
-                stuck = false;
-                macroState = MacroState.LOOK;
-                KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindAttack, false);
-                stuckTimer.schedule();
-            }
+        // Will continue checking do something abt that maybe
+        if (stuckCausedByMicroTeleport()) {
+            LogUtils.warn("Might have gotten stuck because you got teleported. Disabling");
+            onDisable();
             return true;
         }
+        Vec3 closest = null;
+        Vec3 player = new Vec3(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.eyeHeight, mc.thePlayer.posZ);
+        for (Vec3 dirt : dirtBlocks) {
+            BlockPos dirtPos = new BlockPos(dirt.addVector(0, -1, 0));
+            Block block = mc.theWorld.getBlockState(new BlockPos(dirt.xCoord, dirt.yCoord + 0.1, dirt.zCoord)).getBlock();
+            BlockPos blockPos = new BlockPos(dirt.xCoord, dirt.yCoord + 0.1, dirt.zCoord);
+            if ((block instanceof BlockLog) || block == Blocks.sapling) {
+                Vec3 distance = new Vec3(blockPos.getX() + 0.5D + getBetween(-0.1f, 0.1f), (blockPos.getY() + (block.getBlockBoundsMaxY() * 0.75) + getBetween(-0.1f, 0.1f)), blockPos.getZ() + 0.5D + getBetween(-0.1f, 0.1f));
+                if (closest == null || player.squareDistanceTo(distance) <= player.squareDistanceTo(closest))
+                    closest = distance;
+            }
+
+            if (!(mc.theWorld.getBlockState(dirtPos).getBlock() instanceof BlockDirt)) {
+                LogUtils.error("Broke Dirt by Mistake at Position: " + dirtPos);
+                onDisable();
+                return true;
+            }
+        }
+
+        int treecapitator = InventoryUtils.getSlotIdOfItemInHotbar("Treecapitator");
+        if (treecapitator == -1) {
+            LogUtils.error("No Treecapitator found in hotbar!");
+            onDisable();
+            return true;
+        }
+
+        mc.thePlayer.inventory.currentItem = treecapitator;
+
+        MovingObjectPosition mop = mc.objectMouseOver;
+
+        boolean shouldBreak = mop != null && mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && !mc.theWorld.getBlockState(mop.getBlockPos()).getBlock().equals(Blocks.dirt);
+        KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindAttack, shouldBreak);
+
+        if (closest != null) {
+            RotationHandler.getInstance().easeTo(new RotationConfiguration(new Target(closest), MayOBeesConfig.getRandomizedForagingMacroRotationSpeed(), RotationConfiguration.RotationType.CLIENT, null));
+        } else {
+            stuck = false;
+            macroState = MacroState.LOOK;
+            KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindAttack, false);
+            stuckTimer.schedule();
+        }
+        return true;
     }
 
     @SubscribeEvent

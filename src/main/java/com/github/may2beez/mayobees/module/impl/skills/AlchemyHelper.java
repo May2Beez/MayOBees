@@ -16,7 +16,6 @@ import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Slot;
-import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StringUtils;
@@ -136,22 +135,31 @@ public class AlchemyHelper implements IModule {
                         switch (MayOBeesConfig.alchemyHelperMaxIngredientType) {
                             case 1: {
                                 putItem(INGREDIENT_SLOT, "Enchanted Sugar Cane", MayOBeesConfig.getRandomizedDelayBetweenIngredientsGuiActions());
+                                break;
                             }
                             case 2: {
                                 putItem(INGREDIENT_SLOT, "Enchanted Blaze Rod", MayOBeesConfig.getRandomizedDelayBetweenIngredientsGuiActions());
+                                break;
                             }
                             case 3: {
                                 putItem(INGREDIENT_SLOT, "Enchanted Gold Block", MayOBeesConfig.getRandomizedDelayBetweenIngredientsGuiActions());
+                                break;
                             }
                         }
                     }
                     else if (potionName.endsWith("V Potion")) {
                         switch (MayOBeesConfig.alchemyHelperMaxGlowstoneType) {
                             case 1: {
-                                putItem(INGREDIENT_SLOT, "Enchanted Glowstone Dust", MayOBeesConfig.getRandomizedDelayBetweenIngredientsGuiActions());
+                                putItem(INGREDIENT_SLOT, "Glowstone Dust", MayOBeesConfig.getRandomizedDelayBetweenIngredientsGuiActions());
+                                break;
                             }
                             case 2: {
+                                putItem(INGREDIENT_SLOT, "Enchanted Glowstone Dust", MayOBeesConfig.getRandomizedDelayBetweenIngredientsGuiActions());
+                                break;
+                            }
+                            case 3: {
                                 putItem(INGREDIENT_SLOT, "Enchanted Glowstone", MayOBeesConfig.getRandomizedDelayBetweenIngredientsGuiActions());
+                                break;
                             }
                         }
                     }
@@ -195,16 +203,7 @@ public class AlchemyHelper implements IModule {
             return;
         }
 
-        String potionName = "V Potion";
-
-        switch (MayOBeesConfig.alchemyHelperMaxGlowstoneType) {
-            case 1: {
-                potionName = "VII Potion";
-            }
-            case 2: {
-                potionName = "VIII Potion";
-            }
-        }
+        String potionName = getMaxPotion();
 
         Slot potion = InventoryUtils.getSlotOfItemFromInventoryInOpenContainer(potionName, false);
         if (potion == null || !potion.getHasStack()) {
@@ -232,8 +231,9 @@ public class AlchemyHelper implements IModule {
         if (!MayOBeesConfig.alchemyHelperAutoPickUpFinishPotions) return;
         if (!delay.passed()) return;
         if (potion == null || !potion.getHasStack()) return;
-        String potionName = potion.getStack().getDisplayName();
-        if (!potionName.endsWith("V Potion")) return;
+        String potionNameSlot = potion.getStack().getDisplayName();
+        String potionName = getMaxPotion();
+        if (!potionNameSlot.endsWith(potionName)) return;
         InventoryUtils.clickContainerSlot(potionSlot, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.QUICK_MOVE);
         delay.schedule(MayOBeesConfig.getRandomizedDelayBetweenPotionGuiActions() + extraDelay);
         if (potionSlot == POTION_SLOT_3) {
@@ -245,6 +245,26 @@ public class AlchemyHelper implements IModule {
         }
     }
 
+    private String getMaxPotion() {
+        String potionName = "V Potion";
+
+        switch (MayOBeesConfig.alchemyHelperMaxGlowstoneType) {
+            case 1: {
+                potionName = "VI Potion";
+                break;
+            }
+            case 2: {
+                potionName = "VII Potion";
+                break;
+            }
+            case 3: {
+                potionName = "VIII Potion";
+                break;
+            }
+        }
+        return potionName;
+    }
+
     private void putItem(int slot, String itemName, long delayTime) {
         if (!delay.passed()) return;
         Slot itemNameSlot = InventoryUtils.getSlotOfItemFromInventoryInOpenContainer(itemName, true);
@@ -253,16 +273,15 @@ public class AlchemyHelper implements IModule {
         LogUtils.debug("Putting " + itemName + " in slot " + slot + " from slot " + itemNameSlot.slotNumber);
         if (stackSize == 1) {
             InventoryUtils.clickContainerSlot(itemNameSlot.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.QUICK_MOVE);
+            if (MayOBeesConfig.alchemyHelperAutoCloseGUIAfterPuttingIngredients) {
+                InventoryUtils.closeScreen();
+            }
         } else {
             InventoryUtils.clickContainerSlot(itemNameSlot.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.PICKUP);
             Multithreading.schedule(() -> {
                 if (currentBrewingStand == null) return;
                 InventoryUtils.clickContainerSlot(slot, InventoryUtils.ClickType.RIGHT, InventoryUtils.ClickMode.PICKUP);
-                Slot firstEmptySlot = InventoryUtils.getFirstEmptySlotInInventory();
-                if (firstEmptySlot != null) {
-                    Multithreading.schedule(() -> InventoryUtils.clickContainerSlot(firstEmptySlot.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.PICKUP), delayTime / 2, TimeUnit.MILLISECONDS);
-                } else {
-                    LogUtils.error("[Alchemy Helper] Inventory is full!");
+                if (MayOBeesConfig.alchemyHelperAutoCloseGUIAfterPuttingIngredients) {
                     InventoryUtils.closeScreen();
                 }
                 delay.schedule(delayTime);

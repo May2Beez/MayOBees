@@ -619,7 +619,7 @@ public class MayOBeesConfig extends Config {
             description = "The glowstone type to use",
             category = "Skills",
             subcategory = "Alchemy Helper - Options",
-            options = {"None", "Enchanted Glowstone Dust", "Enchanted Glowstone"},
+            options = {"None", "Glowstone Dust", "Enchanted Glowstone Dust", "Enchanted Glowstone"},
             size = 2
     )
     public static int alchemyHelperMaxGlowstoneType = 0;
@@ -639,6 +639,14 @@ public class MayOBeesConfig extends Config {
             subcategory = "Alchemy Helper - Options"
     )
     public static boolean alchemyHelperAutoCloseGUIAfterPickingUpPotions = false;
+
+    @Switch(
+            name = "Auto close GUI after putting ingredients",
+            description = "Automatically closes the GUI after putting ingredients",
+            category = "Skills",
+            subcategory = "Alchemy Helper - Options"
+    )
+    public static boolean alchemyHelperAutoCloseGUIAfterPuttingIngredients = true;
 
     @Slider(
             name = "Delay between potion gui actions (ms)",
