@@ -140,6 +140,19 @@ public class AlchemyHelper implements IModule {
                             case 2: {
                                 putItem(INGREDIENT_SLOT, "Enchanted Blaze Rod", MayOBeesConfig.getRandomizedDelayBetweenIngredientsGuiActions());
                             }
+                            case 3: {
+                                putItem(INGREDIENT_SLOT, "Enchanted Gold Block", MayOBeesConfig.getRandomizedDelayBetweenIngredientsGuiActions());
+                            }
+                        }
+                    }
+                    else if (potionName.endsWith("V Potion")) {
+                        switch (MayOBeesConfig.alchemyHelperMaxGlowstoneType) {
+                            case 1: {
+                                putItem(INGREDIENT_SLOT, "Enchanted Glowstone Dust", MayOBeesConfig.getRandomizedDelayBetweenIngredientsGuiActions());
+                            }
+                            case 2: {
+                                putItem(INGREDIENT_SLOT, "Enchanted Glowstone", MayOBeesConfig.getRandomizedDelayBetweenIngredientsGuiActions());
+                            }
                         }
                     }
                 }
@@ -182,7 +195,18 @@ public class AlchemyHelper implements IModule {
             return;
         }
 
-        Slot potion = InventoryUtils.getSlotOfItemFromInventoryInOpenContainer("V Potion", false);
+        String potionName = "V Potion";
+
+        switch (MayOBeesConfig.alchemyHelperMaxGlowstoneType) {
+            case 1: {
+                potionName = "VII Potion";
+            }
+            case 2: {
+                potionName = "VIII Potion";
+            }
+        }
+
+        Slot potion = InventoryUtils.getSlotOfItemFromInventoryInOpenContainer(potionName, false);
         if (potion == null || !potion.getHasStack()) {
             LogUtils.info("[Alchemy Helper] Sold all potions!");
             mc.thePlayer.closeScreen();

@@ -6,10 +6,16 @@ import com.github.may2beez.mayobees.module.impl.combat.AutoClicker;
 import com.github.may2beez.mayobees.module.impl.combat.MobAura;
 import com.github.may2beez.mayobees.module.impl.dungeon.AutoBoomTNT;
 import com.github.may2beez.mayobees.module.impl.other.GhostBlocks;
+import com.github.may2beez.mayobees.module.impl.player.AutoHarp;
 import com.github.may2beez.mayobees.module.impl.player.Brush;
 import com.github.may2beez.mayobees.module.impl.player.GiftAura;
+import com.github.may2beez.mayobees.module.impl.player.VisitorHelper;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
 import com.github.may2beez.mayobees.module.impl.skills.*;
+import com.github.may2beez.mayobees.module.impl.skills.foraging.FillChestWithSaplingMacro;
+import com.github.may2beez.mayobees.module.impl.skills.foraging.FillForagingSackMacro;
+import com.github.may2beez.mayobees.module.impl.skills.foraging.Foraging;
+import com.github.may2beez.mayobees.module.impl.utils.AutoBazaar;
 import com.github.may2beez.mayobees.util.InventoryUtils;
 import com.github.may2beez.mayobees.util.LogUtils;
 import lombok.Getter;
@@ -48,7 +54,10 @@ public class ModuleManager {
                 FillChestWithSaplingMacro.getInstance(),
                 FillForagingSackMacro.getInstance(),
                 AutoBoomTNT.getInstance(),
-                Brush.getInstance()
+                Brush.getInstance(),
+                AutoHarp.getInstance(),
+                VisitorHelper.getInstance(),
+                AutoBazaar.getInstance()
         );
     }
 

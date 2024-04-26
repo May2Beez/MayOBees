@@ -1,6 +1,7 @@
 package com.github.may2beez.mayobees.handler;
 
 import com.github.may2beez.mayobees.util.InventoryUtils;
+import com.github.may2beez.mayobees.util.LogUtils;
 import com.github.may2beez.mayobees.util.ScoreboardUtils;
 import com.github.may2beez.mayobees.util.TablistUtils;
 import lombok.Getter;
@@ -14,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class GameStateHandler {
-    private static GameStateHandler INSTANCE;
+    private static GameStateHandler instance;
     private final Minecraft mc = Minecraft.getMinecraft();
     private final Pattern areaPattern = Pattern.compile("Area:\\s(.+)");
     @Getter
@@ -24,10 +25,10 @@ public class GameStateHandler {
     @Getter
     private String serverIP;
     public static GameStateHandler getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new GameStateHandler();
+        if (instance == null) {
+            instance = new GameStateHandler();
         }
-        return INSTANCE;
+        return instance;
     }
 
     @SubscribeEvent
@@ -57,6 +58,7 @@ public class GameStateHandler {
                 location = Location.DUNGEON;
                 return;
             }
+            if(!line.startsWith("Area: ")) continue;
             Matcher matcher = areaPattern.matcher(line);
             if (matcher.find()) {
                 String area = matcher.group(1);

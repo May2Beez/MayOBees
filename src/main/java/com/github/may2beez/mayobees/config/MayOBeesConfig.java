@@ -8,6 +8,7 @@ import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import cc.polyfrost.oneconfig.config.data.InfoType;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
+import com.github.may2beez.mayobees.hud.ForagingSkillTrackerHUD;
 import com.github.may2beez.mayobees.module.ModuleManager;
 import com.github.may2beez.mayobees.module.impl.combat.AutoClicker;
 import com.github.may2beez.mayobees.module.impl.other.Dev;
@@ -608,10 +609,20 @@ public class MayOBeesConfig extends Config {
             description = "The max ingredient type to use",
             category = "Skills",
             subcategory = "Alchemy Helper - Options",
-            options = {"None", "Enchanted Sugar Cane", "Enchanted Blaze Rod"},
+            options = {"None", "Enchanted Sugar Cane", "Enchanted Blaze Rod", "Enchanted Gold Block"},
             size = 2
     )
     public static int alchemyHelperMaxIngredientType = 0;
+
+    @Dropdown(
+            name = "Glowstone Type",
+            description = "The glowstone type to use",
+            category = "Skills",
+            subcategory = "Alchemy Helper - Options",
+            options = {"None", "Enchanted Glowstone Dust", "Enchanted Glowstone"},
+            size = 2
+    )
+    public static int alchemyHelperMaxGlowstoneType = 0;
 
     @Switch(
             name = "Auto pick up finish potions",
@@ -808,6 +819,13 @@ public class MayOBeesConfig extends Config {
             max = 100
     )
     public static int monkeyLevel = 0;
+
+    @HUD(
+            name = "Skill Tracker (Foraging Macro)",
+            category = "Skills",
+            subcategory = "Foraging - Options"
+    )
+    public static ForagingSkillTrackerHUD foragingSkillTrackerHUD = new ForagingSkillTrackerHUD();
 
     //</editor-fold>
 
@@ -1047,6 +1065,54 @@ public class MayOBeesConfig extends Config {
     )
     public static boolean stopMacrosOnWorldChange = true;
 
+    @Slider(
+            name = "Teleport Check Distance Sensitivity",
+            description = "The Minimum Distance Change Required To Trigger failsafe",
+            category = "Other",
+            subcategory = "Failsafe",
+            min = 0,
+            max = 20
+    )
+    public static int failsafeTeleportCheckDistanceSensitivity = 1;
+
+    @Slider(
+            name = "Rotation Check Yaw Sensitivity",
+            description = "The Minimum Yaw Change Required To Trigger failsafe",
+            category = "Other",
+            subcategory = "Failsafe",
+            min = 1,
+            max = 20
+    )
+    public static int failsafeRotationCheckYawSensitivity = 1;
+
+
+    @Slider(
+            name = "Rotation Check Pitch Sensitivity",
+            description = "The Minimum Pitch Change Required To Trigger failsafe",
+            category = "Other",
+            subcategory = "Failsafe",
+            min = 1,
+            max = 20
+    )
+    public static int failsafeRotationCheckPitchSensitivity = 1;
+
+    @Switch(
+            name = "Fix Micro Rotations",
+            description = "Whether macro should micro rotations from macro check or not",
+            category = "Other",
+            subcategory = "Failsafe"
+    )
+    public static boolean failsafeFixMicroRotation = true;
+
+    @Slider(
+            name = "Micro Rotation Fix Delay (In Seconds)",
+            description = "Time to wait before fixing micro rotation",
+            category = "Description",
+            subcategory = "Failsafe",
+            min = 0, max = 600
+    )
+    public static int failsafeDelayBeforeRotationFix = 60;
+
     //</editor-fold>
 
     //<editor-fold desc="Gift Aura">
@@ -1187,6 +1253,54 @@ public class MayOBeesConfig extends Config {
     )
     public static int delayBeforeTP = 100;
 
+    //</editor-fold>
+    //<editor-fold desc="Auto harp">
+
+    @Switch(
+            name = "Auto Harp",
+            description = "Automatically Completes Harp",
+            category = "Player",
+            subcategory = "Auto Harp"
+    )
+    public static boolean autoHarp = false;
+
+    //</editor-fold>
+
+    // Todo: Global Delay for everything?
+    //<editor-fold desc="Visitor Helper">
+    @Switch(
+            name = "Visitor Helper", category = "Player", subcategory = "Visitor Helper",
+            description = "Enable Visitor Helper"
+    )
+    public static boolean visitorHelper = false;
+
+    @Slider(
+            name = "Max Spend Threshold (In Thousands)", category = "Player", subcategory = "Visitor Helper",
+            description = "Maximum Amount of Coins Allowed To Spend Per Visitor (in thousands, 0 = no limit)",
+            min = 0f, max = 7000f
+    )
+    public static int visitorHelperSpendThreshold = 0;
+
+    @Slider(
+            name = "GUI Delay", category = "Player", subcategory = "Visitor Helper",
+            description = "The delay between clicking during GUI macros (in milliseconds)",
+            min = 250f, max = 1000f
+    )
+    public static int visitorHelperGuiDelay = 400;
+
+    @Slider(
+            name = "Additional random GUI Delay", category = "Player", subcategory = "Visitor Helper",
+            description = "The maximum random time added to the delay time between clicking during GUI macros (in milliseconds)",
+            min = 0f, max = 1000f
+    )
+    public static int visitorHelperGuiDelayRandomness = 350;
+
+    @Slider(
+            name = "Max wait time before stopping (should be > clickTime + randomTime)", category = "Player", subcategory = "Visitor Helper",
+            description = "The maximum time to wait before stopping the module (in milliseconds)",
+            min = 0f, max = 2000f
+    )
+    public static int visitorHelperGuiTimeoutTime = 750;
     //</editor-fold>
     //</editor-fold>
 

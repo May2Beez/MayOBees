@@ -5,6 +5,9 @@ import cc.polyfrost.oneconfig.utils.commands.annotations.Main;
 import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommand;
 import cc.polyfrost.oneconfig.utils.commands.annotations.SubCommandGroup;
 import com.github.may2beez.mayobees.MayOBees;
+import com.github.may2beez.mayobees.config.MayOBeesConfig;
+import com.github.may2beez.mayobees.module.impl.utils.helper.BazaarConfig;
+import com.github.may2beez.mayobees.module.impl.utils.AutoBazaar;
 import com.github.may2beez.mayobees.module.impl.player.Brush;
 import com.github.may2beez.mayobees.util.LogUtils;
 
@@ -41,5 +44,18 @@ public class MainCommand {
             Brush.getInstance().getWaypoints().get(currentList).getWaypoints().set(waypoint, Brush.getInstance().getWaypoints().get(currentList).getWaypoints().get(waypoint).add(xOffset, yOffset, zOffset));
             LogUtils.info("Offset waypoint " + waypoint + " by " + xOffset + " " + yOffset + " " + zOffset);
         }
+    }
+
+    @SubCommand
+    private void bz(String itemName, int amount) {
+        LogUtils.info("Item: " + itemName);
+        BazaarConfig config = new BazaarConfig(
+                itemName.replace("_", " "),
+                amount,
+                MayOBeesConfig.visitorHelperSpendThreshold * 1000,
+                MayOBeesConfig.visitorHelperGuiDelay,
+                MayOBeesConfig.visitorHelperGuiDelayRandomness,
+                MayOBeesConfig.visitorHelperGuiTimeoutTime);
+        AutoBazaar.getInstance().buy(config);
     }
 }
