@@ -3,7 +3,6 @@ package com.github.may2beez.mayobees.module.impl.skills;
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.event.SpawnParticleEvent;
 import com.github.may2beez.mayobees.handler.RotationHandler;
-import com.github.may2beez.mayobees.module.IModule;
 import com.github.may2beez.mayobees.module.IModuleActive;
 import com.github.may2beez.mayobees.module.impl.combat.MobAura;
 import com.github.may2beez.mayobees.util.*;

@@ -17,8 +17,6 @@ import com.github.may2beez.mayobees.module.impl.player.GiftAura;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
 import com.github.may2beez.mayobees.module.impl.skills.AlchemyHelper;
 import com.github.may2beez.mayobees.util.LogUtils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.MovingObjectPosition;
 import org.lwjgl.input.Keyboard;
 
 public class MayOBeesConfig extends Config {
@@ -1029,13 +1027,32 @@ public class MayOBeesConfig extends Config {
     )
     public static boolean saveEntityNBTToFile = false;
 
+    @Switch(
+            name = "Include armor stands with skulls only",
+            description = "Includes armor stands with skulls only",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static boolean entityNBTArmorStandSkullsOnly = false;
+
     @KeyBind(
             name = "Get Entity NBT",
             description = "Gets the entity NBT",
             category = "Debug",
             subcategory = "Entity NBT"
     )
-    public static OneKeyBind saveEntityNBTToFileKeybind = new OneKeyBind(Keyboard.KEY_NONE);
+    public static OneKeyBind getEntityNBTKeybind = new OneKeyBind(Keyboard.KEY_NONE);
+
+    @Button(
+            name = "Get all loaded entity NBT",
+            text = "Get all loaded entity NBT",
+            description = "Gets the entity NBT of all loaded entities",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static void getAllLoadedEntityNBT() {
+        Dev.getInstance().getAllLoadedEntityNBT();
+    }
     //</editor-fold>
     //</editor-fold>
 
@@ -1365,7 +1382,7 @@ public class MayOBeesConfig extends Config {
             Brush.getInstance().addNewBrushWaypointList();
         });
 
-        registerKeyBind(saveEntityNBTToFileKeybind, () -> {
+        registerKeyBind(getEntityNBTKeybind, () -> {
             Dev.getInstance().getEntityNBT();
         });
     }

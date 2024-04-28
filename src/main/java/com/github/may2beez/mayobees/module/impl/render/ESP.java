@@ -304,7 +304,7 @@ public class ESP implements IModule {
 
     private void giftClick(ClickEvent event) {
         if (!MayOBeesConfig.giftESP) return;
-        if (!HeadUtils.isGift(event.entity)) return;
+        if (!HeadUtils.isArmorStandWithSkull(event.entity)) return;
         if (clickedGifts.contains(event.entity.getPosition())) return;
         clickedGifts.add(event.entity.getPosition());
     }

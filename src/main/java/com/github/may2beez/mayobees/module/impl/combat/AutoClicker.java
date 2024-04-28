@@ -1,7 +1,6 @@
 package com.github.may2beez.mayobees.module.impl.combat;
 
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
-import com.github.may2beez.mayobees.event.ClickEvent;
 import com.github.may2beez.mayobees.module.IModuleActive;
 import com.github.may2beez.mayobees.util.KeyBindUtils;
 import net.minecraft.client.Minecraft;

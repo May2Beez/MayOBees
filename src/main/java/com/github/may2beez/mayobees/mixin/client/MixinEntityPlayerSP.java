@@ -1,7 +1,7 @@
 package com.github.may2beez.mayobees.mixin.client;
 
-import com.github.may2beez.mayobees.event.MotionUpdateEvent;
 import com.github.may2beez.mayobees.event.ContainerClosedEvent;
+import com.github.may2beez.mayobees.event.MotionUpdateEvent;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;

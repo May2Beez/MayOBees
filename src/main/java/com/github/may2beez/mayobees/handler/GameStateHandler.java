@@ -1,7 +1,6 @@
 package com.github.may2beez.mayobees.handler;
 
 import com.github.may2beez.mayobees.util.InventoryUtils;
-import com.github.may2beez.mayobees.util.LogUtils;
 import com.github.may2beez.mayobees.util.ScoreboardUtils;
 import com.github.may2beez.mayobees.util.TablistUtils;
 import lombok.Getter;

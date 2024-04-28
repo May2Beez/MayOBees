@@ -3,6 +3,7 @@ package com.github.may2beez.mayobees.module.impl.other;
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.event.PacketEvent;
 import com.github.may2beez.mayobees.module.IModule;
+import com.github.may2beez.mayobees.util.HeadUtils;
 import com.github.may2beez.mayobees.util.LogUtils;
 import com.github.may2beez.mayobees.util.ScoreboardUtils;
 import com.github.may2beez.mayobees.util.TablistUtils;
@@ -224,10 +225,15 @@ public class Dev implements IModule {
             LogUtils.info("Entity is null!");
             return;
         }
+        String nbt = getEntityNBTtoString(entity);
+        if (nbt == null || nbt.isEmpty()) {
+            LogUtils.info(MayOBeesConfig.entityNBTArmorStandSkullsOnly ? "Skull" : "Entity" + " NBT is empty!");
+            return;
+        }
         if (MayOBeesConfig.saveEntityNBTToFile) {
             try {
                 FileWriter file = new FileWriter("entityNBT_" + getCurrentTime() + ".txt");
-                file.write(entity.serializeNBT().toString().replace("§", "&") + "\n");
+                file.write(nbt.replace("§", "&") + "\n");
                 file.close();
                 LogUtils.info("Saved entity NBT to file!");
             } catch (IOException e) {
@@ -235,8 +241,54 @@ public class Dev implements IModule {
                 e.printStackTrace();
             }
         } else {
-            System.out.println(entity.serializeNBT().toString());
+            System.out.println(nbt);
             LogUtils.info("Printed entity NBT to console!");
         }
     }
+
+    private static String getEntityNBTtoString(Entity entity) {
+        String nbt;
+        try {
+            if (MayOBeesConfig.entityNBTArmorStandSkullsOnly && !HeadUtils.isArmorStandWithSkull(entity))
+                return null;
+            nbt = entity.serializeNBT().toString();
+        } catch (Exception ignored) {
+            return null;
+        }
+        return nbt;
+    }
+
+    public void getAllLoadedEntityNBT() {
+        if (mc.theWorld == null) {
+            LogUtils.info("World is null!");
+            return;
+        }
+        List<String> entityNBTs = new ArrayList<>();
+        for (Entity entity : mc.theWorld.loadedEntityList) {
+            String nbt = getEntityNBTtoString(entity);
+            if (nbt == null || nbt.isEmpty()) {
+                continue;
+            }
+            entityNBTs.add(nbt);
+        }
+        if (MayOBeesConfig.saveEntityNBTToFile) {
+            try {
+                FileWriter file = new FileWriter("allEntityNBT_" + getCurrentTime() + ".txt");
+                for (String nbt : entityNBTs) {
+                    file.write(nbt.replace("§", "&") + "\n");
+                }
+                file.close();
+                LogUtils.info("Saved all entity NBTs to file!");
+            } catch (IOException e) {
+                LogUtils.error("Failed to save all entity NBTs to file!");
+                e.printStackTrace();
+            }
+        } else {
+            for (String nbt : entityNBTs) {
+                System.out.println(nbt);
+            }
+            LogUtils.info("Printed all entity NBTs to console!");
+        }
+    }
+    //</editor-fold>
 }
