@@ -227,7 +227,7 @@ public class Dev implements IModule {
         }
         String nbt = getEntityNBTtoString(entity);
         if (nbt == null || nbt.isEmpty()) {
-            LogUtils.info(MayOBeesConfig.entityNBTArmorStandSkullsOnly ? "Skull" : "Entity" + " NBT is empty!");
+            LogUtils.info((MayOBeesConfig.entityNBTArmorStandSkullsOnly ? "Skull" : "Entity") + " NBT is empty!");
             return;
         }
         if (MayOBeesConfig.saveEntityNBTToFile) {
