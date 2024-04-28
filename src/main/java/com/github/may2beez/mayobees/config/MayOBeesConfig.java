@@ -17,6 +17,8 @@ import com.github.may2beez.mayobees.module.impl.player.GiftAura;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
 import com.github.may2beez.mayobees.module.impl.skills.AlchemyHelper;
 import com.github.may2beez.mayobees.util.LogUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.MovingObjectPosition;
 import org.lwjgl.input.Keyboard;
 
 public class MayOBeesConfig extends Config {
@@ -1017,6 +1019,24 @@ public class MayOBeesConfig extends Config {
     )
     public static boolean listenToOutgoingPackets = false;
     //</editor-fold>
+
+    //<editor-fold desc="Entity NBT">
+    @Switch(
+            name = "Save Entity NBT",
+            description = "Saves the entity NBT to a file",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static boolean saveEntityNBTToFile = false;
+
+    @KeyBind(
+            name = "Get Entity NBT",
+            description = "Gets the entity NBT",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static OneKeyBind saveEntityNBTToFileKeybind = new OneKeyBind(Keyboard.KEY_NONE);
+    //</editor-fold>
     //</editor-fold>
 
     //<editor-fold desc="OTHER">
@@ -1343,6 +1363,10 @@ public class MayOBeesConfig extends Config {
 
         registerKeyBind(addNewBrushWaypointListKeybind, () -> {
             Brush.getInstance().addNewBrushWaypointList();
+        });
+
+        registerKeyBind(saveEntityNBTToFileKeybind, () -> {
+            Dev.getInstance().getEntityNBT();
         });
     }
 }

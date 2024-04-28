@@ -7,6 +7,8 @@ import com.github.may2beez.mayobees.util.LogUtils;
 import com.github.may2beez.mayobees.util.ScoreboardUtils;
 import com.github.may2beez.mayobees.util.TablistUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.io.FileWriter;
@@ -210,4 +212,31 @@ public class Dev implements IModule {
         }
     }
     //</editor-fold>
+
+    //<editor-fold desc="Entity NBT">
+    public void getEntityNBT() {
+        MovingObjectPosition objectMouseOver = Minecraft.getMinecraft().objectMouseOver;
+        Entity entity = null;
+        if (objectMouseOver != null && objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY && objectMouseOver.entityHit != null) {
+            entity = objectMouseOver.entityHit;
+        }
+        if (entity == null) {
+            LogUtils.info("Entity is null!");
+            return;
+        }
+        if (MayOBeesConfig.saveEntityNBTToFile) {
+            try {
+                FileWriter file = new FileWriter("entityNBT_" + getCurrentTime() + ".txt");
+                file.write(entity.serializeNBT().toString().replace("§", "&") + "\n");
+                file.close();
+                LogUtils.info("Saved entity NBT to file!");
+            } catch (IOException e) {
+                LogUtils.error("Failed to save entity NBT to file!");
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println(entity.serializeNBT().toString());
+            LogUtils.info("Printed entity NBT to console!");
+        }
+    }
 }
