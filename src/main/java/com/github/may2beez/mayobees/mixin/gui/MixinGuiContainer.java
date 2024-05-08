@@ -18,7 +18,7 @@ public class MixinGuiContainer {
     }
 
     @Inject(method = "onGuiClosed", at = @At("RETURN"))
-    public void onGuiClosed(CallbackInfo ci){
+    public void onGuiClosed(CallbackInfo ci) {
         MinecraftForge.EVENT_BUS.post(new GuiClosedEvent());
     }
 }
