@@ -58,7 +58,8 @@ public class AutoHarp implements IModuleActive {
 
     @SubscribeEvent
     public void onGuiOpen(GuiScreenEvent.InitGuiEvent.Post event) {
-        if (!MayOBeesConfig.autoHarp || isRunning()) return;
+        if (!MayOBeesConfig.autoHarp || isRunning())
+            return;
         String inventoryName = InventoryUtils.getInventoryName();
         if (inventoryName != null && inventoryName.startsWith("Harp - ")) {
             onEnable();
@@ -67,15 +68,17 @@ public class AutoHarp implements IModuleActive {
     }
 
     @SubscribeEvent
-    public void onGuiClose(GuiClosedEvent event){
-        if(!isRunning()) return;
+    public void onGuiClose(GuiClosedEvent event) {
+        if (!isRunning())
+            return;
         onDisable();
         LogUtils.debug("Harp Gui Closed");
     }
 
     @SubscribeEvent
     public void onPacketReceive(PacketEvent.Receive event) {
-        if (!isRunning()) return;
+        if (!isRunning())
+            return;
 
         long currentTime = System.currentTimeMillis();
         boolean time = currentTime - lastPacketReceiveTime > lagSpikeThreshold;
@@ -83,9 +86,11 @@ public class AutoHarp implements IModuleActive {
         if (event.packet instanceof S2FPacketSetSlot) {
             S2FPacketSetSlot packet = (S2FPacketSetSlot) event.packet;
             int slotIndex = packet.func_149173_d();
-            if (slotIndex > 43) return;
+            if (slotIndex > 43)
+                return;
             hasGuiUpdated = false;
-            if (slotIndex < 37) return;
+            if (slotIndex < 37)
+                return;
             slots[slotIndex - 37] = packet.func_149174_e();
             return;
         }
@@ -93,7 +98,8 @@ public class AutoHarp implements IModuleActive {
         if (time && !hasGuiUpdated) {
             for (int i = 0; i < 7; i++) {
                 if (slots[i] != null && Block.getBlockFromItem(slots[i].getItem()) == Blocks.quartz_block) {
-                    InventoryUtils.clickContainerSlot(i + 37, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.CLONE);
+                    InventoryUtils.clickContainerSlot(i + 37, InventoryUtils.ClickType.MIDDLE,
+                            InventoryUtils.ClickMode.CLONE);
                     break;
                 }
             }
@@ -101,11 +107,13 @@ public class AutoHarp implements IModuleActive {
 
         lastPacketReceiveTime = currentTime;
 
-        if (hasGuiUpdated) return;
+        if (hasGuiUpdated)
+            return;
         hasGuiUpdated = true;
         for (int i = 0; i < 7; i++) {
             if (slots[i] != null && Block.getBlockFromItem(slots[i].getItem()) == Blocks.quartz_block) {
-                InventoryUtils.clickContainerSlot(i + 37, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.CLONE);
+                InventoryUtils.clickContainerSlot(i + 37, InventoryUtils.ClickType.MIDDLE,
+                        InventoryUtils.ClickMode.CLONE);
                 break;
             }
         }
