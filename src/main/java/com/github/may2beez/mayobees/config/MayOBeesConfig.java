@@ -888,13 +888,21 @@ public class MayOBeesConfig extends Config {
     public static int autoExperimentsClickDelayRandomization = 150;
 
     @Slider(
-            name = "Max Rounds",
-            description = "Maximum times to complete the mini games",
+            name = "Metaphysical Serum Count",
+            description = "The amount of metaphysical serum that was consumed",
             category = "Skills",
             subcategory = "Enchanting",
-            min = 1, max = 40
+            min = 0, max = 3
     )
-    public static int autoExperimentsMaxRounds = 9;
+    public static int autoExperimentsSerumCount = 0;
+
+    @Switch(
+            name = "Infinite Mode",
+            description = "Runs Infinitely until closed manually or closed by the game",
+            category = "Skills",
+            subcategory = "Enchanting"
+    )
+    public static boolean autoExperimentsInfiniteMode = false;
     //</editor-fold>
     //</editor-fold>
 

@@ -61,8 +61,7 @@ public class FillChestWithSaplingMacro implements IModuleActive {
         state = States.IDLE;
         waitTimer.reset();
         enabled = true;
-        if (MayOBeesConfig.mouseUngrab)
-            UngrabUtils.ungrabMouse();
+        UngrabUtils.ungrabMouse();
     }
 
     @Override

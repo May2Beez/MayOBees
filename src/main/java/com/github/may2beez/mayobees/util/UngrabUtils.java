@@ -1,5 +1,6 @@
 package com.github.may2beez.mayobees.util;
 
+import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.MouseHelper;
 import org.lwjgl.input.Mouse;
@@ -10,6 +11,7 @@ public class UngrabUtils {
     private static boolean doesGameWantUngrabbed;
 
     public static void ungrabMouse() {
+        if (!MayOBeesConfig.mouseUngrab) return;
         Minecraft m = Minecraft.getMinecraft();
         if (isUngrabbed) return;
         m.gameSettings.pauseOnLostFocus = false;

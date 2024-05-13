@@ -45,6 +45,7 @@ public class NickHider implements IModule {
 
     @SubscribeEvent
     public void onPlayerListUpdate(UpdateTablistEvent event) {
+        if(!this.isRunning()) return;
         this.currentPlayers.clear();
         for (NetworkPlayerInfo npi : Minecraft.getMinecraft().getNetHandler().getPlayerInfoMap()) {
             String name = npi.getGameProfile().getName();

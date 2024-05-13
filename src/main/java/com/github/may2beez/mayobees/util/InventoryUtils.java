@@ -407,7 +407,8 @@ public class InventoryUtils {
 
     public static enum ClickType {
         LEFT,
-        RIGHT
+        RIGHT,
+        MIDDLE
     }
 
     public static enum ClickMode {

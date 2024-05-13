@@ -31,7 +31,7 @@ public class AutoExperiments implements IModuleActive {
     private final Deque<Integer> clickQueue = new ArrayDeque<>();
     private boolean enabled = false;
     private boolean solving = false;
-    private int experiment = -1;
+    private Experiment experiment = Experiment.NONE;
     private String lastItemName = "";
     private boolean shouldCloseGui = false;
 
@@ -43,7 +43,7 @@ public class AutoExperiments implements IModuleActive {
     public void onDisable() {
         this.enabled = false;
         this.solving = false;
-        this.experiment = -1;
+        this.experiment = Experiment.NONE;
         this.lastItemName = "";
         this.shouldCloseGui = false;
         this.clickQueue.clear();
@@ -59,8 +59,7 @@ public class AutoExperiments implements IModuleActive {
         return "AutoExperiments";
     }
 
-    // 0 = Chronomatron ; 1 = Ultrasequencer
-    private void enable(final int experiment) {
+    private void enable(final Experiment experiment) {
         this.experiment = experiment;
         this.enabled = true;
     }
@@ -71,9 +70,9 @@ public class AutoExperiments implements IModuleActive {
 
         final String inventoryName = InventoryUtils.getInventoryName(((GuiChest) event.gui).inventorySlots);
         if (inventoryName.startsWith("Chronomatron (")) {
-            this.enable(0);
+            this.enable(Experiment.Chronomatron);
         } else if (inventoryName.startsWith("Ultrasequencer (")) {
-            this.enable(1);
+            this.enable(Experiment.Ultrasequencer);
         }
     }
 
@@ -111,11 +110,16 @@ public class AutoExperiments implements IModuleActive {
             this.solving = true;
             this.lastItemName = "";
             this.clickDelay.schedule(this.getRandomClickTime());
-            this.shouldCloseGui = this.clickQueue.size() >= MayOBeesConfig.autoExperimentsMaxRounds;
+            if(!MayOBeesConfig.autoExperimentsInfiniteMode) {
+                this.shouldCloseGui = this.clickQueue.size() >= this.experiment.maxRounds - MayOBeesConfig.autoExperimentsSerumCount;
+            }
+            else {
+                this.shouldCloseGui = false;
+            }
             return;
         }
 
-        if (this.experiment != 0 || this.solving) return;
+        if (this.experiment != Experiment.Chronomatron || this.solving) return;
 
         if (slotName.equals(this.lastItemName) && !slotStack.isItemEnchanted()) {
             this.lastItemName = "";
@@ -130,7 +134,7 @@ public class AutoExperiments implements IModuleActive {
 
     @SubscribeEvent
     public void onTickUltrasequencer(TickEvent.ClientTickEvent event) {
-        if (mc.thePlayer == null || mc.theWorld == null || !this.isRunning() || this.solving || (this.experiment == 1 && !this.clickQueue.isEmpty()))
+        if (mc.thePlayer == null || mc.theWorld == null || !this.isRunning() || this.solving || (this.experiment == Experiment.Ultrasequencer && !this.clickQueue.isEmpty()))
             return;
         final TreeMap<Integer, Integer> map = new TreeMap<>();
         for (int i = 0; i <= mc.thePlayer.openContainer.inventorySlots.size() - 37; i++) {
@@ -150,11 +154,23 @@ public class AutoExperiments implements IModuleActive {
         if (this.clickDelay.isScheduled() && !this.clickDelay.passed()) return;
         if (this.clickQueue.isEmpty()) return;
 
-        InventoryUtils.clickContainerSlot(this.clickQueue.poll(), InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.CLONE);
+        InventoryUtils.clickContainerSlot(this.clickQueue.poll(), InventoryUtils.ClickType.MIDDLE, InventoryUtils.ClickMode.CLONE);
         this.clickDelay.schedule(this.getRandomClickTime());
     }
 
     private int getRandomClickTime() {
         return MayOBeesConfig.autoExperimentsClickDelay + (int) (new Random().nextFloat() * MayOBeesConfig.autoExperimentsClickDelayRandomization);
+    }
+
+    enum Experiment{
+        NONE(2),
+        Chronomatron(12),
+        Ultrasequencer(9);
+
+        public final int maxRounds;
+
+        Experiment(final int maxRounds){
+            this.maxRounds = maxRounds;
+        }
     }
 }

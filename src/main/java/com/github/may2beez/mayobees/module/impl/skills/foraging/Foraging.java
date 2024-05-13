@@ -81,8 +81,7 @@ public class Foraging implements IModuleActive {
     @Override
     public void onEnable() {
         enabled = true;
-        if (MayOBeesConfig.mouseUngrab)
-            UngrabUtils.ungrabMouse();
+        UngrabUtils.ungrabMouse();
         startTime = System.currentTimeMillis() - (stopTime - startTime);
         dirtBlocks.clear();
         dirtBlocks.addAll(getDirts());
