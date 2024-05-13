@@ -1,6 +1,7 @@
 package com.github.may2beez.mayobees.event;
 
 import net.minecraftforge.fml.common.eventhandler.Event;
+
 import java.util.List;
 
 public class UpdateTablistEvent extends Event {

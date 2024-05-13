@@ -2,7 +2,6 @@ package com.github.may2beez.mayobees.util;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityArmorStand;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StringUtils;
 
@@ -14,15 +13,20 @@ public class HeadUtils {
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjczYTIxMTQxMzZiOGVlNDkyNmNhYTUxNzg1NDE0MD2M2YTJiNzZlNGYxNjY4Y2I4OWQ5OTcxNmM0MjEifX19"
     };
 
-    public static boolean isGift(Entity entity) {
+    public static boolean isArmorStandWithSkull(Entity entity) {
         if (!(entity instanceof EntityArmorStand))
             return false;
-        return isGift((EntityArmorStand) entity);
+        return isArmorStandWithSkull((EntityArmorStand) entity);
+    }
+
+    public static boolean isArmorStandWithSkull(EntityArmorStand armorStand) {
+        ItemStack helmet = armorStand.getEquipmentInSlot(4);
+        return helmet != null && helmet.getTagCompound() != null;
     }
 
     public static boolean isGift(EntityArmorStand armorStand) {
+        if (!isArmorStandWithSkull(armorStand)) return false;
         ItemStack helmet = armorStand.getEquipmentInSlot(4);
-        if (helmet == null || helmet.getItem() != Items.skull || helmet.getTagCompound() == null) return false;
         return !armorStand.hasCustomName()
                 && Math.abs(armorStand.lastTickPosY - armorStand.posY) < 0.1
                 && (helmet.getTagCompound().toString().contains(HeadUtils.GIFT_TEXTURES[0])

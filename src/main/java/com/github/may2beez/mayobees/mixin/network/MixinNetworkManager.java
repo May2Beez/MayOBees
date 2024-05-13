@@ -1,7 +1,7 @@
 package com.github.may2beez.mayobees.mixin.network;
 
 import com.github.may2beez.mayobees.event.PacketEvent;
-import io.netty.channel.*;
+import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraftforge.common.MinecraftForge;

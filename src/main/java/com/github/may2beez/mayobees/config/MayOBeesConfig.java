@@ -1061,6 +1061,43 @@ public class MayOBeesConfig extends Config {
     )
     public static boolean listenToOutgoingPackets = false;
     //</editor-fold>
+
+    //<editor-fold desc="Entity NBT">
+    @Switch(
+            name = "Save Entity NBT",
+            description = "Saves the entity NBT to a file",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static boolean saveEntityNBTToFile = false;
+
+    @Switch(
+            name = "Include armor stands with skulls only",
+            description = "Includes armor stands with skulls only",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static boolean entityNBTArmorStandSkullsOnly = false;
+
+    @KeyBind(
+            name = "Get Entity NBT",
+            description = "Gets the entity NBT",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static OneKeyBind getEntityNBTKeybind = new OneKeyBind(Keyboard.KEY_NONE);
+
+    @Button(
+            name = "Get all loaded entity NBT",
+            text = "Get all loaded entity NBT",
+            description = "Gets the entity NBT of all loaded entities",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static void getAllLoadedEntityNBT() {
+        Dev.getInstance().getAllLoadedEntityNBT();
+    }
+    //</editor-fold>
     //</editor-fold>
 
     //<editor-fold desc="OTHER">
@@ -1406,6 +1443,10 @@ public class MayOBeesConfig extends Config {
 
         registerKeyBind(addNewBrushWaypointListKeybind, () -> {
             Brush.getInstance().addNewBrushWaypointList();
+        });
+
+        registerKeyBind(getEntityNBTKeybind, () -> {
+            Dev.getInstance().getEntityNBT();
         });
     }
 }

@@ -1,6 +1,5 @@
 package com.github.may2beez.mayobees.util;
 
-import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
