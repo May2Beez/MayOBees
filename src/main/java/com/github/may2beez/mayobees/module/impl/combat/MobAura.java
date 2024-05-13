@@ -64,8 +64,8 @@ public class MobAura implements IModuleActive {
 
     @Override
     public void onEnable() {
-        enabled = true;
         nextRotationSpeed = MayOBeesConfig.getRandomizedMobAuraRotationSpeed();
+        enabled = true;
     }
 
     @Override

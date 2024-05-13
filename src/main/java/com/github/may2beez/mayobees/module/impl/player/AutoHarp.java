@@ -12,6 +12,7 @@ import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -57,22 +58,20 @@ public class AutoHarp implements IModuleActive {
     }
 
     @SubscribeEvent
-    public void onGuiOpen(GuiScreenEvent.InitGuiEvent.Post event) {
-        if (!MayOBeesConfig.autoHarp || isRunning())
-            return;
-        String inventoryName = InventoryUtils.getInventoryName();
+    public void onGuiOpenEvent(GuiScreenEvent.InitGuiEvent event) {
+        if (!MayOBeesConfig.autoHarp || this.isRunning() || !(event.gui instanceof GuiChest)) return;
+        String inventoryName = InventoryUtils.getInventoryName(((GuiChest) event.gui).inventorySlots);
         if (inventoryName != null && inventoryName.startsWith("Harp - ")) {
-            onEnable();
-            LogUtils.debug("Harp Enabled");
+            this.onEnable();
+            LogUtils.info("Harp Enabled");
         }
     }
 
     @SubscribeEvent
     public void onGuiClose(GuiClosedEvent event) {
-        if (!isRunning())
-            return;
-        onDisable();
-        LogUtils.debug("Harp Gui Closed");
+        if (!this.isRunning()) return;
+        this.onDisable();
+        LogUtils.info("Harp Gui Closed");
     }
 
     @SubscribeEvent

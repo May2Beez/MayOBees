@@ -6,10 +6,7 @@ import com.github.may2beez.mayobees.module.impl.combat.AutoClicker;
 import com.github.may2beez.mayobees.module.impl.combat.MobAura;
 import com.github.may2beez.mayobees.module.impl.dungeon.AutoBoomTNT;
 import com.github.may2beez.mayobees.module.impl.other.GhostBlocks;
-import com.github.may2beez.mayobees.module.impl.player.AutoHarp;
-import com.github.may2beez.mayobees.module.impl.player.Brush;
-import com.github.may2beez.mayobees.module.impl.player.GiftAura;
-import com.github.may2beez.mayobees.module.impl.player.VisitorHelper;
+import com.github.may2beez.mayobees.module.impl.player.*;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
 import com.github.may2beez.mayobees.module.impl.skills.AlchemyHelper;
 import com.github.may2beez.mayobees.module.impl.skills.Fishing;
@@ -58,7 +55,9 @@ public class ModuleManager {
                 Brush.getInstance(),
                 AutoHarp.getInstance(),
                 VisitorHelper.getInstance(),
-                AutoBazaar.getInstance()
+                AutoBazaar.getInstance(),
+                NickHider.getInstance(),
+                AutoExperiments.getInstance()
         );
     }
 

@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
@@ -34,6 +35,18 @@ public class InventoryUtils {
             }
         }
         return -1;
+    }
+
+    public static Slot getSlotOfItemInContainerMatches(String item) {
+        for (Slot slot : mc.thePlayer.openContainer.inventorySlots) {
+            if (slot.getHasStack()) {
+                String itemName = StringUtils.stripControlCodes(slot.getStack().getDisplayName());
+                if (itemName.matches(item)) {
+                    return slot;
+                }
+            }
+        }
+        return null;
     }
 
     public static boolean isInventoryEmpty(EntityPlayer player) {
@@ -147,6 +160,17 @@ public class InventoryUtils {
             }
         }
         return null;
+    }
+
+    // Todo: Replace the second one with return getInventoryName(mc.thePlayer.openContainer)
+    public static String getInventoryName(Container container) {
+        // why return null and have one extra null check?
+        // using contains / equals / whatever works fine on an empty string no need for extra null check
+        if (container instanceof ContainerChest) {
+            IInventory inv = ((ContainerChest) container).getLowerChestInventory();
+            return inv != null && inv.hasCustomName() ? inv.getName() : "";
+        }
+        return "";
     }
 
     public static String getInventoryName() {
@@ -377,6 +401,15 @@ public class InventoryUtils {
             return true;
         }
         return false;
+    }
+
+    public static boolean isInventoryLoaded() {
+        if (mc.thePlayer == null || mc.thePlayer.openContainer == null) return false;
+        if (!(mc.currentScreen instanceof GuiChest)) return false;
+        ContainerChest chest = (ContainerChest) mc.thePlayer.openContainer;
+        int lowerChestSize = chest.getLowerChestInventory().getSizeInventory();
+        ItemStack lastSlot = chest.getLowerChestInventory().getStackInSlot(lowerChestSize - 1);
+        return lastSlot != null && lastSlot.getItem() != null;
     }
 
     public static enum ClickType {

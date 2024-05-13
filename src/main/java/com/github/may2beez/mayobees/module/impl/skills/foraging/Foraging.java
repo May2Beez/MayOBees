@@ -81,8 +81,7 @@ public class Foraging implements IModuleActive {
     @Override
     public void onEnable() {
         enabled = true;
-        if (MayOBeesConfig.mouseUngrab)
-            UngrabUtils.ungrabMouse();
+        UngrabUtils.ungrabMouse();
         startTime = System.currentTimeMillis() - (stopTime - startTime);
         dirtBlocks.clear();
         dirtBlocks.addAll(getDirts());
@@ -500,7 +499,6 @@ public class Foraging implements IModuleActive {
             Matcher matcher2 = foragingChatPattern2.matcher(message.replace(",", ""));
             if (!matcher2.find() || !matcher2.group(1).equals("Foraging")) return;
             percentage = Float.parseFloat(matcher2.group(2)) / (Float.parseFloat(matcher2.group(3)) * (matcher2.group(4) != null ? 10 : 0.01f));
-            LogUtils.info("Found. Name: " + matcher2.group(1) + ", Percentage: " + percentage);
         }
 
         if (foragingLevel != 0 && lastSkillPercentage != 0) {

@@ -834,7 +834,6 @@ public class MayOBeesConfig extends Config {
             subcategory = "Foraging - Options"
     )
     public static ForagingSkillTrackerHUD foragingSkillTrackerHUD = new ForagingSkillTrackerHUD();
-
     //</editor-fold>
 
     //<editor-fold desc="Fishing">
@@ -859,6 +858,51 @@ public class MayOBeesConfig extends Config {
             subcategory = "Fishing"
     )
     public static boolean antiAfkWhileFishing = false;
+    //</editor-fold>
+
+    //<editor-fold desc="Enchanting">
+    @Switch(
+            name = "AutoExperiments",
+            description = "Automate Experimentation Table Mini Games",
+            category = "Skills",
+            subcategory = "Enchanting"
+    )
+    public static boolean autoExperiments = false;
+
+    @Slider(
+            name = "Click Delay",
+            description = "Delay between clicks during the Mini Games",
+            category = "Skills",
+            subcategory = "Enchanting",
+            min = 0, max = 1000
+    )
+    public static int autoExperimentsClickDelay = 400;
+
+    @Slider(
+            name = "Click Delay Randomization",
+            description = "Random Delay between clicks during the Mini Games",
+            category = "Skills",
+            subcategory = "Enchanting",
+            min = 0, max = 300
+    )
+    public static int autoExperimentsClickDelayRandomization = 150;
+
+    @Slider(
+            name = "Metaphysical Serum Count",
+            description = "The amount of metaphysical serum that was consumed",
+            category = "Skills",
+            subcategory = "Enchanting",
+            min = 0, max = 3
+    )
+    public static int autoExperimentsSerumCount = 0;
+
+    @Switch(
+            name = "Infinite Mode",
+            description = "Runs Infinitely until closed manually or closed by the game",
+            category = "Skills",
+            subcategory = "Enchanting"
+    )
+    public static boolean autoExperimentsInfiniteMode = false;
     //</editor-fold>
     //</editor-fold>
 
@@ -1346,6 +1390,25 @@ public class MayOBeesConfig extends Config {
             min = 0f, max = 2000f
     )
     public static int visitorHelperGuiTimeoutTime = 750;
+    //</editor-fold>
+
+    //<editor-fold desc="NickHider">
+    @Switch(
+            name = "NickHider",
+            description = "Enable Nick Hider?",
+            category = "Player",
+            subcategory = "NickHider"
+    )
+    public static boolean nickHider = false;
+
+    @Text(
+            name = "Your Nickname (Requires Restart)",
+            description = "The name to show in your name",
+            category = "Player",
+            subcategory = "NickHider"
+    )
+    public static String nickHiderUserName = "MayoBees";
+
     //</editor-fold>
     //</editor-fold>
 
