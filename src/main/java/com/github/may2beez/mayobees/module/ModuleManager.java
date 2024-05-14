@@ -9,6 +9,7 @@ import com.github.may2beez.mayobees.module.impl.other.GhostBlocks;
 import com.github.may2beez.mayobees.module.impl.player.*;
 import com.github.may2beez.mayobees.module.impl.render.ESP;
 import com.github.may2beez.mayobees.module.impl.skills.AlchemyHelper;
+import com.github.may2beez.mayobees.module.impl.skills.AutoExperiments;
 import com.github.may2beez.mayobees.module.impl.skills.Fishing;
 import com.github.may2beez.mayobees.module.impl.skills.foraging.FillChestWithSaplingMacro;
 import com.github.may2beez.mayobees.module.impl.skills.foraging.FillForagingSackMacro;
