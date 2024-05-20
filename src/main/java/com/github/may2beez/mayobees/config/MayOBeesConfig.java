@@ -923,7 +923,7 @@ public class MayOBeesConfig extends Config {
 
     //<editor-fold desc="Tablist">
     @DualOption(
-            name = "Save Tablist",
+            name = "Save Tablist To File",
             description = "Saves the tablist to a file",
             category = "Debug",
             subcategory = "Tablist",
@@ -949,11 +949,12 @@ public class MayOBeesConfig extends Config {
     public static void getTablist() {
         Dev.getInstance().getTablist();
     }
+
     //</editor-fold>
 
     //<editor-fold desc="Inventory">
     @DualOption(
-            name = "Save Inventory",
+            name = "Save Inventory To File",
             description = "Saves the inventory to a file",
             category = "Debug",
             subcategory = "Inventory",
@@ -976,7 +977,7 @@ public class MayOBeesConfig extends Config {
 
     //<editor-fold desc="Item Lore">
     @DualOption(
-            name = "Save Item Lore",
+            name = "Save Item Lore To File",
             description = "Saves the item lore of specific slot to a file",
             category = "Debug",
             subcategory = "Item Lore",
@@ -1008,7 +1009,7 @@ public class MayOBeesConfig extends Config {
 
     //<editor-fold desc="Scoreboard">
     @DualOption(
-            name = "Save Scoreboard",
+            name = "Save Scoreboard To File",
             description = "Saves the scoreboard to a file",
             category = "Debug",
             subcategory = "Scoreboard",
@@ -1064,7 +1065,7 @@ public class MayOBeesConfig extends Config {
 
     //<editor-fold desc="Entity NBT">
     @Switch(
-            name = "Save Entity NBT",
+            name = "Save Entity NBT To File",
             description = "Saves the entity NBT to a file",
             category = "Debug",
             subcategory = "Entity NBT"
@@ -1078,6 +1079,14 @@ public class MayOBeesConfig extends Config {
             subcategory = "Entity NBT"
     )
     public static boolean entityNBTArmorStandSkullsOnly = false;
+
+    @Switch(
+            name = "Don't Include armor stands",
+            description = "Don't include armor stands",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static boolean entityNBTDontIncludeArmorStands = false;
 
     @KeyBind(
             name = "Get Entity NBT",
@@ -1097,7 +1106,43 @@ public class MayOBeesConfig extends Config {
     public static void getAllLoadedEntityNBT() {
         Dev.getInstance().getAllLoadedEntityNBT();
     }
-    //</editor-fold>
+
+    @Switch(
+            name = "Don't Include NPCs",
+            description = "Include real players only",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static boolean entityNBTDontIncludeNPCs = false;
+
+    @Switch(
+            name = "Don't Include SkyBlock NPCs",
+            description = "Don't Include SkyBlock NPCs",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static boolean entityNBTDontIncludeSkyBlockNPCs = false;
+
+    @Switch(
+            name = "Collect Living Entities Every Tick",
+            description = "Collects living entities every tick",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static boolean entityNBTCollectEveryTick = false;
+
+    @Button(
+            name = "Clear Collected Entities",
+            text = "Clear Collected Entities",
+            description = "Clears the collected living entities",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static void clearCollectedEntities() {
+        Dev.getInstance().clearCollectedEntities();
+    }
+
+
     //</editor-fold>
 
     //<editor-fold desc="OTHER">

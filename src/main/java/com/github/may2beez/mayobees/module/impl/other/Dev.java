@@ -3,14 +3,13 @@ package com.github.may2beez.mayobees.module.impl.other;
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.event.PacketEvent;
 import com.github.may2beez.mayobees.module.IModule;
-import com.github.may2beez.mayobees.util.HeadUtils;
-import com.github.may2beez.mayobees.util.LogUtils;
-import com.github.may2beez.mayobees.util.ScoreboardUtils;
-import com.github.may2beez.mayobees.util.TablistUtils;
+import com.github.may2beez.mayobees.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -208,7 +207,7 @@ public class Dev implements IModule {
     }
     @SubscribeEvent
     public void onPacketSend(PacketEvent.Send event) {
-        if (MayOBeesConfig.listenToIncomingPackets) {
+        if (MayOBeesConfig.listenToOutgoingPackets) {
             LogUtils.debug("Sent packet: " + event.packet.getClass().getSimpleName());
         }
     }
@@ -225,11 +224,11 @@ public class Dev implements IModule {
             LogUtils.info("Entity is null!");
             return;
         }
-        String nbt = getEntityNBTtoString(entity);
-        if (nbt == null || nbt.isEmpty()) {
-            LogUtils.info((MayOBeesConfig.entityNBTArmorStandSkullsOnly ? "Skull" : "Entity") + " NBT is empty!");
+        if (!filterEntity(entity)) {
+            LogUtils.info("Entity is filtered out!");
             return;
         }
+        String nbt = getEntityNBTtoString(entity);
         if (MayOBeesConfig.saveEntityNBTToFile) {
             try {
                 FileWriter file = new FileWriter("entityNBT_" + getCurrentTime() + ".txt");
@@ -246,35 +245,52 @@ public class Dev implements IModule {
         }
     }
 
-    private static String getEntityNBTtoString(Entity entity) {
-        String nbt;
-        try {
-            if (MayOBeesConfig.entityNBTArmorStandSkullsOnly && !HeadUtils.isArmorStandWithSkull(entity))
-                return null;
-            nbt = entity.serializeNBT().toString();
-        } catch (Exception ignored) {
-            return null;
+    private final List<Entity> entitiesList = new ArrayList<>();
+
+    private boolean filterEntity(Entity entity) {
+        List<String> playerOnTab = TablistUtils.getTabListPlayersSkyblock();
+        if (MayOBeesConfig.entityNBTArmorStandSkullsOnly)
+            return HeadUtils.isArmorStandWithSkull(entity);
+        return entity != mc.thePlayer &&
+                !(MayOBeesConfig.entityNBTDontIncludeArmorStands && entity instanceof EntityArmorStand) &&
+                !(MayOBeesConfig.entityNBTDontIncludeSkyBlockNPCs && EntityUtils.isNPC(entity)) &&
+                !(MayOBeesConfig.entityNBTDontIncludeNPCs && !EntityUtils.isPlayer(entity, playerOnTab));
+    }
+
+    @SubscribeEvent
+    public void onTick(TickEvent.ClientTickEvent event) {
+        if (mc.theWorld == null || mc.thePlayer == null) {
+            return;
         }
-        return nbt;
+        if (!MayOBeesConfig.entityNBTCollectEveryTick) return;
+        if (event.phase != TickEvent.Phase.START) return;
+        for (Entity entity : mc.theWorld.getEntities(Entity.class, this::filterEntity)) {
+            if (!entitiesList.contains(entity)) {
+                entitiesList.add(entity);
+            }
+        }
     }
 
     public void getAllLoadedEntityNBT() {
-        if (mc.theWorld == null) {
-            LogUtils.info("World is null!");
+        if (mc.theWorld == null || mc.thePlayer == null) {
+            LogUtils.info("World or player is null!");
             return;
         }
-        List<String> entityNBTs = new ArrayList<>();
-        for (Entity entity : mc.theWorld.loadedEntityList) {
-            String nbt = getEntityNBTtoString(entity);
-            if (nbt == null || nbt.isEmpty()) {
-                continue;
-            }
-            entityNBTs.add(nbt);
+        List<Entity> entityList = new ArrayList<>();
+        if (MayOBeesConfig.entityNBTCollectEveryTick) {
+            entityList.addAll(entitiesList);
+            MayOBeesConfig.entityNBTCollectEveryTick = false;
+            entitiesList.clear();
+        } else {
+            entityList.addAll(mc.theWorld.getEntities(Entity.class, this::filterEntity));
         }
         if (MayOBeesConfig.saveEntityNBTToFile) {
             try {
-                FileWriter file = new FileWriter("allEntityNBT_" + getCurrentTime() + ".txt");
-                for (String nbt : entityNBTs) {
+                FileWriter file = new FileWriter("allEntitiesData_" + getCurrentTime() + ".txt");
+                for (Entity entity : entityList) {
+                    String nbt = getEntityNBTtoString(entity);
+                    if (nbt.isEmpty())
+                        continue;
                     file.write(nbt.replace("§", "&") + "\n");
                 }
                 file.close();
@@ -284,11 +300,28 @@ public class Dev implements IModule {
                 e.printStackTrace();
             }
         } else {
-            for (String nbt : entityNBTs) {
-                System.out.println(nbt);
+            for (Entity entity : entityList) {
+                System.out.println(getEntityNBTtoString(entity));
             }
             LogUtils.info("Printed all entity NBTs to console!");
         }
     }
+
+    public void clearCollectedEntities() {
+        entitiesList.clear();
+        LogUtils.info("Cleared collected entities!");
+    }
+
+    private static String getEntityNBTtoString(Entity entity) {
+        String nbt;
+        try {
+            nbt = entity.serializeNBT().toString();
+        } catch (Exception e) {
+            nbt = entity.toString();
+        }
+        return nbt;
+    }
+
     //</editor-fold>
+
 }
