@@ -19,6 +19,7 @@ import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemBow;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.Vec3;
@@ -183,7 +184,14 @@ public class MobAura implements IModuleActive {
             return;
         }
         if (MayOBeesConfig.mobAuraMouseButton == 0) {
-            KeyBindUtils.leftClick();
+            if (mc.thePlayer.getHeldItem().getItem() instanceof ItemBow) {
+                KeyBindUtils.leftClick();
+            } else {
+                if (currentTarget.isPresent() && mc.thePlayer.getDistanceToEntity(currentTarget.get()) <= 3) {
+                    mc.thePlayer.swingItem();
+                    mc.playerController.attackEntity(mc.thePlayer, currentTarget.get());
+                }
+            }
         } else if (MayOBeesConfig.mobAuraMouseButton == 1) {
             KeyBindUtils.rightClick();
         } else if (MayOBeesConfig.mobAuraMouseButton == 2) {
