@@ -13,6 +13,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -202,14 +203,44 @@ public class Dev implements IModule {
     @SubscribeEvent
     public void onPacketReceive(PacketEvent.Receive event) {
         if (MayOBeesConfig.listenToIncomingPackets) {
-            LogUtils.debug("Received packet: " + event.packet.getClass().getSimpleName());
+            Class<?> clazz = event.packet.getClass();
+            Field[] fields = clazz.getDeclaredFields();
+
+            StringBuilder packetData = new StringBuilder();
+            packetData.append(clazz.getSimpleName());
+            for (Field field : fields) {
+                try {
+                    field.setAccessible(true);
+                    packetData.append(" | ").append(field.getName()).append(": ").append(field.get(event.packet));
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+            LogUtils.debug("Received packet: " + getPacketData(event));
         }
     }
     @SubscribeEvent
     public void onPacketSend(PacketEvent.Send event) {
         if (MayOBeesConfig.listenToOutgoingPackets) {
-            LogUtils.debug("Sent packet: " + event.packet.getClass().getSimpleName());
+            LogUtils.debug("Sent packet: " + getPacketData(event));
         }
+    }
+
+    public String getPacketData(PacketEvent packet) {
+        Class<?> clazz = packet.getClass();
+        Field[] fields = clazz.getDeclaredFields();
+
+        StringBuilder packetData = new StringBuilder();
+        packetData.append(clazz.getSimpleName());
+        for (Field field : fields) {
+            try {
+                field.setAccessible(true);
+                packetData.append(" | ").append(field.getName()).append(": ").append(field.get(packet));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return packetData.toString();
     }
     //</editor-fold>
 
