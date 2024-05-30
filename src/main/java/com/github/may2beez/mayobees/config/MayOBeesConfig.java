@@ -1079,6 +1079,15 @@ public class MayOBeesConfig extends Config {
             size = 2
     )
     public static String outgoingPacketsBlacklist = "";
+    @Button(
+            name = "Add spamming incoming packets to the blacklist",
+            category = "Debug",
+            subcategory = "Packet listener",
+            text = "Set"
+    )
+    public static void addSpammingIncomingPacketsToBlacklist() {
+        incomingPacketsBlacklist = Dev.getInstance().addPacketsToList(Dev.getInstance().blackListedIncomingPackets, incomingPacketsBlacklist);
+    }
     //</editor-fold>
 
     //<editor-fold desc="Entity NBT">

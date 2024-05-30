@@ -17,9 +17,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class Dev implements IModule {
     private static Dev instance;
@@ -220,6 +218,44 @@ public class Dev implements IModule {
                 .anyMatch(packet -> packet.equals(event.packet.getClass().getSimpleName())))
             return;
         LogUtils.debug("Sent packet: " + getPacketData(event.packet));
+    }
+    public final String[] blackListedIncomingPackets = {
+            "S0CPacketSpawnPlayer",
+            "S10PacketSpawnPainting",
+            "S33PacketUpdateSign",
+            "S21PacketChunkData",
+            "S35PacketUpdateTileEntity",
+            "S11PacketSpawnExperienceOrb",
+            "S02PacketChat",
+            "S38PacketPlayerListItem",
+            "S0DPacketCollectItem",
+            "S13PacketDestroyEntities",
+            "S0FPacketSpawnMob",
+            "S00PacketKeepAlive",
+            "S3BPacketScoreboardObjective",
+            "S3EPacketTeams",
+            "S03PacketTimeUpdate",
+            "S1CPacketEntityMetadata",
+            "S0EPacketSpawnObject",
+            "S04PacketEntityEquipment",
+            "S20PacketEntityProperties",
+            "S12PacketEntityVelocity",
+            "S15PacketEntityRelMove",
+            "S16PacketEntityLook",
+            "S17PacketEntityLookMove",
+            "S19PacketEntityHeadLook",
+            "S2APacketParticles",
+            "S18PacketEntityTeleport",
+            "S22PacketMultiBlockChange",
+            "S32PacketConfirmTransaction"
+    };
+
+    public String addPacketsToList(String[] packets, String list) {
+        if (list.isEmpty())
+            return String.join(", ", packets);
+        Set<String> currentSet = new LinkedHashSet<>(Arrays.asList(list.split("\\s*,\\s*")));
+        currentSet.addAll(Arrays.asList(packets));
+        return String.join(", ", currentSet);
     }
 
     public String getPacketData(Packet<?> packet) {
