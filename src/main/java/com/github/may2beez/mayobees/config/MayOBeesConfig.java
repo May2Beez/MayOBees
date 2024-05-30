@@ -1061,6 +1061,24 @@ public class MayOBeesConfig extends Config {
             subcategory = "Packet listener"
     )
     public static boolean listenToOutgoingPackets = false;
+    @Text(
+            name = "Incoming packets blacklist (comma separated)",
+            description = "The filter for incoming packets",
+            category = "Debug",
+            subcategory = "Packet listener",
+            multiline = true,
+            size = 2
+    )
+    public static String incomingPacketsBlacklist = "";
+    @Text(
+            name = "Outgoing packets blacklist (comma separated)",
+            description = "The filter for outgoing packets",
+            category = "Debug",
+            subcategory = "Packet listener",
+            multiline = true,
+            size = 2
+    )
+    public static String outgoingPacketsBlacklist = "";
     //</editor-fold>
 
     //<editor-fold desc="Entity NBT">

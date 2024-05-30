@@ -7,6 +7,7 @@ import com.github.may2beez.mayobees.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.network.Packet;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -17,6 +18,7 @@ import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Dev implements IModule {
@@ -202,31 +204,25 @@ public class Dev implements IModule {
     //<editor-fold desc="Packet listener">
     @SubscribeEvent
     public void onPacketReceive(PacketEvent.Receive event) {
-        if (MayOBeesConfig.listenToIncomingPackets) {
-            Class<?> clazz = event.packet.getClass();
-            Field[] fields = clazz.getDeclaredFields();
-
-            StringBuilder packetData = new StringBuilder();
-            packetData.append(clazz.getSimpleName());
-            for (Field field : fields) {
-                try {
-                    field.setAccessible(true);
-                    packetData.append(" | ").append(field.getName()).append(": ").append(field.get(event.packet));
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            }
-            LogUtils.debug("Received packet: " + getPacketData(event));
-        }
+        if (!MayOBeesConfig.listenToIncomingPackets)
+            return;
+        if (Arrays.stream(MayOBeesConfig.incomingPacketsBlacklist.split(","))
+                .map(String::trim)
+                .anyMatch(packet -> packet.equals(event.packet.getClass().getSimpleName())))
+            return;
+        LogUtils.debug("Received packet: " + getPacketData(event.packet));
     }
     @SubscribeEvent
     public void onPacketSend(PacketEvent.Send event) {
-        if (MayOBeesConfig.listenToOutgoingPackets) {
-            LogUtils.debug("Sent packet: " + getPacketData(event));
-        }
+        if (!MayOBeesConfig.listenToOutgoingPackets) return;
+        if (Arrays.stream(MayOBeesConfig.outgoingPacketsBlacklist.split(","))
+                .map(String::trim)
+                .anyMatch(packet -> packet.equals(event.packet.getClass().getSimpleName())))
+            return;
+        LogUtils.debug("Sent packet: " + getPacketData(event.packet));
     }
 
-    public String getPacketData(PacketEvent packet) {
+    public String getPacketData(Packet<?> packet) {
         Class<?> clazz = packet.getClass();
         Field[] fields = clazz.getDeclaredFields();
 
