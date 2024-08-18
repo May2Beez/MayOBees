@@ -1017,6 +1017,18 @@ public class MayOBeesConfig extends Config {
     )
     public static boolean listenToOutgoingPackets = false;
     //</editor-fold>
+
+    //<editor-fold desc="NBT">
+    @Button(
+            name = "Get NBT",
+            text = "Get NBT",
+            description = "Gets the NBT of the item in the hand",
+            category = "Debug",
+            subcategory = "NBT"
+    )
+    public static void getNBT() {
+        Dev.getInstance().getItemNBT();
+    }
     //</editor-fold>
 
     //<editor-fold desc="OTHER">

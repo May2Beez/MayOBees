@@ -1,13 +1,19 @@
 package com.github.may2beez.mayobees.module.impl.other;
 
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
+import com.github.may2beez.mayobees.event.KeyTypedEvent;
 import com.github.may2beez.mayobees.event.PacketEvent;
+import com.github.may2beez.mayobees.mixin.gui.GuiContainerAccessor;
 import com.github.may2beez.mayobees.module.IModule;
 import com.github.may2beez.mayobees.util.LogUtils;
 import com.github.may2beez.mayobees.util.ScoreboardUtils;
 import com.github.may2beez.mayobees.util.TablistUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.lwjgl.input.Keyboard;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -196,6 +202,46 @@ public class Dev implements IModule {
     }
     //</editor-fold>
 
+    public void getItemNBT() {
+        getItemNBT(mc.thePlayer.getHeldItem());
+    }
+
+    public void getItemNBT(ItemStack is) {
+        if (mc.thePlayer == null || mc.theWorld == null)
+            return;
+        if (mc.thePlayer.inventory == null) {
+            LogUtils.info("Inventory is empty!");
+            return;
+        }
+        if (is == null) {
+            LogUtils.info("Slot is empty!");
+            return;
+        }
+        NBTTagCompound nbt = is.getTagCompound();
+        LogUtils.info(nbt.toString());
+        if (nbt.hasKey("ExtraAttributes")) {
+            NBTTagCompound extraAttributes = nbt.getCompoundTag("ExtraAttributes");
+            for (String key : extraAttributes.getKeySet()) {
+                LogUtils.info(key + ": " + extraAttributes.getTag(key));
+            }
+            int drill_fuel = extraAttributes.getInteger("drill_fuel");
+            LogUtils.info("Drill fuel: " + drill_fuel);
+        }
+    }
+
+    @SubscribeEvent
+    public void onSlotClick(KeyTypedEvent event) {
+        System.out.println("Key: " + event.getKeyCode());
+        if (event.getKeyCode() == Keyboard.KEY_Y) {
+            GuiContainerAccessor guiContainer = (GuiContainerAccessor) mc.currentScreen;
+            Slot slot = guiContainer.getTheSlot();
+            if (slot != null) {
+                LogUtils.info("Slot: " + slot.slotNumber);
+                getItemNBT(slot.getStack());
+            }
+        }
+    }
+
     //<editor-fold desc="Packet listener">
     @SubscribeEvent
     public void onPacketReceive(PacketEvent.Receive event) {
@@ -205,7 +251,7 @@ public class Dev implements IModule {
     }
     @SubscribeEvent
     public void onPacketSend(PacketEvent.Send event) {
-        if (MayOBeesConfig.listenToIncomingPackets) {
+        if (MayOBeesConfig.listenToOutgoingPackets) {
             LogUtils.debug("Sent packet: " + event.packet.getClass().getSimpleName());
         }
     }
