@@ -4,13 +4,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.play.client.C0EPacketClickWindow;
 import net.minecraft.util.StringUtils;
 
 import java.util.ArrayList;
@@ -35,6 +35,18 @@ public class InventoryUtils {
             }
         }
         return -1;
+    }
+
+    public static Slot getSlotOfItemInContainerMatches(String item) {
+        for (Slot slot : mc.thePlayer.openContainer.inventorySlots) {
+            if (slot.getHasStack()) {
+                String itemName = StringUtils.stripControlCodes(slot.getStack().getDisplayName());
+                if (itemName.matches(item)) {
+                    return slot;
+                }
+            }
+        }
+        return null;
     }
 
     public static boolean isInventoryEmpty(EntityPlayer player) {
@@ -133,7 +145,8 @@ public class InventoryUtils {
     public static Slot getSlotOfItemFromInventoryInOpenContainer(String item, boolean equals) {
         final ContainerChest chest = (ContainerChest) mc.thePlayer.openContainer;
         for (Slot slot : mc.thePlayer.openContainer.inventorySlots) {
-            if (slot != null && slot.getHasStack() && slot.slotNumber >= chest.getLowerChestInventory().getSizeInventory()) {
+            if (slot != null && slot.getHasStack()
+                    && slot.slotNumber >= chest.getLowerChestInventory().getSizeInventory()) {
                 String itemName = StringUtils.stripControlCodes(slot.getStack().getDisplayName());
                 if (equals) {
                     if (itemName.equalsIgnoreCase(item)) {
@@ -149,11 +162,23 @@ public class InventoryUtils {
         return null;
     }
 
+    // Todo: Replace the second one with return getInventoryName(mc.thePlayer.openContainer)
+    public static String getInventoryName(Container container) {
+        // why return null and have one extra null check?
+        // using contains / equals / whatever works fine on an empty string no need for extra null check
+        if (container instanceof ContainerChest) {
+            IInventory inv = ((ContainerChest) container).getLowerChestInventory();
+            return inv != null && inv.hasCustomName() ? inv.getName() : "";
+        }
+        return "";
+    }
+
     public static String getInventoryName() {
         try {
             if (mc.currentScreen instanceof GuiChest) {
                 final ContainerChest chest = (ContainerChest) mc.thePlayer.openContainer;
-                if (chest == null) return null;
+                if (chest == null)
+                    return null;
                 final IInventory inv = chest.getLowerChestInventory();
                 return inv.hasCustomName() ? inv.getName() : null;
             }
@@ -231,11 +256,13 @@ public class InventoryUtils {
     }
 
     public static void clickContainerSlot(int slot, ClickType mouseButton, ClickMode mode) {
-        mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, slot, mouseButton.ordinal(), mode.ordinal(), mc.thePlayer);
+        mc.playerController.windowClick(mc.thePlayer.openContainer.windowId, slot, mouseButton.ordinal(),
+                mode.ordinal(), mc.thePlayer);
     }
 
     public static void clickSlot(int slot, ClickType mouseButton, ClickMode mode) {
-        mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, slot, mouseButton.ordinal(), mode.ordinal(), mc.thePlayer);
+        mc.playerController.windowClick(mc.thePlayer.inventoryContainer.windowId, slot, mouseButton.ordinal(),
+                mode.ordinal(), mc.thePlayer);
     }
 
     public static void swapSlots(int slot, int hotbarSlot) {
@@ -250,7 +277,8 @@ public class InventoryUtils {
         if (mc.currentScreen instanceof GuiChest) {
             final ContainerChest chest = (ContainerChest) mc.thePlayer.openContainer;
             for (Slot slot : chest.inventorySlots) {
-                if (slot != null && slot.getHasStack() && slot.slotNumber >= chest.getLowerChestInventory().getSizeInventory()) {
+                if (slot != null && slot.getHasStack()
+                        && slot.slotNumber >= chest.getLowerChestInventory().getSizeInventory()) {
                     if (StringUtils.stripControlCodes(slot.getStack().getDisplayName()).equalsIgnoreCase(item)) {
                         clickContainerSlot(slot.slotNumber, ClickType.LEFT, ClickMode.QUICK_MOVE);
                     }
@@ -287,9 +315,11 @@ public class InventoryUtils {
     }
 
     public static List<String> getLoreOfItemInContainer(int slot) {
-        if (slot == -1) return new ArrayList<>();
+        if (slot == -1)
+            return new ArrayList<>();
         ItemStack itemStack = mc.thePlayer.openContainer.getSlot(slot).getStack();
-        if (itemStack == null) return new ArrayList<>();
+        if (itemStack == null)
+            return new ArrayList<>();
         return getItemLore(itemStack);
     }
 
@@ -364,7 +394,8 @@ public class InventoryUtils {
     }
 
     public static boolean closeScreen() {
-        if (mc.thePlayer == null) return false;
+        if (mc.thePlayer == null)
+            return false;
         if (mc.currentScreen != null) {
             mc.displayGuiScreen(null);
             return true;
@@ -372,9 +403,19 @@ public class InventoryUtils {
         return false;
     }
 
+    public static boolean isInventoryLoaded() {
+        if (mc.thePlayer == null || mc.thePlayer.openContainer == null) return false;
+        if (!(mc.currentScreen instanceof GuiChest)) return false;
+        ContainerChest chest = (ContainerChest) mc.thePlayer.openContainer;
+        int lowerChestSize = chest.getLowerChestInventory().getSizeInventory();
+        ItemStack lastSlot = chest.getLowerChestInventory().getStackInSlot(lowerChestSize - 1);
+        return lastSlot != null && lastSlot.getItem() != null;
+    }
+
     public static enum ClickType {
         LEFT,
-        RIGHT
+        RIGHT,
+        MIDDLE
     }
 
     public static enum ClickMode {

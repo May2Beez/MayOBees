@@ -834,7 +834,6 @@ public class MayOBeesConfig extends Config {
             subcategory = "Foraging - Options"
     )
     public static ForagingSkillTrackerHUD foragingSkillTrackerHUD = new ForagingSkillTrackerHUD();
-
     //</editor-fold>
 
     //<editor-fold desc="Fishing">
@@ -860,6 +859,51 @@ public class MayOBeesConfig extends Config {
     )
     public static boolean antiAfkWhileFishing = false;
     //</editor-fold>
+
+    //<editor-fold desc="Enchanting">
+    @Switch(
+            name = "AutoExperiments",
+            description = "Automate Experimentation Table Mini Games",
+            category = "Skills",
+            subcategory = "Enchanting"
+    )
+    public static boolean autoExperiments = false;
+
+    @Slider(
+            name = "Click Delay",
+            description = "Delay between clicks during the Mini Games",
+            category = "Skills",
+            subcategory = "Enchanting",
+            min = 0, max = 1000
+    )
+    public static int autoExperimentsClickDelay = 400;
+
+    @Slider(
+            name = "Click Delay Randomization",
+            description = "Random Delay between clicks during the Mini Games",
+            category = "Skills",
+            subcategory = "Enchanting",
+            min = 0, max = 300
+    )
+    public static int autoExperimentsClickDelayRandomization = 150;
+
+    @Slider(
+            name = "Metaphysical Serum Count",
+            description = "The amount of metaphysical serum that was consumed",
+            category = "Skills",
+            subcategory = "Enchanting",
+            min = 0, max = 3
+    )
+    public static int autoExperimentsSerumCount = 0;
+
+    @Switch(
+            name = "Infinite Mode",
+            description = "Runs Infinitely until closed manually or closed by the game",
+            category = "Skills",
+            subcategory = "Enchanting"
+    )
+    public static boolean autoExperimentsInfiniteMode = false;
+    //</editor-fold>
     //</editor-fold>
 
     //<editor-fold desc="DEV">
@@ -879,7 +923,7 @@ public class MayOBeesConfig extends Config {
 
     //<editor-fold desc="Tablist">
     @DualOption(
-            name = "Save Tablist",
+            name = "Save Tablist To File",
             description = "Saves the tablist to a file",
             category = "Debug",
             subcategory = "Tablist",
@@ -905,11 +949,12 @@ public class MayOBeesConfig extends Config {
     public static void getTablist() {
         Dev.getInstance().getTablist();
     }
+
     //</editor-fold>
 
     //<editor-fold desc="Inventory">
     @DualOption(
-            name = "Save Inventory",
+            name = "Save Inventory To File",
             description = "Saves the inventory to a file",
             category = "Debug",
             subcategory = "Inventory",
@@ -932,7 +977,7 @@ public class MayOBeesConfig extends Config {
 
     //<editor-fold desc="Item Lore">
     @DualOption(
-            name = "Save Item Lore",
+            name = "Save Item Lore To File",
             description = "Saves the item lore of specific slot to a file",
             category = "Debug",
             subcategory = "Item Lore",
@@ -964,7 +1009,7 @@ public class MayOBeesConfig extends Config {
 
     //<editor-fold desc="Scoreboard">
     @DualOption(
-            name = "Save Scoreboard",
+            name = "Save Scoreboard To File",
             description = "Saves the scoreboard to a file",
             category = "Debug",
             subcategory = "Scoreboard",
@@ -1016,6 +1061,33 @@ public class MayOBeesConfig extends Config {
             subcategory = "Packet listener"
     )
     public static boolean listenToOutgoingPackets = false;
+    @Text(
+            name = "Incoming packets blacklist (comma separated)",
+            description = "The filter for incoming packets",
+            category = "Debug",
+            subcategory = "Packet listener",
+            multiline = true,
+            size = 2
+    )
+    public static String incomingPacketsBlacklist = "";
+    @Text(
+            name = "Outgoing packets blacklist (comma separated)",
+            description = "The filter for outgoing packets",
+            category = "Debug",
+            subcategory = "Packet listener",
+            multiline = true,
+            size = 2
+    )
+    public static String outgoingPacketsBlacklist = "";
+    @Button(
+            name = "Add spamming incoming packets to the blacklist",
+            category = "Debug",
+            subcategory = "Packet listener",
+            text = "Set"
+    )
+    public static void addSpammingIncomingPacketsToBlacklist() {
+        incomingPacketsBlacklist = Dev.getInstance().addPacketsToList(Dev.getInstance().blackListedIncomingPackets, incomingPacketsBlacklist);
+    }
     //</editor-fold>
 
     //<editor-fold desc="NBT">
@@ -1029,6 +1101,87 @@ public class MayOBeesConfig extends Config {
     public static void getNBT() {
         Dev.getInstance().getItemNBT();
     }
+
+    //<editor-fold desc="Entity NBT">
+    @Switch(
+            name = "Save Entity NBT To File",
+            description = "Saves the entity NBT to a file",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static boolean saveEntityNBTToFile = false;
+
+    @Switch(
+            name = "Include armor stands with skulls only",
+            description = "Includes armor stands with skulls only",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static boolean entityNBTArmorStandSkullsOnly = false;
+
+    @Switch(
+            name = "Don't Include armor stands",
+            description = "Don't include armor stands",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static boolean entityNBTDontIncludeArmorStands = false;
+
+    @KeyBind(
+            name = "Get Entity NBT",
+            description = "Gets the entity NBT",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static OneKeyBind getEntityNBTKeybind = new OneKeyBind(Keyboard.KEY_NONE);
+
+    @Button(
+            name = "Get all loaded entity NBT",
+            text = "Get all loaded entity NBT",
+            description = "Gets the entity NBT of all loaded entities",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static void getAllLoadedEntityNBT() {
+        Dev.getInstance().getAllLoadedEntityNBT();
+    }
+
+    @Switch(
+            name = "Don't Include NPCs",
+            description = "Include real players only",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static boolean entityNBTDontIncludeNPCs = false;
+
+    @Switch(
+            name = "Don't Include SkyBlock NPCs",
+            description = "Don't Include SkyBlock NPCs",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static boolean entityNBTDontIncludeSkyBlockNPCs = false;
+
+    @Switch(
+            name = "Collect Living Entities Every Tick",
+            description = "Collects living entities every tick",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static boolean entityNBTCollectEveryTick = false;
+
+    @Button(
+            name = "Clear Collected Entities",
+            text = "Clear Collected Entities",
+            description = "Clears the collected living entities",
+            category = "Debug",
+            subcategory = "Entity NBT"
+    )
+    public static void clearCollectedEntities() {
+        Dev.getInstance().clearCollectedEntities();
+    }
+
+
     //</editor-fold>
 
     //<editor-fold desc="OTHER">
@@ -1322,6 +1475,25 @@ public class MayOBeesConfig extends Config {
     )
     public static int visitorHelperGuiTimeoutTime = 750;
     //</editor-fold>
+
+    //<editor-fold desc="NickHider">
+    @Switch(
+            name = "NickHider",
+            description = "Enable Nick Hider?",
+            category = "Player",
+            subcategory = "NickHider"
+    )
+    public static boolean nickHider = false;
+
+    @Text(
+            name = "Your Nickname (Requires Restart)",
+            description = "The name to show in your name",
+            category = "Player",
+            subcategory = "NickHider"
+    )
+    public static String nickHiderUserName = "MayoBees";
+
+    //</editor-fold>
     //</editor-fold>
 
     public MayOBeesConfig() {
@@ -1355,6 +1527,10 @@ public class MayOBeesConfig extends Config {
 
         registerKeyBind(addNewBrushWaypointListKeybind, () -> {
             Brush.getInstance().addNewBrushWaypointList();
+        });
+
+        registerKeyBind(getEntityNBTKeybind, () -> {
+            Dev.getInstance().getEntityNBT();
         });
     }
 }

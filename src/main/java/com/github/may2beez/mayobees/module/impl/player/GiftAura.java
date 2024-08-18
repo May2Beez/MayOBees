@@ -3,7 +3,6 @@ package com.github.may2beez.mayobees.module.impl.player;
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.handler.GameStateHandler;
 import com.github.may2beez.mayobees.handler.RotationHandler;
-import com.github.may2beez.mayobees.module.IModule;
 import com.github.may2beez.mayobees.module.IModuleActive;
 import com.github.may2beez.mayobees.util.HeadUtils;
 import com.github.may2beez.mayobees.util.LogUtils;
@@ -15,9 +14,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-
 import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.ArrayList;

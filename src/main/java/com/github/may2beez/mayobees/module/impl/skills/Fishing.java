@@ -3,7 +3,6 @@ package com.github.may2beez.mayobees.module.impl.skills;
 import com.github.may2beez.mayobees.config.MayOBeesConfig;
 import com.github.may2beez.mayobees.event.SpawnParticleEvent;
 import com.github.may2beez.mayobees.handler.RotationHandler;
-import com.github.may2beez.mayobees.module.IModule;
 import com.github.may2beez.mayobees.module.IModuleActive;
 import com.github.may2beez.mayobees.module.impl.combat.MobAura;
 import com.github.may2beez.mayobees.util.*;
@@ -44,6 +43,8 @@ public class Fishing implements IModuleActive {
 
     private static final List<String> fishingMobs = JsonUtils.getListFromUrl("https://raw.githubusercontent.com/May2Beez/May2BeezQoL/master/sea_creatures_list.json", "mobs");
 
+    public boolean enabled = false;
+
     private final Timer throwTimer = new Timer();
     private final Timer inWaterTimer = new Timer();
 
@@ -60,7 +61,7 @@ public class Fishing implements IModuleActive {
 
     @Override
     public boolean isRunning() {
-        return MayOBeesConfig.fishing;
+        return this.enabled && MayOBeesConfig.fishing;
     }
 
     private enum AutoFishState {
@@ -85,8 +86,7 @@ public class Fishing implements IModuleActive {
         inWaterTimer.schedule();
         attackDelay.reset();
         antiAfkTimer.schedule();
-        if (MayOBeesConfig.mouseUngrab)
-            UngrabUtils.ungrabMouse();
+        UngrabUtils.ungrabMouse();
         oldBobberPosY = 0.0D;
         particles.clear();
         rodSlot = InventoryUtils.getSlotIdOfItemInHotbar("Rod");
@@ -98,6 +98,7 @@ public class Fishing implements IModuleActive {
         startRotation = new Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
         KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.getKeyCode(), MayOBeesConfig.sneakWhileFishing);
         MobAura.getInstance().onEnable();
+        this.enabled = true;
 //        MobAura.getInstance().setTarget(fishingMobs.stream().filter(name -> !name.toLowerCase().contains("squid")).toArray(String[]::new));
     }
 
@@ -110,6 +111,8 @@ public class Fishing implements IModuleActive {
         RotationHandler.getInstance().reset();
         MobAura.getInstance().onDisable();
         UngrabUtils.regrabMouse();
+        this.enabled = false;
+        LogUtils.info("Disabled Fishing");
     }
 
     @SubscribeEvent
@@ -120,9 +123,6 @@ public class Fishing implements IModuleActive {
 
         particles.removeIf(p -> (System.currentTimeMillis() - p.timeAdded) > 1000);
 
-        if (MobAura.getInstance().isRunning()) {
-            return;
-        }
 
         if (MayOBeesConfig.antiAfkWhileFishing && antiAfkTimer.hasPassed(3000 + new Random().nextInt(1500))) {
             antiAfkTimer.schedule();
@@ -153,7 +153,7 @@ public class Fishing implements IModuleActive {
 
         switch (currentState) {
             case THROWING: {
-                if (mc.thePlayer.fishEntity == null && throwTimer.hasPassed(250) && RotationHandler.getInstance().isRotating()) {
+                if (mc.thePlayer.fishEntity == null && throwTimer.hasPassed(250) && !RotationHandler.getInstance().isRotating()) {
                     mc.thePlayer.inventory.currentItem = rodSlot;
                     mc.playerController.sendUseItem(mc.thePlayer, mc.theWorld, mc.thePlayer.getHeldItem());
                     throwTimer.schedule();

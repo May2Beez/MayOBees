@@ -5,22 +5,16 @@ import com.github.may2beez.mayobees.event.KeyTypedEvent;
 import com.github.may2beez.mayobees.event.PacketEvent;
 import com.github.may2beez.mayobees.mixin.gui.GuiContainerAccessor;
 import com.github.may2beez.mayobees.module.IModule;
-import com.github.may2beez.mayobees.util.LogUtils;
-import com.github.may2beez.mayobees.util.ScoreboardUtils;
-import com.github.may2beez.mayobees.util.TablistUtils;
+import com.github.may2beez.mayobees.util.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import org.lwjgl.input.Keyboard;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Dev implements IModule {
     private static Dev instance;
@@ -245,15 +239,198 @@ public class Dev implements IModule {
     //<editor-fold desc="Packet listener">
     @SubscribeEvent
     public void onPacketReceive(PacketEvent.Receive event) {
-        if (MayOBeesConfig.listenToIncomingPackets) {
-            LogUtils.debug("Received packet: " + event.packet.getClass().getSimpleName());
-        }
+        if (!MayOBeesConfig.listenToIncomingPackets)
+            return;
+        if (Arrays.stream(MayOBeesConfig.incomingPacketsBlacklist.split(","))
+                .map(String::trim)
+                .anyMatch(packet -> packet.equals(event.packet.getClass().getSimpleName())))
+            return;
+        LogUtils.debug("Received packet: " + getPacketData(event.packet));
     }
     @SubscribeEvent
     public void onPacketSend(PacketEvent.Send event) {
         if (MayOBeesConfig.listenToOutgoingPackets) {
             LogUtils.debug("Sent packet: " + event.packet.getClass().getSimpleName());
         }
+        if (!MayOBeesConfig.listenToOutgoingPackets) return;
+        if (Arrays.stream(MayOBeesConfig.outgoingPacketsBlacklist.split(","))
+                .map(String::trim)
+                .anyMatch(packet -> packet.equals(event.packet.getClass().getSimpleName())))
+            return;
+        LogUtils.debug("Sent packet: " + getPacketData(event.packet));
+    }
+    public final String[] blackListedIncomingPackets = {
+            "S00PacketKeepAlive",
+            "S02PacketChat",
+            "S03PacketTimeUpdate",
+            "S04PacketEntityEquipment",
+            "S06PacketUpdateHealth",
+            "S0BPacketAnimation",
+            "S0CPacketSpawnPlayer",
+            "S0DPacketCollectItem",
+            "S0EPacketSpawnObject",
+            "S0FPacketSpawnMob",
+            "S10PacketSpawnPainting",
+            "S11PacketSpawnExperienceOrb",
+            "S12PacketEntityVelocity",
+            "S13PacketDestroyEntities",
+            "S15PacketEntityRelMove",
+            "S16PacketEntityLook",
+            "S17PacketEntityLookMove",
+            "S18PacketEntityTeleport",
+            "S19PacketEntityHeadLook",
+            "S1CPacketEntityMetadata",
+            "S1FPacketSetExperience",
+            "S20PacketEntityProperties",
+            "S21PacketChunkData",
+            "S22PacketMultiBlockChange",
+            "S29PacketSoundEffect",
+            "S29PacketSoundEffect",
+            "S2APacketParticles",
+            "S32PacketConfirmTransaction",
+            "S33PacketUpdateSign",
+            "S35PacketUpdateTileEntity",
+            "S38PacketPlayerListItem",
+            "S3BPacketScoreboardObjective",
+            "S3EPacketTeams",
+            "S47PacketPlayerListHeaderFooter"
+    };
+
+    public String addPacketsToList(String[] packets, String list) {
+        if (list.isEmpty())
+            return String.join(", ", packets);
+        Set<String> currentSet = new LinkedHashSet<>(Arrays.asList(list.split("\\s*,\\s*")));
+        currentSet.addAll(Arrays.asList(packets));
+        return String.join(", ", currentSet);
+    }
+
+    public String getPacketData(Packet<?> packet) {
+        Class<?> clazz = packet.getClass();
+        Field[] fields = clazz.getDeclaredFields();
+
+        StringBuilder packetData = new StringBuilder();
+        packetData.append(clazz.getSimpleName());
+        for (Field field : fields) {
+            try {
+                field.setAccessible(true);
+                packetData.append(" | ").append(field.getName()).append(": ").append(field.get(packet));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return packetData.toString();
     }
     //</editor-fold>
+
+    //<editor-fold desc="Entity NBT">
+    public void getEntityNBT() {
+        MovingObjectPosition objectMouseOver = Minecraft.getMinecraft().objectMouseOver;
+        Entity entity = null;
+        if (objectMouseOver != null && objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY && objectMouseOver.entityHit != null) {
+            entity = objectMouseOver.entityHit;
+        }
+        if (entity == null) {
+            LogUtils.info("Entity is null!");
+            return;
+        }
+        if (!filterEntity(entity)) {
+            LogUtils.info("Entity is filtered out!");
+            return;
+        }
+        String nbt = getEntityNBTtoString(entity);
+        if (MayOBeesConfig.saveEntityNBTToFile) {
+            try {
+                FileWriter file = new FileWriter("entityNBT_" + getCurrentTime() + ".txt");
+                file.write(nbt.replace("§", "&") + "\n");
+                file.close();
+                LogUtils.info("Saved entity NBT to file!");
+            } catch (IOException e) {
+                LogUtils.error("Failed to save entity NBT to file!");
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println(nbt);
+            LogUtils.info("Printed entity NBT to console!");
+        }
+    }
+
+    private final List<Entity> entitiesList = new ArrayList<>();
+
+    private boolean filterEntity(Entity entity) {
+        List<String> playerOnTab = TablistUtils.getTabListPlayersSkyblock();
+        if (MayOBeesConfig.entityNBTArmorStandSkullsOnly)
+            return HeadUtils.isArmorStandWithSkull(entity);
+        return entity != mc.thePlayer &&
+                !(MayOBeesConfig.entityNBTDontIncludeArmorStands && entity instanceof EntityArmorStand) &&
+                !(MayOBeesConfig.entityNBTDontIncludeSkyBlockNPCs && EntityUtils.isNPC(entity)) &&
+                !(MayOBeesConfig.entityNBTDontIncludeNPCs && !EntityUtils.isPlayer(entity, playerOnTab));
+    }
+
+    @SubscribeEvent
+    public void onTick(TickEvent.ClientTickEvent event) {
+        if (mc.theWorld == null || mc.thePlayer == null) {
+            return;
+        }
+        if (!MayOBeesConfig.entityNBTCollectEveryTick) return;
+        if (event.phase != TickEvent.Phase.START) return;
+        for (Entity entity : mc.theWorld.getEntities(Entity.class, this::filterEntity)) {
+            if (!entitiesList.contains(entity)) {
+                entitiesList.add(entity);
+            }
+        }
+    }
+
+    public void getAllLoadedEntityNBT() {
+        if (mc.theWorld == null || mc.thePlayer == null) {
+            LogUtils.info("World or player is null!");
+            return;
+        }
+        List<Entity> entityList = new ArrayList<>();
+        if (MayOBeesConfig.entityNBTCollectEveryTick) {
+            entityList.addAll(entitiesList);
+            MayOBeesConfig.entityNBTCollectEveryTick = false;
+            entitiesList.clear();
+        } else {
+            entityList.addAll(mc.theWorld.getEntities(Entity.class, this::filterEntity));
+        }
+        if (MayOBeesConfig.saveEntityNBTToFile) {
+            try {
+                FileWriter file = new FileWriter("allEntitiesData_" + getCurrentTime() + ".txt");
+                for (Entity entity : entityList) {
+                    String nbt = getEntityNBTtoString(entity);
+                    if (nbt.isEmpty())
+                        continue;
+                    file.write(nbt.replace("§", "&") + "\n");
+                }
+                file.close();
+                LogUtils.info("Saved all entity NBTs to file!");
+            } catch (IOException e) {
+                LogUtils.error("Failed to save all entity NBTs to file!");
+                e.printStackTrace();
+            }
+        } else {
+            for (Entity entity : entityList) {
+                System.out.println(getEntityNBTtoString(entity));
+            }
+            LogUtils.info("Printed all entity NBTs to console!");
+        }
+    }
+
+    public void clearCollectedEntities() {
+        entitiesList.clear();
+        LogUtils.info("Cleared collected entities!");
+    }
+
+    private static String getEntityNBTtoString(Entity entity) {
+        String nbt;
+        try {
+            nbt = entity.serializeNBT().toString();
+        } catch (Exception e) {
+            nbt = entity.toString();
+        }
+        return nbt;
+    }
+
+    //</editor-fold>
+
 }

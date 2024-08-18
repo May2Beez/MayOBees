@@ -8,7 +8,6 @@ import com.github.may2beez.mayobees.util.LogUtils;
 import com.github.may2beez.mayobees.util.helper.AudioManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
-import net.minecraft.util.Tuple;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
