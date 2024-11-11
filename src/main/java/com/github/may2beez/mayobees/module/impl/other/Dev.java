@@ -7,7 +7,16 @@ import com.github.may2beez.mayobees.mixin.gui.GuiContainerAccessor;
 import com.github.may2beez.mayobees.module.IModule;
 import com.github.may2beez.mayobees.util.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.Packet;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.lwjgl.input.Keyboard;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -18,6 +27,7 @@ import java.util.*;
 
 public class Dev implements IModule {
     private static Dev instance;
+
     public static Dev getInstance() {
         if (instance == null) {
             instance = new Dev();
@@ -247,6 +257,7 @@ public class Dev implements IModule {
             return;
         LogUtils.debug("Received packet: " + getPacketData(event.packet));
     }
+
     @SubscribeEvent
     public void onPacketSend(PacketEvent.Send event) {
         if (MayOBeesConfig.listenToOutgoingPackets) {
@@ -259,6 +270,7 @@ public class Dev implements IModule {
             return;
         LogUtils.debug("Sent packet: " + getPacketData(event.packet));
     }
+
     public final String[] blackListedIncomingPackets = {
             "S00PacketKeepAlive",
             "S02PacketChat",

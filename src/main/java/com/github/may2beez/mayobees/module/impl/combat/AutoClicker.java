@@ -47,7 +47,7 @@ public class AutoClicker implements IModuleActive {
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         if (!isRunning() && MayOBeesConfig.autoClickerMode != 1) return;
-        if (event.phase == TickEvent.Phase.START) return;
+        if (event.phase != TickEvent.Phase.START) return;
         if (mc.thePlayer == null || mc.theWorld == null) return;
         if (mc.currentScreen != null) return;
         if (mc.thePlayer.isUsingItem()) return;

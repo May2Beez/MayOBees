@@ -15,4 +15,10 @@ public interface GuiContainerAccessor {
 
     @Accessor(value = "theSlot")
     Slot getTheSlot();
+
+    @Accessor("guiLeft")
+    int getGuiLeft();
+
+    @Accessor("guiTop")
+    int getGuiTop();
 }

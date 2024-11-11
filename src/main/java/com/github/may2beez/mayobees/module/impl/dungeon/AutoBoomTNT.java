@@ -49,7 +49,7 @@ public class AutoBoomTNT implements IModule {
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         if (!isRunning()) return;
-        if (event.phase == TickEvent.Phase.START) return;
+        if (event.phase != TickEvent.Phase.START) return;
         if (mc.thePlayer == null || mc.theWorld == null) return;
         if (!delay.passed()) return;
         if (GameStateHandler.getInstance().getLocation() != GameStateHandler.Location.DUNGEON) return;
