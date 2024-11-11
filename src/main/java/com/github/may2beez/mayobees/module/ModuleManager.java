@@ -90,8 +90,8 @@ public class ModuleManager {
         ItemStack heldItem = Minecraft.getMinecraft().thePlayer.getHeldItem();
         if (heldItem == null) return;
 
-        if (heldItem.getItem() == Items.fishing_rod)
-            toggle(Fishing.getInstance());
+//        if (heldItem.getItem() == Items.fishing_rod)
+//            toggle(Fishing.getInstance());
 
         if (!MayOBeesConfig.mobAuraItemName.isEmpty() && heldItem.getDisplayName().contains(MayOBeesConfig.mobAuraItemName))
             toggle(MobAura.getInstance());

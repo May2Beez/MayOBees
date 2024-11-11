@@ -521,13 +521,13 @@ public class MayOBeesConfig extends Config {
     )
     public boolean infoSmartToggle3 = false;
 
-    @Info(
-            text = "Fishing Macro - Hold Rod",
-            size = 2,
-            category = "Misc",
-            type = InfoType.INFO
-    )
-    public boolean infoSmartToggle4 = false;
+//    @Info(
+//            text = "Fishing Macro - Hold Rod",
+//            size = 2,
+//            category = "Misc",
+//            type = InfoType.INFO
+//    )
+//    public boolean infoSmartToggle4 = false;
 
     @Info(
             text = "Shortbow Aura - Hold Your Item",
@@ -1503,6 +1503,9 @@ public class MayOBeesConfig extends Config {
 
         this.addDependency("mobAuraRange", "mobAuraUnlimitedRange", () -> !mobAuraUnlimitedRange);
         this.addDependency("mobAuraYDifference", "mobAuraUnlimitedRange", () -> !mobAuraUnlimitedRange);
+        this.hideIf("fishing", true);
+        this.hideIf("antiAfkWhileFishing", true);
+        this.hideIf("sneakWhileFishing", true);
 
         registerKeyBind(smartToggleKeybind, () -> {
             ModuleManager.getInstance().smartToggle();
